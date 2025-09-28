@@ -7,6 +7,7 @@ import jakarta.persistence.EntityExistsException;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,13 +16,15 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class UserService {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public void create(UserCreateResDto dto) {
         if(userRepository.findByEmail(dto.getEmail()).isPresent()) throw new EntityExistsException("중복되는 이메일입니다.");
 
         // todo - 비밀번호 암호화, 프로필 이미지 저장 후 url 가져오기
+        String encodedPassword = passwordEncoder.encode(dto.getPassword());
 
-        User user = dto.toEntity(dto.getPassword(), "url");
+        User user = dto.toEntity(encodedPassword, "url");
         userRepository.save(user);
     }
 
