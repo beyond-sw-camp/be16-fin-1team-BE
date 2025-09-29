@@ -21,7 +21,7 @@ public class JwtAuthFilter implements GlobalFilter {
 
     private static final List<String> ALLOWED_PATH = List.of(
             "/user/create",
-            "/user/doLogin",
+            "/user/login",
             "/user/refresh-at",
             "/health"
     );
