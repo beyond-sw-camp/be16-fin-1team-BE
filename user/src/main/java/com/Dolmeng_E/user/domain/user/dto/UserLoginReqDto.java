@@ -1,4 +1,4 @@
-package com.Dolmeng_E.user.user.dto;
+package com.Dolmeng_E.user.domain.user.dto;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;

@@ -1,10 +1,10 @@
-package com.Dolmeng_E.user.user.controller;
+package com.Dolmeng_E.user.domain.user.controller;
 
-import com.Dolmeng_E.user.user.entity.User;
-import com.Dolmeng_E.user.user.dto.UserCreateReqDto;
-import com.Dolmeng_E.user.user.dto.UserLoginReqDto;
-import com.Dolmeng_E.user.user.dto.UserLoginResDto;
-import com.Dolmeng_E.user.user.service.UserService;
+import com.Dolmeng_E.user.domain.user.entity.User;
+import com.Dolmeng_E.user.domain.user.dto.UserCreateReqDto;
+import com.Dolmeng_E.user.domain.user.dto.UserLoginReqDto;
+import com.Dolmeng_E.user.domain.user.dto.UserLoginResDto;
+import com.Dolmeng_E.user.domain.user.service.UserService;
 import com.Dolmeng_E.user.common.auth.JwtTokenProvider;
 import com.Dolmeng_E.user.common.dto.CommonSuccessDto;
 import jakarta.validation.Valid;

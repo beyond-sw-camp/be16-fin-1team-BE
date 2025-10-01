@@ -1,7 +1,7 @@
 package com.Dolmeng_E.user.common.auth;
 
-import com.Dolmeng_E.user.user.entity.User;
-import com.Dolmeng_E.user.user.repository.UserRepository;
+import com.Dolmeng_E.user.domain.user.entity.User;
+import com.Dolmeng_E.user.domain.user.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
