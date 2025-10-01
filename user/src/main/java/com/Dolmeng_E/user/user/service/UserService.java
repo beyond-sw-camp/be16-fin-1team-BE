@@ -1,9 +1,9 @@
-package com.Dolmeng_E.user.app.service;
+package com.Dolmeng_E.user.user.service;
 
-import com.Dolmeng_E.user.app.domain.User;
-import com.Dolmeng_E.user.app.dto.UserCreateReqDto;
-import com.Dolmeng_E.user.app.dto.UserLoginReqDto;
-import com.Dolmeng_E.user.app.repository.UserRepository;
+import com.Dolmeng_E.user.user.entity.User;
+import com.Dolmeng_E.user.user.dto.UserCreateReqDto;
+import com.Dolmeng_E.user.user.dto.UserLoginReqDto;
+import com.Dolmeng_E.user.user.repository.UserRepository;
 import com.Dolmeng_E.user.common.service.S3Uploader;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;

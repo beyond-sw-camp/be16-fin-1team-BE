@@ -1,4 +1,4 @@
-package com.Dolmeng_E.user.app.domain;
+package com.Dolmeng_E.user.user.entity;
 
 import com.Dolmeng_E.user.common.domain.BaseTimeEntity;
 import jakarta.persistence.*;

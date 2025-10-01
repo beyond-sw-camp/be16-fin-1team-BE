@@ -1,4 +1,4 @@
-package com.Dolmeng_E.user.app.dto;
+package com.Dolmeng_E.user.user.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

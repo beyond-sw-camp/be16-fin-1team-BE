@@ -1,13 +1,11 @@
-package com.Dolmeng_E.user.app.dto;
+package com.Dolmeng_E.user.user.dto;
 
-import com.Dolmeng_E.user.app.domain.User;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 
 @NoArgsConstructor
 @AllArgsConstructor

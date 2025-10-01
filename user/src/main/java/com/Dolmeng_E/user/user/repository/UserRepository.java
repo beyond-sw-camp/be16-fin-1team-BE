@@ -1,6 +1,6 @@
-package com.Dolmeng_E.user.app.repository;
+package com.Dolmeng_E.user.user.repository;
 
-import com.Dolmeng_E.user.app.domain.User;
+import com.Dolmeng_E.user.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
