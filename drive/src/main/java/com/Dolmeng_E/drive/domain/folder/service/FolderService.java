@@ -53,14 +53,4 @@ public class FolderService {
             performRecursiveSoftDelete(childFolder);
         }
     }
-
-    // 폴더명 수정
-    public String updateFolderName(UpdateFolderNameDto updateFolderNameDto, String id){
-        Folder folder = folderRepository.findById(id).orElseThrow(()->new EntityNotFoundException("해당 폴더가 존재하지 않습니다."));
-        if(folderRepository.findByParentIdAndName(folder.getParentId(), updateFolderNameDto.getName()).isPresent()){
-            throw new IllegalArgumentException("중복된 폴더명입니다.");
-        }
-        folder.updateName(updateFolderNameDto.getName());
-        return folder.getName();
-    }
 }

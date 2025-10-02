@@ -36,16 +36,6 @@ public class FolderController {
                 .build(), HttpStatus.OK);
     }
 
-    // 폴더명 수정
-    @PutMapping("/{folder_id}")
-    public ResponseEntity<?> updateFolder(@RequestBody UpdateFolderNameDto updateFolderNameDto, @PathVariable String folder_id) {
-        return new ResponseEntity<>(CommonSuccessDto.builder()
-                .result(folderService.updateFolderName(updateFolderNameDto, folder_id))
-                .statusCode(HttpStatus.OK.value())
-                .statusMessage("폴더명 수정 성공")
-                .build(), HttpStatus.OK);
-    }
-
     // 폴더 삭제
     @DeleteMapping("/{folder_id}")
     public ResponseEntity<?> deleteFolder(@PathVariable String folder_id) {
