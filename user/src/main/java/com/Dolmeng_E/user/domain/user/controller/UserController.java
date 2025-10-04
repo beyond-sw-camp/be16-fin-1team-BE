@@ -65,4 +65,10 @@ public class UserController {
         return new ResponseEntity<>(new CommonSuccessDto(new UserLoginResDto(accessToken, refreshToken), HttpStatus.OK.value(), "google 로그인 성공"), HttpStatus.OK);
     }
 
+    // 회원가입 API 구현1 - 이메일 입력 단계 - 중복 검증 및 이메일 인증코드 전송
+    @PostMapping("/email")
+    public ResponseEntity<?> sendSignupVerificationCode(@RequestBody @Valid UserEmailReqDto dto) {
+        userService.sendSignupVerificationCode(dto);
+        return new ResponseEntity<>(new CommonSuccessDto(dto.getEmail(), HttpStatus.OK.value(), "이메일 중복 검증 성공"), HttpStatus.OK);
+    }
 }

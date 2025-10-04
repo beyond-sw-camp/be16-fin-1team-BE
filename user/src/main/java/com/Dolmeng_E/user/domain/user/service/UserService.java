@@ -8,12 +8,15 @@ import com.example.modulecommon.service.S3Uploader;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@RequiredArgsConstructor
 @Transactional
 public class UserService {
     private final UserRepository userRepository;
@@ -22,6 +25,20 @@ public class UserService {
     private final JwtTokenProvider jwtTokenProvider;
     private final KakaoService kakaoService;
     private final GoogleService googleService;
+    private final MailService mailService;
+    private final RedisTemplate<String, String> redisTemplate;
+
+    @Autowired
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, S3Uploader s3Uploader, JwtTokenProvider jwtTokenProvider, KakaoService kakaoService, GoogleService googleService, MailService mailService, @Qualifier("rtInventory") RedisTemplate<String, String> redisTemplate) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.s3Uploader = s3Uploader;
+        this.jwtTokenProvider = jwtTokenProvider;
+        this.kakaoService = kakaoService;
+        this.googleService = googleService;
+        this.mailService = mailService;
+        this.redisTemplate = redisTemplate;
+    }
 
     // 회원가입 API
     public void create(UserCreateReqDto dto) {
@@ -101,6 +118,16 @@ public class UserService {
 
         return new UserLoginResDto(accessToken, refreshToken);
     }
+    
+    // 회원가입 API 구현1 - 이메일 입력 단계 - 중복 검증 및 이메일 인증코드 전송
+    public void sendSignupVerificationCode(UserEmailReqDto dto) {
+        if(userRepository.findByEmail(dto.getEmail()).isPresent()) throw new EntityExistsException("중복되는 이메일입니다.");
 
+        // 중복문제 없으니, 이메일 인증코드 전송
+        String authCode = mailService.sendMimeMessage(dto.getEmail());
+
+        // auth code -> redis에 저장
+        redisTemplate.opsForValue().set("EmailAuthCode:" + dto.getEmail(), authCode);
+    }
 
 }
