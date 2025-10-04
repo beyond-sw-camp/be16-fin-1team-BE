@@ -173,4 +173,13 @@ public class UserService {
             user.updateProfileImageUrl(profileImgaeUrl);
         }
     }
+
+    // 비밀번호 리셋 API 구현1 - 이메일 검증
+    public void verifyEmailForPasswordReset(UserEmailReqDto dto) {
+        userRepository.findByEmail(dto.getEmail()).orElseThrow(() -> new EntityNotFoundException("없는 회원입니다."));
+
+        String authCode = mailService.sendMimeMessage(dto.getEmail());
+
+        redisTemplate.opsForValue().set("PasswordAuthCode:" + dto.getEmail(), authCode, 3, TimeUnit.MINUTES);
+    }
 }

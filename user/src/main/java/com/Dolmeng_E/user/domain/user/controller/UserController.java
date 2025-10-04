@@ -117,4 +117,11 @@ public class UserController {
         userService.update(dto, userEmail);
         return new ResponseEntity<>(new CommonSuccessDto(userEmail, HttpStatus.OK.value(), "회원정보 수정 성공"), HttpStatus.OK);
     }
+
+    // 비밀번호 리셋 API 구현1 - 이메일 검증
+    @PostMapping("/password/email")
+    public ResponseEntity<?> verifyEmailForPasswordReset(@RequestBody @Valid UserEmailReqDto dto) {
+        userService.verifyEmailForPasswordReset(dto);
+        return new ResponseEntity<>(new CommonSuccessDto(dto.getEmail(), HttpStatus.OK.value(), "이메일 존재여부 검증 및 인증코드 전송 성공"), HttpStatus.OK);
+    }
 }
