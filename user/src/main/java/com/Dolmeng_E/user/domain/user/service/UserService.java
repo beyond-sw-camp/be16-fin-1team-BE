@@ -182,4 +182,14 @@ public class UserService {
 
         redisTemplate.opsForValue().set("PasswordAuthCode:" + dto.getEmail(), authCode, 3, TimeUnit.MINUTES);
     }
+    // 비밀번호 리셋 API 구현2 - 인증코드 검증
+    public void verifyAuthCodeForPassword(UserEmailAuthCodeReqDto dto) {
+        String authCode = redisTemplate.opsForValue().get("PasswordAuthCode:" + dto.getEmail());
+        if(authCode == null) { throw new RuntimeException("인증코드가 누락되었습니다."); }
+
+        // 인증코드 불일치 시, 예외 발생
+        if(!authCode.equals(dto.getAuthCode())) {
+            throw new IllegalArgumentException("인증코드가 다릅니다.");
+        }
+    }
 }

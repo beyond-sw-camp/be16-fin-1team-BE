@@ -125,4 +125,11 @@ public class UserController {
         userService.verifyEmailForPasswordReset(dto);
         return new ResponseEntity<>(new CommonSuccessDto(dto.getEmail(), HttpStatus.OK.value(), "이메일 존재여부 검증 및 인증코드 전송 성공"), HttpStatus.OK);
     }
+
+    // 비밀번호 리셋 API 구현2 - 인증코드 검증
+    @PostMapping("/password/authcode")
+    public ResponseEntity<?> verifyAuthCodeForPassword(@RequestBody @Valid UserEmailAuthCodeReqDto dto) {
+        userService.verifyAuthCodeForPassword(dto);
+        return new ResponseEntity<>(new CommonSuccessDto(dto.getEmail(), HttpStatus.OK.value(), "인증코드 검증 성공"), HttpStatus.OK);
+    }
 }
