@@ -22,12 +22,12 @@ public class JwtAuthFilter implements GlobalFilter {
     private static final List<String> ALLOWED_PATH = List.of(
             "/user",
             "/user/auth/login",
-            "/user/auth/refresh",
             "/user/kakao/login",
             "/user/google/login",
             "/auth/email",
             "/user/email",
             "/user/authcode",
+            "/user/auth/token",
             "/health"
     );
 

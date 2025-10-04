@@ -26,7 +26,7 @@ public class UserController {
         User user = userService.login(dto);
 
         String accessToken = jwtTokenProvider.createAtToken(user);
-        String refreshToken = jwtTokenProvider.createRtToken(user);
+        String refreshToken = jwtTokenProvider.createRtToken(user, dto.isRememberMe());
         return new ResponseEntity<>(new CommonSuccessDto(new UserLoginResDto(accessToken, refreshToken), HttpStatus.OK.value(), "로그인 성공"), HttpStatus.OK);
     }
 
@@ -78,7 +78,28 @@ public class UserController {
     public ResponseEntity<?> create(@ModelAttribute @Valid UserCreateReqDto dto) {
         userService.create(dto);
         return new ResponseEntity<>(new CommonSuccessDto(dto.getEmail(), HttpStatus.CREATED.value(), "회원가입 성공"), HttpStatus.CREATED);
-
+    }
+  
+    // access/refresh token 갱신 API
+    @PostMapping("/auth/token")
+    public ResponseEntity<?> tokenRefresh(@RequestBody @Valid UserRefreshTokenReqDto dto) {
+        User user = userService.tokenRefresh(dto);
+        String accessToken = jwtTokenProvider.createAtToken(user);
+        String refreshToken = jwtTokenProvider.createRtToken(user, dto.isRememberMe());
+        return new ResponseEntity<>(new CommonSuccessDto(new UserLoginResDto(accessToken, refreshToken), HttpStatus.OK.value(), "access/refresh token 재발급 성공"), HttpStatus.OK);
     }
 
+    // 로그아웃 API
+    @PostMapping("/auth/logout")
+    public ResponseEntity<?> logout(@RequestHeader("X-User-Email")String userEmail) {
+        userService.logout(userEmail);
+        return new ResponseEntity<>(new CommonSuccessDto(userEmail, HttpStatus.OK.value(), "로그아웃 성공"),  HttpStatus.OK);
+    }
+
+    // 회원 탈퇴 API
+    @DeleteMapping("/auth")
+    public ResponseEntity<?> delete(@RequestHeader("X-User-Email")String userEmail) {
+        userService.delete(userEmail);
+        return new ResponseEntity<>(new CommonSuccessDto(userEmail, HttpStatus.OK.value(), "회원탈퇴 성공"),  HttpStatus.OK);
+    }
 }
