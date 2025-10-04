@@ -132,4 +132,11 @@ public class UserController {
         userService.verifyAuthCodeForPassword(dto);
         return new ResponseEntity<>(new CommonSuccessDto(dto.getEmail(), HttpStatus.OK.value(), "인증코드 검증 성공"), HttpStatus.OK);
     }
+
+    // 비밀번호 리셋 API 구현3 - 비밀번호 리셋
+    @PutMapping("/password")
+    public ResponseEntity<?> updatePassword(@RequestBody @Valid UserUpdatePasswordReqDto dto) {
+        userService.updatePassword(dto);
+        return new ResponseEntity<>(new CommonSuccessDto(dto.getEmail(), HttpStatus.OK.value(), "비밀번호 수정 성공"), HttpStatus.OK);
+    }
 }

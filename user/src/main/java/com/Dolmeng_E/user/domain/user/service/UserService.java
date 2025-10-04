@@ -43,7 +43,7 @@ public class UserService {
         this.redisTemplate = redisTemplate;
     }
 
-    // 회원가입 API
+    // 회원가입 API 구현3 - 계정 생성
     public void create(UserCreateReqDto dto) {
         if(userRepository.findByEmail(dto.getEmail()).isPresent()) throw new EntityExistsException("중복되는 이메일입니다.");
 
@@ -182,6 +182,7 @@ public class UserService {
 
         redisTemplate.opsForValue().set("PasswordAuthCode:" + dto.getEmail(), authCode, 3, TimeUnit.MINUTES);
     }
+
     // 비밀번호 리셋 API 구현2 - 인증코드 검증
     public void verifyAuthCodeForPassword(UserEmailAuthCodeReqDto dto) {
         String authCode = redisTemplate.opsForValue().get("PasswordAuthCode:" + dto.getEmail());
@@ -191,5 +192,12 @@ public class UserService {
         if(!authCode.equals(dto.getAuthCode())) {
             throw new IllegalArgumentException("인증코드가 다릅니다.");
         }
+    }
+
+    // 비밀번호 리셋 API 구현3 - 비밀번호 리셋
+    public void updatePassword(UserUpdatePasswordReqDto dto) {
+        User user = userRepository.findByEmail(dto.getEmail()).orElseThrow(()->new EntityNotFoundException("없는 회원입니다."));
+        String encodedPassword = passwordEncoder.encode(dto.getNewPassword());
+        user.updatePassword(encodedPassword);
     }
 }
