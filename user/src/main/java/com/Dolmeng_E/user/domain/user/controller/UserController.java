@@ -110,4 +110,11 @@ public class UserController {
         UserDetailResDto userDetailResDto = userService.getUserDetail(userId);
         return new ResponseEntity<>(new CommonSuccessDto(userDetailResDto, HttpStatus.OK.value(), "회원상세 조회 성공"),  HttpStatus.OK);
     }
+
+    // 회원 정보 수정
+    @PutMapping("/auth")
+    public ResponseEntity<?> update(@ModelAttribute @Valid UserUpdateReqDto dto, @RequestHeader("X-User-Email")String userEmail) {
+        userService.update(dto, userEmail);
+        return new ResponseEntity<>(new CommonSuccessDto(userEmail, HttpStatus.OK.value(), "회원정보 수정 성공"), HttpStatus.OK);
+    }
 }

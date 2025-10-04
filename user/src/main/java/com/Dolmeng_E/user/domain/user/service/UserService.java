@@ -161,4 +161,16 @@ public class UserService {
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("없는 회원입니다."));
         return UserDetailResDto.fromEntity(user);
     }
+
+    // 회원 정보 수정
+    public void update(UserUpdateReqDto dto, String userEmail) {
+        User user = userRepository.findByEmail(userEmail).orElseThrow(() -> new EntityNotFoundException("없는 회원입니다."));
+        if(dto.getName() != null && !dto.getName().isEmpty()) { user.updateName(dto.getName()); }
+        if(dto.getPhoneNumber() != null) { user.updatePhoneNumber(dto.getPhoneNumber()); }
+        if(dto.getProfileImage() != null) {
+            s3Uploader.delete(user.getProfileImageUrl());
+            String profileImgaeUrl = s3Uploader.upload(dto.getProfileImage(), "user");
+            user.updateProfileImageUrl(profileImgaeUrl);
+        }
+    }
 }
