@@ -23,14 +23,16 @@ public class JwtTokenProvider {
     private final UserRepository userRepository;
     private final RedisTemplate<String, String> redisTemplate;
 
-    @Value("${jwt.expirationAt}")
-    private int expirationAt;
-
     @Value("${jwt.secretKeyAt}")
     private String secretKeyAt;
 
-    @Value("${jwt.expirationRt}")
-    private int expirationRt;
+    @Value("${jwt.accessTokenExpiryMinutes}")
+    private int accessTokenExpiryMinutes;
+
+    @Value("${jwt.refreshTokenExpiryDaysNonPersistent}")
+    private int refreshTokenExpiryDaysNonPersistent;
+    @Value("${jwt.refreshTokenExpiryDaysPersistent}")
+    private int refreshTokenExpiryDaysPersistent;
 
     @Value("${jwt.secretKeyRt}")
     private String secretKeyRt;
@@ -63,32 +65,29 @@ public class JwtTokenProvider {
         String accessToken = Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime() + expirationAt*60*1000L)) // 30분을 세팅
-                // secret 키를 통해 signiture 생성
+                .setExpiration(new Date(now.getTime() + accessTokenExpiryMinutes*60*1000L))
                 .signWith(secret_at_key)
                 .compact();
 
         return accessToken;
     }
 
-    public String createRtToken(User user) {
+    public String createRtToken(User user, boolean rememberMe) {
         String email = user.getEmail();
-//        String role = member.getRole().toString();
+//        String role = user.getUserRole().toString();
 
-        // claims는 페이로드 (사용자 정보)
+        int refreshTokenExpiryDays = rememberMe ? refreshTokenExpiryDaysPersistent : refreshTokenExpiryDaysNonPersistent;
         Claims claims = Jwts.claims().setSubject(email);
 //        claims.put("role", role);
-
         Date now = new Date();
         String refreshToken = Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime() + expirationRt*60*1000L))
+                .setExpiration(new Date(now.getTime() + refreshTokenExpiryDays * 24 * 60 * 60 * 1000L))
                 .signWith(secret_rt_key)
                 .compact();
 
-        redisTemplate.opsForValue().set("RefreshToken:"+user.getEmail(), refreshToken, 200, TimeUnit.DAYS); // 200일 ttl
-
+        redisTemplate.opsForValue().set("RefreshToken:"+user.getEmail(), refreshToken, refreshTokenExpiryDays, TimeUnit.DAYS);
 
         return refreshToken;
     }

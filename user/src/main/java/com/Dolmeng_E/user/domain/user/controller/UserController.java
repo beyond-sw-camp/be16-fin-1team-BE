@@ -26,7 +26,7 @@ public class UserController {
         User user = userService.login(dto);
 
         String accessToken = jwtTokenProvider.createAtToken(user);
-        String refreshToken = jwtTokenProvider.createRtToken(user);
+        String refreshToken = jwtTokenProvider.createRtToken(user, dto.isRememberMe());
         return new ResponseEntity<>(new CommonSuccessDto(new UserLoginResDto(accessToken, refreshToken), HttpStatus.OK.value(), "로그인 성공"), HttpStatus.OK);
     }
 
@@ -84,7 +84,7 @@ public class UserController {
     public ResponseEntity<?> tokenRefresh(@RequestBody @Valid UserRefreshTokenReqDto dto) {
         User user = userService.tokenRefresh(dto);
         String accessToken = jwtTokenProvider.createAtToken(user);
-        String refreshToken = jwtTokenProvider.createRtToken(user);
+        String refreshToken = jwtTokenProvider.createRtToken(user, dto.isRememberMe());
         return new ResponseEntity<>(new CommonSuccessDto(new UserLoginResDto(accessToken, refreshToken), HttpStatus.OK.value(), "access/refresh token 재발급 성공"), HttpStatus.OK);
     }
 

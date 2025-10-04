@@ -14,4 +14,6 @@ import lombok.NoArgsConstructor;
 public class UserRefreshTokenReqDto {
     @NotEmpty(message = "Refresh Token이 비어있습니다.")
     private String refreshToken;
+
+    private boolean rememberMe = false;
 }

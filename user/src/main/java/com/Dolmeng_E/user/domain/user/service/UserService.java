@@ -87,10 +87,7 @@ public class UserService {
 
         // 토큰 생성해서 반환
         String accessToken = jwtTokenProvider.createAtToken(user);
-        String refreshToken = jwtTokenProvider.createRtToken(user);
-
-        // todo - 자동로그인 기능 적용 시 사용
-//        String refreshToken = jwtTokenProvider.createRtToken(user, dto.isRememberMe());
+        String refreshToken = jwtTokenProvider.createRtToken(user, dto.isRememberMe());
 
         return new UserLoginResDto(accessToken, refreshToken);
     }
