@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -25,6 +26,9 @@ public class AccessGroupService {
     private final AccessDetailRepository accessDetailRepository;
     private final AccessListRepository accessListRepository;
     private final WorkspaceRepository workspaceRepository;
+
+
+//    To-Do : 모든 로직 구현 후 try-catch 작업 해야함
 
     // 관리자 권한 그룹 생성 (워크스페이스 ID 기반, 워크스페이스 생성시 자동생성)
     public void createAdminGroupForWorkspace(String workspaceId) {
@@ -87,8 +91,41 @@ public class AccessGroupService {
 
     //    커스터마이징 권한그룹 생성
 
-    public void createCustomAccessGroup(CustomAccessGroupDto customAccessGroupDto) {
+    public void createCustomAccessGroup(CustomAccessGroupDto dto) {
 
+        // 1. 워크스페이스 조회
+        Workspace workspace = workspaceRepository.findById(dto.getWorkspaceId())
+                .orElseThrow(() -> new IllegalArgumentException("워크스페이스를 찾을 수 없습니다. ID=" + dto.getWorkspaceId()));
+
+        // 2. AccessGroup 생성
+        AccessGroup newGroup = AccessGroup.builder()
+                .workspace(workspace)
+                .accessGroupName(dto.getAccessGroupName())
+                .build();
+
+        accessGroupRepository.save(newGroup);
+
+        // 3️. AccessType 순서대로 accessList 값 매핑
+        AccessType[] types = AccessType.values();
+        List<Boolean> accessValues = dto.getAccessList();
+
+        for (int i = 0; i < types.length; i++) {
+            AccessType type = types[i];
+            boolean isAccess = i < accessValues.size() && Boolean.TRUE.equals(accessValues.get(i));
+
+            // AccessList (권한 정의 테이블) 조회
+            AccessList accessList = accessListRepository.findByAccessType(type)
+                    .orElseThrow(() -> new IllegalStateException("AccessList 정의 없음: " + type));
+
+            // AccessDetail 생성 및 저장
+            AccessDetail detail = AccessDetail.builder()
+                    .accessGroup(newGroup)
+                    .accessList(accessList)
+                    .isAccess(isAccess)
+                    .build();
+
+            accessDetailRepository.save(detail);
+        }
     }
 
     //    권한그룹 수정

@@ -7,10 +7,22 @@ import org.springframework.context.annotation.ComponentScan;
 
 @EnableFeignClients
 @SpringBootApplication
-@ComponentScan(basePackages = {
-		"com.Dolmeng_E.workspace", // 여기는 서비스 명에 맞게 user -> drive등 바꿔주기
-		"com.example.modulecommon"
-})
+@ComponentScan(
+		basePackages = {
+				"com.Dolmeng_E.workspace",
+				"com.example.modulecommon"
+		},
+		// s3 일단 차단
+		excludeFilters = {
+				@ComponentScan.Filter(
+						type = org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE,
+						classes = {
+								com.example.modulecommon.config.AwsS3Config.class,
+								com.example.modulecommon.service.S3Uploader.class
+						}
+				)
+		}
+)
 public class WorkspaceApplication {
 
 	public static void main(String[] args) {

@@ -37,7 +37,7 @@ public class AccessGroupController {
     public ResponseEntity<?> createDefaultUserAccessGroup(@RequestBody DefaultAccessGroupCreateDto defaultAccessGroupCreateDto) {
         accessGroupService.createDefaultUserAccessGroup(defaultAccessGroupCreateDto.getWorkspaceId());
         return new ResponseEntity<>(CommonSuccessDto.builder()
-                .statusMessage("사용자 그룹 생성 완료")
+                .statusMessage("기본 사용자 그룹 생성 완료")
                 .result(HttpStatus.CREATED)
                 .statusCode(HttpStatus.CREATED.value())
                 .build()
@@ -49,7 +49,12 @@ public class AccessGroupController {
     @PostMapping("/custom")
     public ResponseEntity<?> createCustomAccessGroup(@RequestBody CustomAccessGroupDto customAccessGroupDto) {
         accessGroupService.createCustomAccessGroup(customAccessGroupDto);
-        return null;
+        return new ResponseEntity<>(CommonSuccessDto.builder()
+                .statusMessage("커스텀 사용자 그룹 생성 완료")
+                .result(HttpStatus.CREATED)
+                .statusCode(HttpStatus.CREATED.value())
+                .build()
+                ,HttpStatus.CREATED);
     }
 
 //    권한그룹 수정
