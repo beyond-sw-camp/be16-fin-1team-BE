@@ -2,6 +2,7 @@ package com.Dolmeng_E.workspace.domain.access_group.service;
 
 import com.Dolmeng_E.workspace.common.dto.UserInfoResDto;
 import com.Dolmeng_E.workspace.common.service.UserFeign;
+import com.Dolmeng_E.workspace.domain.access_group.dto.AccessGroupListResDto;
 import com.Dolmeng_E.workspace.domain.access_group.dto.AccessGroupModifyDto;
 import com.Dolmeng_E.workspace.domain.access_group.dto.CustomAccessGroupDto;
 import com.Dolmeng_E.workspace.domain.access_group.entity.AccessDetail;
@@ -18,6 +19,8 @@ import com.Dolmeng_E.workspace.domain.workspace.repository.WorkspaceParticipantR
 import com.Dolmeng_E.workspace.domain.workspace.repository.WorkspaceRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -197,6 +200,15 @@ public class AccessGroupService {
     }
 
     //    권한그룹 리스트 조회
+
+    public Page<AccessGroupListResDto> accessGroupList(Pageable pageable, String userEmail, String workspaceId) {
+        Workspace workspace = workspaceRepository.findById(workspaceId)
+                .orElseThrow(() -> new IllegalArgumentException("워크스페이스를 찾을 수 없습니다. ID=" + workspaceId));
+        Page<AccessGroup> accessGroupPage = accessGroupRepository.findByWorkspaceId(workspace.getId(), pageable);
+        return accessGroupPage.map(
+                group -> AccessGroupListResDto.fromEntity(group, workspaceParticipantRepository.countByAccessGroup(group))
+        );
+    }
 
     //    권한그룹 상세 조회
 

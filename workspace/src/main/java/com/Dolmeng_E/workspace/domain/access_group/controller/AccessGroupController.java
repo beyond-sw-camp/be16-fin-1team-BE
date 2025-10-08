@@ -1,11 +1,13 @@
 package com.Dolmeng_E.workspace.domain.access_group.controller;
 
+import com.Dolmeng_E.workspace.domain.access_group.dto.AccessGroupListResDto;
 import com.Dolmeng_E.workspace.domain.access_group.dto.AccessGroupModifyDto;
 import com.Dolmeng_E.workspace.domain.access_group.dto.CustomAccessGroupDto;
 import com.Dolmeng_E.workspace.domain.access_group.dto.DefaultAccessGroupCreateDto;
 import com.Dolmeng_E.workspace.domain.access_group.service.AccessGroupService;
 import com.example.modulecommon.dto.CommonSuccessDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -22,7 +24,6 @@ public class AccessGroupController {
     // 관리자 권한 그룹 생성 (워크스페이스 ID 기반, 워크스페이스 생성시 자동생성)
     @PostMapping("/admin")
     public ResponseEntity<?> createAdminAccessGroup(@RequestBody DefaultAccessGroupCreateDto defaultAccessGroupCreateDto) {
-//        워크스페이스 id string으로 변경시 dto에도 id string으로 변경요망
         String id = accessGroupService.createAdminGroupForWorkspace(defaultAccessGroupCreateDto.getWorkspaceId());
         return new ResponseEntity<>(CommonSuccessDto.builder()
                 .statusMessage("관리자 그룹 생성 완료")
@@ -72,10 +73,15 @@ public class AccessGroupController {
                 ,HttpStatus.OK);
     }
 //    권한그룹 리스트 조회
-    @GetMapping("/group-list")
-    public ResponseEntity<?> accessGroupList(@PageableDefault(page = 0,size = 10)Pageable pageable) {
-        accessGroupService.accessGroupList(pageable);
-        return null;
+    @GetMapping("/group-list/{workspaceId}")
+        public ResponseEntity<?> accessGroupList(@PageableDefault(page = 0, size = 10) Pageable pageable,
+                                                 @RequestHeader("X-User-Email") String userEmail, @PathVariable String workspaceId) {
+        return new ResponseEntity<>(CommonSuccessDto.builder()
+                .statusMessage("권한 그룹 리스트 조회 완료")
+                .result(accessGroupService.accessGroupList(pageable, userEmail, workspaceId))
+                .statusCode(HttpStatus.OK.value())
+                .build()
+                ,HttpStatus.OK);
     }
 
 //    권한그룹 상세 조회
