@@ -1,6 +1,6 @@
 package com.Dolmeng_E.chat.domain.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.Dolmeng_E.chat.domain.dto.ChatMessageDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -13,11 +13,11 @@ public class StompController {
     private final SimpMessageSendingOperations messageTemplate;
 
     @MessageMapping("/{roomId}")
-    public void sendMessage(@DestinationVariable Long roomId, String message) {
-        System.out.println(message);
+    public void sendMessage(@DestinationVariable Long roomId, ChatMessageDto dto) {
+        System.out.println("sender: " + dto.getSenderEmail() + ", message: " + dto.getMessage());
 
 //        chatService.saveMessage(roomId, dto);
 
-        messageTemplate.convertAndSend("/topic/"+roomId, message);
+        messageTemplate.convertAndSend("/topic/"+roomId, dto);
     }
 }
