@@ -1,10 +1,12 @@
 package com.Dolmeng_E.workspace.domain.access_group.controller;
 
-import com.Dolmeng_E.workspace.domain.access_group.dto.CustomAccessGroupDto;
-import com.Dolmeng_E.workspace.domain.access_group.dto.DefaultAccessGroupCreateDto;
+import com.Dolmeng_E.workspace.domain.access_group.dto.*;
 import com.Dolmeng_E.workspace.domain.access_group.service.AccessGroupService;
 import com.example.modulecommon.dto.CommonSuccessDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,11 +21,10 @@ public class AccessGroupController {
     // 관리자 권한 그룹 생성 (워크스페이스 ID 기반, 워크스페이스 생성시 자동생성)
     @PostMapping("/admin")
     public ResponseEntity<?> createAdminAccessGroup(@RequestBody DefaultAccessGroupCreateDto defaultAccessGroupCreateDto) {
-//        워크스페이스 id string으로 변경시 dto에도 id string으로 변경요망
-        accessGroupService.createAdminGroupForWorkspace(defaultAccessGroupCreateDto.getWorkspaceId());
+        String id = accessGroupService.createAdminGroupForWorkspace(defaultAccessGroupCreateDto.getWorkspaceId());
         return new ResponseEntity<>(CommonSuccessDto.builder()
                 .statusMessage("관리자 그룹 생성 완료")
-                .result(HttpStatus.CREATED)
+                .result(id)
                 .statusCode(HttpStatus.CREATED.value())
                 .build()
                 ,HttpStatus.CREATED);
@@ -35,10 +36,10 @@ public class AccessGroupController {
 //    일반유저 권한그룹 생성(워크스페이스 생성시 자동생성)
     @PostMapping("/common-user")
     public ResponseEntity<?> createDefaultUserAccessGroup(@RequestBody DefaultAccessGroupCreateDto defaultAccessGroupCreateDto) {
-        accessGroupService.createDefaultUserAccessGroup(defaultAccessGroupCreateDto.getWorkspaceId());
+        String id = accessGroupService.createDefaultUserAccessGroup(defaultAccessGroupCreateDto.getWorkspaceId());
         return new ResponseEntity<>(CommonSuccessDto.builder()
                 .statusMessage("기본 사용자 그룹 생성 완료")
-                .result(HttpStatus.CREATED)
+                .result(id)
                 .statusCode(HttpStatus.CREATED.value())
                 .build()
                 ,HttpStatus.CREATED);
@@ -47,8 +48,8 @@ public class AccessGroupController {
 
 //    커스터마이징 권한그룹 생성
     @PostMapping("/custom")
-    public ResponseEntity<?> createCustomAccessGroup(@RequestBody CustomAccessGroupDto customAccessGroupDto) {
-        accessGroupService.createCustomAccessGroup(customAccessGroupDto);
+    public ResponseEntity<?> createCustomAccessGroup(@RequestBody CustomAccessGroupDto customAccessGroupDto, @RequestHeader("X-User-Email") String userEmail) {
+        accessGroupService.createCustomAccessGroup(customAccessGroupDto, userEmail);
         return new ResponseEntity<>(CommonSuccessDto.builder()
                 .statusMessage("커스텀 사용자 그룹 생성 완료")
                 .result(HttpStatus.CREATED)
@@ -58,14 +59,63 @@ public class AccessGroupController {
     }
 
 //    권한그룹 수정
-
+    @PatchMapping("")
+    public ResponseEntity<?> modifyAccessGroup(@RequestBody AccessGroupModifyDto accessGroupModifyDto, @RequestHeader("X-User-Email") String userEmail) {
+        accessGroupService.modifyAccessGroup(accessGroupModifyDto, userEmail);
+        return new ResponseEntity<>(CommonSuccessDto.builder()
+                .statusMessage("권한 그룹 수정 완료")
+                .result(HttpStatus.OK)
+                .statusCode(HttpStatus.OK.value())
+                .build()
+                ,HttpStatus.OK);
+    }
 //    권한그룹 리스트 조회
+    @GetMapping("/group-list/{workspaceId}")
+        public ResponseEntity<?> accessGroupList(@PageableDefault(page = 0, size = 10) Pageable pageable,
+                                                 @RequestHeader("X-User-Email") String userEmail, @PathVariable String workspaceId) {
+        return new ResponseEntity<>(CommonSuccessDto.builder()
+                .statusMessage("권한 그룹 리스트 조회 완료")
+                .result(accessGroupService.accessGroupList(pageable, userEmail, workspaceId))
+                .statusCode(HttpStatus.OK.value())
+                .build()
+                ,HttpStatus.OK);
+    }
 
 //    권한그룹 상세 조회
 
-//    권한그룹 사용자 추가
+
+//    권한그룹 사용자 추가(워크스페이스 초대 받아서 가입 시 디폴트로 일반사용자 권한그룹에 추가되어 이거를 써야할지)
+    @PostMapping("/{groupId}/users")
+        public ResponseEntity<?> addUserToAccessGroup(@RequestHeader("X-User-Email") String userEmail
+            , @PathVariable String groupId, AccessGroupAddUserDto accessGroupAddUserDto) {
+        accessGroupService.addUserToAccessGroup(userEmail,groupId,accessGroupAddUserDto);
+        return new ResponseEntity<>(CommonSuccessDto.builder()
+                .statusMessage("권한그룹 사용자 추가 완료")
+                .result(HttpStatus.CREATED)
+                .statusCode(HttpStatus.CREATED.value())
+                .build()
+                ,HttpStatus.CREATED);
+    }
+
+    //    권한그룹 사용자 변경 (이미 워크스페이스에 존재하는 사용자의 그룹 변경)
+    @PatchMapping("/{groupId}/users")
+    public ResponseEntity<?> updateUserAccessGroup(
+            @RequestHeader("X-User-Email") String adminEmail,
+            @PathVariable String groupId,
+            @RequestBody AccessGroupAddUserDto dto
+    ) {
+        accessGroupService.updateUserAccessGroup(adminEmail, groupId, dto);
+
+        return new ResponseEntity<>(CommonSuccessDto.builder()
+                .statusMessage("권한그룹 사용자 변경 완료")
+                .result(HttpStatus.OK)
+                .statusCode(HttpStatus.OK.value())
+                .build(),
+                HttpStatus.OK);
+    }
 
 //    권한그룹 사용자 수정
+
 
 //    권한그룹 사용자 제거
 
