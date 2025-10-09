@@ -30,10 +30,18 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
 	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
 
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+
+    // jwt 토큰 관련 라이브러리 추가
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -45,6 +53,22 @@ dependencies {
 
 	//    circuit 브레이커 도입시
 	implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j'
+
+    implementation 'software.amazon.awssdk:s3:2.17.58'
+
+    // 공통 모듈 의존성
+    implementation "com.example:module-common:1.1.2"
+}
+
+repositories {
+    maven {
+        url = uri("https://maven.pkg.github.com/EunDuk2/module-common")
+        credentials {
+            username = findProperty("GITHUB_USER") ?: System.getenv("GITHUB_USER")
+            password = findProperty("GITHUB_TOKEN") ?: System.getenv("GITHUB_TOKEN")
+        }
+    }
+    mavenCentral()
 }
 
 dependencyManagement{
