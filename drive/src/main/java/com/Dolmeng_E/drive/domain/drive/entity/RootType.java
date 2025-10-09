@@ -1,4 +1,4 @@
-package com.Dolmeng_E.drive.domain.folder.entity;
+package com.Dolmeng_E.drive.domain.drive.entity;
 
 public enum RootType {
     WORKSPACE, PROJECT, STONE

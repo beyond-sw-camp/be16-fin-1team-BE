@@ -1,4 +1,4 @@
-package com.Dolmeng_E.drive.domain.folder.entity;
+package com.Dolmeng_E.drive.domain.drive.entity;
 
 import com.example.modulecommon.domain.BaseTimeEntity;
 import jakarta.persistence.*;
@@ -8,6 +8,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -52,6 +55,10 @@ public class Folder extends BaseTimeEntity {
     @Column(nullable = false)
     @Builder.Default
     private Boolean isDelete = false;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "folder", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<File> files = new ArrayList<>();
 
     public void updateName(String updatedName) {
         this.name = updatedName;

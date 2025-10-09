@@ -1,4 +1,4 @@
-package com.Dolmeng_E.drive.domain.folder.dto;
+package com.Dolmeng_E.drive.domain.drive.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,6 +9,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class FolderUpdateNameDto {
+public class FolderContentsDto {
     private String name;
+    private String createBy;
+    private String updateAt;
+    private String size;
+    private String type;
 }
