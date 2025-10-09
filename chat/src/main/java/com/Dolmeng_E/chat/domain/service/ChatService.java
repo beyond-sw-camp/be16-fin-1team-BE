@@ -1,6 +1,7 @@
 package com.Dolmeng_E.chat.domain.service;
 
 import com.Dolmeng_E.chat.common.dto.UserInfoResDto;
+import com.Dolmeng_E.chat.domain.dto.ChatCreateReqDto;
 import com.Dolmeng_E.chat.domain.dto.ChatMessageDto;
 import com.Dolmeng_E.chat.domain.entity.ChatMessage;
 import com.Dolmeng_E.chat.domain.entity.ChatParticipant;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -54,7 +56,27 @@ public class ChatService {
                     .build();
             readStatusRepository.save(readStatus);
         }
-
     }
+
+    // 채팅방 생성
+    public void createChatRoom(ChatCreateReqDto dto) {
+        // 채팅방 생성
+        ChatRoom chatRoom = ChatRoom.builder()
+                .workspaceId(dto.getWorkspaceId())
+                .projectId(dto.getProjectId())
+                .stoneId(dto.getStoneId())
+                .name(dto.getRoomName())
+                .build();
+        // 초대한 인원들을 참여자로 등록
+        for(UUID userId : dto.getUserIdList()) {
+            ChatParticipant chatParticipant = ChatParticipant.builder()
+                    .chatRoom(chatRoom)
+                    .userId(userId)
+                    .build();
+            chatRoom.getChatParticipantList().add(chatParticipant);
+        }
+        chatRoomRepository.save(chatRoom);
+    }
+
 
 }
