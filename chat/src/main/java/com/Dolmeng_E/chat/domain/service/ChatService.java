@@ -89,5 +89,14 @@ public class ChatService {
         return chatRoomListResDtoList;
     }
 
+    // 해당 room의 참여자가 맞는 지 검증
+    public boolean isRoomParticipant(String email, Long roomId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("없는 채팅방입니다."));
+        UUID userId = userFeignClient.fetchUserInfo(email).getUserId();
+
+        return chatRoom.getChatParticipantList().stream()
+                .anyMatch(p -> p.getUserId().equals(userId));
+    }
+
 
 }

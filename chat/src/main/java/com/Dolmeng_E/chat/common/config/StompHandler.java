@@ -1,5 +1,6 @@
 package com.Dolmeng_E.chat.common.config;
 
+import com.Dolmeng_E.chat.domain.service.ChatService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.annotation.PostConstruct;
@@ -14,12 +15,15 @@ import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.spec.SecretKeySpec;
+import javax.naming.AuthenticationException;
 import java.security.Key;
 import java.util.Date;
 
 @Component
 @RequiredArgsConstructor
 public class StompHandler implements ChannelInterceptor {
+    private final ChatService chatService;
+
     @Value("${jwt.secretKeyAt}")
     private String secretKeyAt;
 
@@ -48,6 +52,28 @@ public class StompHandler implements ChannelInterceptor {
 
             System.out.println("토큰 검증 완료");
         }
+        if(StompCommand.SUBSCRIBE == accessor.getCommand()){
+            System.out.println("subscribe 요청 시 토큰 검증 및 참여자 검증");
+            String bearerToken = accessor.getFirstNativeHeader("Authorization");
+            String token = bearerToken.substring(7);
+
+            System.out.println("bearerToken: " + bearerToken);
+
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(secret_at_key)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            String email = claims.getSubject();
+            String roomId = accessor.getDestination().split("/")[2];
+
+            if(!chatService.isRoomParticipant(email, Long.parseLong(roomId))) {
+                throw new IllegalArgumentException("해당 room에 대한 권한이 없습니다.");
+            }
+            System.out.println("subscribe 검증 완료");
+        }
+
         return message;
     }
 
