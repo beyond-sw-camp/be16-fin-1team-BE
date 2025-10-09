@@ -1,10 +1,10 @@
-package com.Dolmeng_E.drive.domain.folder.service;
+package com.Dolmeng_E.drive.domain.drive.service;
 
-import com.Dolmeng_E.drive.domain.folder.dto.FolderContentsDto;
-import com.Dolmeng_E.drive.domain.folder.dto.FolderSaveDto;
-import com.Dolmeng_E.drive.domain.folder.dto.FolderUpdateNameDto;
-import com.Dolmeng_E.drive.domain.folder.entity.Folder;
-import com.Dolmeng_E.drive.domain.folder.repository.FolderRepository;
+import com.Dolmeng_E.drive.domain.drive.dto.FolderContentsDto;
+import com.Dolmeng_E.drive.domain.drive.dto.FolderSaveDto;
+import com.Dolmeng_E.drive.domain.drive.dto.FolderUpdateNameDto;
+import com.Dolmeng_E.drive.domain.drive.entity.Folder;
+import com.Dolmeng_E.drive.domain.drive.repository.FolderRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,7 +16,7 @@ import java.util.List;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class FolderService {
+public class DriverService {
 
     private final FolderRepository folderRepository;
 
