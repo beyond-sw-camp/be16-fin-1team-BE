@@ -137,10 +137,11 @@ public class DriverService {
     }
 
     // 문서 생성
-    public String createDocument(String folderId){
+    public String createDocument(String folderId, String documentTitle){
         Folder folder = folderRepository.findById(folderId).orElseThrow(()->new EntityNotFoundException("해당 폴더가 존재하지 않습니다."));
         Document document = Document.builder()
                 .createdBy("회원ID")
+                .title(documentTitle)
                 .folder(folder)
                 .build();
         return documentRepository.save(document).getId();
