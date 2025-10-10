@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/drive")
@@ -27,32 +28,42 @@ public class DriveController {
     }
 
     // 폴더명 수정
-    @PutMapping("/folder/{folder_id}")
-    public ResponseEntity<?> updateFolder(@RequestBody FolderUpdateNameDto folderUpdateNameDto, @PathVariable String folder_id) {
+    @PutMapping("/folder/{folderId}")
+    public ResponseEntity<?> updateFolder(@RequestBody FolderUpdateNameDto folderUpdateNameDto, @PathVariable String folderId) {
         return new ResponseEntity<>(CommonSuccessDto.builder()
-                .result(driverService.updateFolderName(folderUpdateNameDto, folder_id))
+                .result(driverService.updateFolderName(folderUpdateNameDto, folderId))
                 .statusCode(HttpStatus.OK.value())
                 .statusMessage("폴더명 수정 성공")
                 .build(), HttpStatus.OK);
     }
 
     // 폴더 삭제
-    @DeleteMapping("/folder/{folder_id}")
-    public ResponseEntity<?> deleteFolder(@PathVariable String folder_id) {
+    @DeleteMapping("/folder/{folderId}")
+    public ResponseEntity<?> deleteFolder(@PathVariable String folderId) {
         return new ResponseEntity<>(CommonSuccessDto.builder()
-                .result(driverService.deleteFolder(folder_id))
+                .result(driverService.deleteFolder(folderId))
                 .statusCode(HttpStatus.OK.value())
                 .statusMessage("폴더 삭제 성공")
                 .build(), HttpStatus.OK);
     }
 
     // 폴더 하위 요소들 조회
-    @GetMapping("/folder/{folder_id}/contents")
-    public ResponseEntity<?> getFolderContents(@PathVariable String folder_id) {
+    @GetMapping("/folder/{folderId}/contents")
+    public ResponseEntity<?> getFolderContents(@PathVariable String folderId) {
         return new ResponseEntity<>(CommonSuccessDto.builder()
-                .result(driverService.getFolderContents(folder_id))
+                .result(driverService.getFolderContents(folderId))
                 .statusCode(HttpStatus.OK.value())
                 .statusMessage("폴더 하위 요소들 조회 성공")
                 .build(), HttpStatus.OK);
+    }
+
+    // 파일 업로드
+    @PostMapping("/folder/{folderId}/file")
+    public ResponseEntity<?> uploadFile(@PathVariable String folderId, @RequestParam MultipartFile file) {
+        return new ResponseEntity<>(CommonSuccessDto.builder()
+                .result(driverService.uploadFile(file, folderId))
+                .statusCode(HttpStatus.CREATED.value())
+                .statusMessage("파일 업로드 성공")
+                .build(), HttpStatus.CREATED);
     }
 }

@@ -3,12 +3,17 @@ package com.Dolmeng_E.drive.domain.drive.service;
 import com.Dolmeng_E.drive.domain.drive.dto.FolderContentsDto;
 import com.Dolmeng_E.drive.domain.drive.dto.FolderSaveDto;
 import com.Dolmeng_E.drive.domain.drive.dto.FolderUpdateNameDto;
+import com.Dolmeng_E.drive.domain.drive.entity.File;
 import com.Dolmeng_E.drive.domain.drive.entity.Folder;
+import com.Dolmeng_E.drive.domain.drive.repository.FileRepository;
 import com.Dolmeng_E.drive.domain.drive.repository.FolderRepository;
+import com.example.modulecommon.service.S3Uploader;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +24,8 @@ import java.util.List;
 public class DriverService {
 
     private final FolderRepository folderRepository;
+    private final S3Uploader s3Uploader;
+    private final FileRepository fileRepository;
 
     // 폴더 생성
     public String createFolder(FolderSaveDto folderSaveDto){
@@ -75,5 +82,23 @@ public class DriverService {
                     .build());
         }
         return folderContentsDtos;
+    }
+
+    // 파일 업로드
+    public String uploadFile(MultipartFile file, String id){
+        String file_url = s3Uploader.upload(file, "drive");
+        Folder folder = folderRepository.findById(id).orElseThrow(()->new EntityNotFoundException("해당 폴더가 존재하지 않습니다."));
+        if(fileRepository.findByFolderAndName(folder, file.getOriginalFilename()).isPresent()){
+            throw new IllegalArgumentException("동일한 이름의 파일이 존재합니다.");
+        }
+        File fileEntity = File.builder()
+                .url(file_url)
+                .createdBy("회원ID")
+                .folder(folder)
+                .name(file.getOriginalFilename())
+                .type(file.getContentType())
+                .size(file.getSize())
+                .build();
+        return fileRepository.save(fileEntity).getId();
     }
 }
