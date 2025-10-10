@@ -1,6 +1,7 @@
 package com.Dolmeng_E.chat.domain.controller;
 
 import com.Dolmeng_E.chat.domain.dto.ChatCreateReqDto;
+import com.Dolmeng_E.chat.domain.dto.ChatMessageDto;
 import com.Dolmeng_E.chat.domain.dto.ChatRoomListResDto;
 import com.Dolmeng_E.chat.domain.dto.ChatRoomListReqDto;
 import com.Dolmeng_E.chat.domain.service.ChatService;
@@ -31,6 +32,13 @@ public class ChatController {
     public ResponseEntity<?> getChatRoomListByWorkspace(@ModelAttribute ChatRoomListReqDto dto) {
         List<ChatRoomListResDto> chatRoomList = chatService.getChatRoomListByWorkspace(dto);
         return new ResponseEntity<>(new CommonSuccessDto(chatRoomList, HttpStatus.OK.value(), "채팅방 목록 조회 성공"), HttpStatus.OK);
+    }
+
+    // 채팅방 채팅 목록 조회
+    @GetMapping("/room/{roomId}/history")
+    public ResponseEntity<?> getChatListByRoom(@PathVariable("roomId") Long roomId) {
+        List<ChatMessageDto> chatMessageDtoList = chatService.getChatListByRoom(roomId);
+        return new ResponseEntity<>(new CommonSuccessDto(chatMessageDtoList, HttpStatus.OK.value(), "채팅방 채팅 목록 조회 성공"), HttpStatus.OK);
     }
 
 }

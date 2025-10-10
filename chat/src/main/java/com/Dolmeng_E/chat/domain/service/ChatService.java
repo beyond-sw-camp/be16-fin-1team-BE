@@ -98,5 +98,21 @@ public class ChatService {
                 .anyMatch(p -> p.getUserId().equals(userId));
     }
 
+    // 채팅방 채팅 목록 조회
+    public List<ChatMessageDto> getChatListByRoom(Long roomId) {
+        // roomId의 모든 채팅 가져와고
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("없는 채팅방입니다."));
+        List<ChatMessage> chatMessages = chatMessageRepository.findByChatRoomOrderByCreatedAtAsc(chatRoom);
+
+        // 각 채팅의 사용자 email을 dto에 담아 저장
+        List<ChatMessageDto> chatMessageDtoList = new ArrayList<>();
+        for(ChatMessage c : chatMessages) {
+            String email = userFeignClient.fetchUserInfoById(String.valueOf(c.getUserId())).getUserEmail();
+            chatMessageDtoList.add(ChatMessageDto.fromEntity(c, email));
+        }
+
+        return chatMessageDtoList;
+    }
+
 
 }

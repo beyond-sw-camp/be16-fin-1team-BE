@@ -25,6 +25,8 @@ public class ChatMessage extends BaseTimeEntity {
     @Column(nullable = false)
     private String content;
 
+    // todo - 나중에 User name 넣어서 반정규화
+
     @JoinColumn(name = "chat_room_id")
     @ManyToOne(fetch = FetchType.LAZY)
     private ChatRoom chatRoom;
