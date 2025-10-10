@@ -54,12 +54,15 @@ public class DriverService {
     }
     
     // 폴더 삭제(소프트) 재귀 함수
-    // 파일 삭제 로직 추가 필요
+    // 문서 삭제 로직 추가 필요
     private void performRecursiveSoftDelete(Folder folder){
         folder.updateIsDelete();
         List<Folder> childFolders = folderRepository.findAllByParentIdAndIsDeleteIsFalse(folder.getId());
         for(Folder childFolder : childFolders){
             performRecursiveSoftDelete(childFolder);
+        }
+        for(File file : folder.getFiles()){
+            file.updateIsDelete();
         }
     }
     
