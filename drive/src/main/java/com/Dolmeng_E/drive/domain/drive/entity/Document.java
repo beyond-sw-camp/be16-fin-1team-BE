@@ -14,43 +14,35 @@ import org.hibernate.annotations.Parameter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class File extends BaseTimeEntity {
+public class Document extends BaseTimeEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "file_seq")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "document_seq")
     @GenericGenerator(
-            name = "file_seq", // generator 이름
+            name = "document_seq", // generator 이름
             strategy = "com.Dolmeng_E.drive.common.StringPrefixedSequenceIdGenerator", // 1단계에서 만든 클래스 경로
             parameters = {
-                    @Parameter(name = "sequence_name", value = "file_seq"), // DB에 생성할 시퀀스 이름
+                    @Parameter(name = "sequence_name", value = "document_seq"), // DB에 생성할 시퀀스 이름
                     @Parameter(name = "initial_value", value = "1"), // 시퀀스 시작 값
                     @Parameter(name = "increment_size", value = "1"), // 시퀀스 증가 값
-                    @Parameter(name = "valuePrefix", value = "ws_fol_f_") // ID에 붙일 접두사!
+                    @Parameter(name = "valuePrefix", value = "ws_fol_doc_") // ID에 붙일 접두사!
             }
     )
     private String id;
 
     @Column(nullable = false)
-    private String name;
+    @Builder.Default
+    private String title = "제목없음";
 
-    @Column(nullable = false)
-    private String type;
-
-    @Column(nullable = false)
-    private String url;
-
-    @Column(nullable = false)
-    private Long size;
+    @Lob // 내용이 매우 길 수 있음을 나타냄
+    @Column(columnDefinition = "TEXT")
+    private String content;
 
     @Column(nullable = false)
     private String createdBy;
 
-    @Column(nullable = false)
-    @Builder.Default
-    private Boolean isDelete = false;
+    private String updatedBy;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "folder_id")
     private Folder folder;
-
-    public void updateIsDelete() {this.isDelete = true;}
 }

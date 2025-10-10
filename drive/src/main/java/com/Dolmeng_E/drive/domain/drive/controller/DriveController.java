@@ -66,4 +66,24 @@ public class DriveController {
                 .statusMessage("파일 업로드 성공")
                 .build(), HttpStatus.CREATED);
     }
+
+    // 파일 삭제
+    @DeleteMapping("/file/{fileId}")
+    public ResponseEntity<?> deleteFile(@PathVariable String fileId) {
+        return new ResponseEntity<>(CommonSuccessDto.builder()
+                .result(driverService.deleteFile(fileId))
+                .statusCode(HttpStatus.OK.value())
+                .statusMessage("파일 삭제 성공")
+                .build(), HttpStatus.OK);
+    }
+
+    // 문서 생성
+    @PostMapping("/folder/{folderId}/document")
+    public ResponseEntity<?> saveDocument(@PathVariable String folderId) {
+        return new ResponseEntity<>(CommonSuccessDto.builder()
+                .result(driverService.createDocument(folderId))
+                .statusCode(HttpStatus.CREATED.value())
+                .statusMessage("문서 생성 성공")
+                .build(), HttpStatus.CREATED);
+    }
 }
