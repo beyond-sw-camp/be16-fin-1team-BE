@@ -1,6 +1,6 @@
-package com.Dolmeng_E.drive.domain.folder.repository;
+package com.Dolmeng_E.drive.domain.drive.repository;
 
-import com.Dolmeng_E.drive.domain.folder.entity.Folder;
+import com.Dolmeng_E.drive.domain.drive.entity.Folder;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

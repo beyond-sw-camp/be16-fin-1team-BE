@@ -1,7 +1,7 @@
-package com.Dolmeng_E.drive.domain.folder.dto;
+package com.Dolmeng_E.drive.domain.drive.dto;
 
-import com.Dolmeng_E.drive.domain.folder.entity.Folder;
-import com.Dolmeng_E.drive.domain.folder.entity.RootType;
+import com.Dolmeng_E.drive.domain.drive.entity.Folder;
+import com.Dolmeng_E.drive.domain.drive.entity.RootType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

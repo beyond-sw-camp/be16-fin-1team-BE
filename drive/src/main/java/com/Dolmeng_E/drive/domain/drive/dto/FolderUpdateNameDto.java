@@ -1,4 +1,4 @@
-package com.Dolmeng_E.drive.domain.folder.dto;
+package com.Dolmeng_E.drive.domain.drive.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

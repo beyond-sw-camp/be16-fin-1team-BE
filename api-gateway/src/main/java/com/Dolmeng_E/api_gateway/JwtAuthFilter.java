@@ -31,7 +31,8 @@ public class JwtAuthFilter implements GlobalFilter {
             "/user/password/email",
             "/user/password/authcode",
             "/user/password",
-            "/health"
+            "/health",
+            "/connect/**"
     );
 
     private static final List<String> ADMIN_ONLY_PATH = List.of(
@@ -43,10 +44,11 @@ public class JwtAuthFilter implements GlobalFilter {
         String bearerToken = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         String urlPath = exchange.getRequest().getURI().getPath();
 
-//        인증이 필요 없는 경로는 필터 통과
-        if(ALLOWED_PATH.contains(urlPath)) {
+        // 인증이 필요 없는 경로는 필터 통과 (하위 경로 포함)
+        if(ALLOWED_PATH.stream().anyMatch(path -> urlPath.startsWith(path.replace("/**", "")))) {
             return chain.filter(exchange);
         }
+
 
         try{
             if(bearerToken == null || !bearerToken.startsWith("Bearer ")) {
