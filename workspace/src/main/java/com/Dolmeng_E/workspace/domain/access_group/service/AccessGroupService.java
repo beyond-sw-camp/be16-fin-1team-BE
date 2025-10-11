@@ -4,10 +4,7 @@ import com.Dolmeng_E.workspace.common.dto.UserIdListDto;
 import com.Dolmeng_E.workspace.common.dto.UserInfoListResDto;
 import com.Dolmeng_E.workspace.common.dto.UserInfoResDto;
 import com.Dolmeng_E.workspace.common.service.UserFeign;
-import com.Dolmeng_E.workspace.domain.access_group.dto.AccessGroupAddUserDto;
-import com.Dolmeng_E.workspace.domain.access_group.dto.AccessGroupListResDto;
-import com.Dolmeng_E.workspace.domain.access_group.dto.AccessGroupModifyDto;
-import com.Dolmeng_E.workspace.domain.access_group.dto.CustomAccessGroupDto;
+import com.Dolmeng_E.workspace.domain.access_group.dto.*;
 import com.Dolmeng_E.workspace.domain.access_group.entity.AccessDetail;
 import com.Dolmeng_E.workspace.domain.access_group.entity.AccessGroup;
 import com.Dolmeng_E.workspace.domain.access_group.entity.AccessList;
@@ -26,10 +23,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
+
 
 @Service
 @Transactional
@@ -42,7 +38,8 @@ public class AccessGroupService {
     private final WorkspaceRepository workspaceRepository;
     private final UserFeign userFeign;
     private final WorkspaceParticipantRepository workspaceParticipantRepository;
-
+    public static final String DEFAULT_GROUP_NAME = "일반 유저 그룹";
+    public static final String ADMIN_GROUP_NAME = "관리자 그룹";
 
 //    To-Do : 모든 로직 구현 후 try-catch 작업 해야함
 
@@ -54,7 +51,7 @@ public class AccessGroupService {
 
         AccessGroup adminGroup = AccessGroup.builder()
                 .workspace(workspace)
-                .accessGroupName("관리자 그룹")
+                .accessGroupName(ADMIN_GROUP_NAME)
                 .build();
         accessGroupRepository.save(adminGroup);
 
@@ -81,7 +78,7 @@ public class AccessGroupService {
 
         AccessGroup defaultUserGroup = AccessGroup.builder()
                 .workspace(workspace)
-                .accessGroupName("일반 유저 그룹")
+                .accessGroupName(DEFAULT_GROUP_NAME)
                 .build();
         accessGroupRepository.save(defaultUserGroup);
 
@@ -295,7 +292,7 @@ public class AccessGroupService {
                     .findByWorkspaceIdAndUserId(workspace.getId(), userInfo.getUserId())
                     .orElseThrow(() -> new EntityNotFoundException("해당 사용자는 워크스페이스에 존재하지 않습니다."));
 
-            // ✅ 관리자면 건너뛰기 (ADMIN은 항상 유지)
+            // 관리자면 건너뛰기 (ADMIN은 항상 유지)
             if (participant.getWorkspaceRole().equals(WorkspaceRole.ADMIN)) {
                 continue; // 또는 log.warn("관리자는 권한그룹을 변경할 수 없습니다.");
             }
@@ -306,12 +303,101 @@ public class AccessGroupService {
     }
 
 
+    //    권한그룹 사용자 이동(일반 그룹으로 이동)
+    public void moveUserAccessGroup(String adminEmail, String groupId, AccessGroupMoveDto dto) {
+        // 1. 권한그룹 조회
+        AccessGroup accessGroup = accessGroupRepository.findById(groupId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 권한그룹이 존재하지 않습니다."));
+
+        Workspace workspace = accessGroup.getWorkspace();
+
+        // 2. 요청자(관리자) 확인
+        UserInfoResDto adminInfo = userFeign.fetchUserInfo(adminEmail);
+        WorkspaceParticipant admin = workspaceParticipantRepository
+                .findByWorkspaceIdAndUserId(workspace.getId(), adminInfo.getUserId())
+                .orElseThrow(() -> new EntityNotFoundException("요청자는 워크스페이스 참가자가 아닙니다."));
+
+        if (!admin.getWorkspaceRole().equals(WorkspaceRole.ADMIN)) {
+            throw new IllegalArgumentException("관리자만 권한그룹을 수정할 수 있습니다.");
+        }
+
+        // 3. 기본 그룹 조회 (권한그룹명 + workspaceId로 찾기)
+        AccessGroup defaultGroup = accessGroupRepository
+                .findByWorkspaceIdAndAccessGroupName(workspace.getId(), DEFAULT_GROUP_NAME)
+                .orElseThrow(() -> new EntityNotFoundException("기본 권한그룹이 존재하지 않습니다."));
+
+        // 4. 대상 유저 리스트 조회
+        UserIdListDto userIdListDto = new UserIdListDto(dto.getUserIdList());
+        UserInfoListResDto userInfoListResDto = userFeign.fetchUserListInfo(userIdListDto);
+
+        // 5. 그룹 이동 처리
+        for (UserInfoResDto userInfo : userInfoListResDto.getUserInfoList()) {
+            WorkspaceParticipant participant = workspaceParticipantRepository
+                    .findByWorkspaceIdAndUserId(workspace.getId(), userInfo.getUserId())
+                    .orElseThrow(() -> new EntityNotFoundException("해당 사용자는 워크스페이스에 존재하지 않습니다."));
+
+            // 관리자면 스킵
+            if (participant.getWorkspaceRole().equals(WorkspaceRole.ADMIN)) {
+                continue;
+            }
+
+            // 기본 그룹으로 이동
+            participant.setAccessGroup(defaultGroup);
+            workspaceParticipantRepository.save(participant);
 
 
-
-    //    권한그룹 사용자 수정
-
-    //    권한그룹 사용자 제거
+        }
+    }
 
     //    권한그룹 삭제
+
+    public void deleteUserAccessGroup(String adminEmail, String groupId) {
+        // 1. 권한그룹 조회
+        AccessGroup accessGroup = accessGroupRepository.findById(groupId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 권한그룹이 존재하지 않습니다."));
+
+        Workspace workspace = accessGroup.getWorkspace();
+
+        // 2. 요청자(관리자) 확인
+        UserInfoResDto adminInfo = userFeign.fetchUserInfo(adminEmail);
+        WorkspaceParticipant admin = workspaceParticipantRepository
+                .findByWorkspaceIdAndUserId(workspace.getId(), adminInfo.getUserId())
+                .orElseThrow(() -> new EntityNotFoundException("요청자는 워크스페이스 참가자가 아닙니다."));
+
+        if (!admin.getWorkspaceRole().equals(WorkspaceRole.ADMIN)) {
+            throw new IllegalArgumentException("관리자만 권한그룹을 수정할 수 있습니다.");
+        }
+
+        // 3. 기본 그룹 조회
+        AccessGroup defaultGroup = accessGroupRepository
+                .findByWorkspaceIdAndAccessGroupName(workspace.getId(), DEFAULT_GROUP_NAME)
+                .orElseThrow(() -> new EntityNotFoundException("기본 권한그룹이 존재하지 않습니다."));
+
+        // 기본 그룹은 삭제 불가
+        if (accessGroup.getAccessGroupName().equals(DEFAULT_GROUP_NAME)) {
+            throw new IllegalArgumentException("기본 권한그룹은 삭제할 수 없습니다.");
+        }
+        // 관리자 그룹은 삭제 불가
+        if (accessGroup.getAccessGroupName().equals(ADMIN_GROUP_NAME)) {
+            throw new IllegalArgumentException("관리자 권한그룹은 삭제할 수 없습니다.");
+        }
+
+        // 4. 해당 그룹에 속한 사용자들 조회
+        List<WorkspaceParticipant> participants = workspaceParticipantRepository.findByAccessGroup(accessGroup);
+
+        // 5. 기본 그룹으로 이동
+        for (WorkspaceParticipant participant : participants) {
+            if (participant.getWorkspaceRole().equals(WorkspaceRole.ADMIN)) {
+                continue; // 관리자 건너뛰기
+            }
+
+            participant.setAccessGroup(defaultGroup);
+            workspaceParticipantRepository.save(participant);
+        }
+
+        // 6. 그룹 삭제
+        accessDetailRepository.deleteAllByAccessGroup(accessGroup);
+        accessGroupRepository.delete(accessGroup);
+    }
+
 }

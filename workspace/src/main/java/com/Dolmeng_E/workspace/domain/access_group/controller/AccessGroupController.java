@@ -43,7 +43,6 @@ public class AccessGroupController {
                 .statusCode(HttpStatus.CREATED.value())
                 .build()
                 ,HttpStatus.CREATED);
-//        워크스페이스 생성자가 자동으로 사용자권한에 들어가게 포함로직 구현 필요
     }
 
 //    커스터마이징 권한그룹 생성
@@ -114,11 +113,37 @@ public class AccessGroupController {
                 HttpStatus.OK);
     }
 
-//    권한그룹 사용자 수정
 
+//    권한그룹 사용자 이동(일반사용자 그룹으로 이동)
+    @PatchMapping("/{groupId}/move")
+    public ResponseEntity<?> moveUserAccessGroup(
+            @RequestHeader("X-User-Email") String adminEmail,
+            @PathVariable String groupId,
+            @RequestBody AccessGroupMoveDto dto
+    ) {
+        accessGroupService.moveUserAccessGroup(adminEmail, groupId, dto);
 
-//    권한그룹 사용자 제거
+        return new ResponseEntity<>(CommonSuccessDto.builder()
+                .statusMessage("권한그룹 사용자 변경 완료")
+                .result(HttpStatus.OK)
+                .statusCode(HttpStatus.OK.value())
+                .build(),
+                HttpStatus.OK);
 
+    }
 //    권한그룹 삭제
+    @DeleteMapping("/{groupId}/delete")
+    public ResponseEntity<?> deleteUserAccessGroup(
+            @RequestHeader("X-User-Email") String adminEmail,
+            @PathVariable String groupId
+    ) {
+        accessGroupService.deleteUserAccessGroup(adminEmail,groupId);
+        return new ResponseEntity<>(CommonSuccessDto.builder()
+                .statusMessage("권한그룹 사용자 삭세 완료")
+                .result(HttpStatus.OK)
+                .statusCode(HttpStatus.OK.value())
+                .build(),
+                HttpStatus.OK);
+    }
 
 }
