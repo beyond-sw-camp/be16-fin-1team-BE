@@ -150,8 +150,17 @@ public class ChatService {
         // 각 채팅의 사용자 email을 dto에 담아 저장
         List<ChatMessageDto> chatMessageDtoList = new ArrayList<>();
         for(ChatMessage c : chatMessages) {
-            String email = userFeignClient.fetchUserInfoById(String.valueOf(c.getUserId())).getUserEmail();
-            chatMessageDtoList.add(ChatMessageDto.fromEntity(c, email));
+            UserInfoResDto senderInfo = userFeignClient.fetchUserInfoById(String.valueOf(c.getUserId()));
+
+            ChatMessageDto chatMessageDto = ChatMessageDto.builder()
+                    .senderEmail(senderInfo.getUserEmail())
+                    .senderName(senderInfo.getUserName())
+                    .message(c.getContent())
+                    .lastSendTime(c.getCreatedAt())
+                    .userProfileImageUrl(senderInfo.getProfileImageUrl())
+                    .build();
+
+            chatMessageDtoList.add(chatMessageDto);
         }
 
         return chatMessageDtoList;

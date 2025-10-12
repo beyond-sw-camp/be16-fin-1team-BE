@@ -1,7 +1,9 @@
 package com.Dolmeng_E.chat.common.service;
 
+import com.Dolmeng_E.chat.common.dto.UserInfoResDto;
 import com.Dolmeng_E.chat.domain.dto.ChatMessageDto;
 import com.Dolmeng_E.chat.domain.dto.ChatSummaryDto;
+import com.Dolmeng_E.chat.domain.feignclient.UserFeignClient;
 import com.Dolmeng_E.chat.domain.service.ChatService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,6 +27,7 @@ public class KafkaService {
     private final ObjectMapper objectMapper;
     private final SimpMessageSendingOperations messageTemplate;
     private final ChatService chatService;
+    private final UserFeignClient userFeignClient;
 
     // producer
     public void kafkaMessageKeyCreate(ChatMessageDto dto) {
@@ -48,6 +51,11 @@ public class KafkaService {
 
         // 채팅방
         ChatMessageDto chatMessageDto = objectMapper.readValue(message, ChatMessageDto.class);
+        // sender정보 가져와서, 이름이랑 프로필 이미지 담기
+        UserInfoResDto senderInfo = userFeignClient.fetchUserInfo(chatMessageDto.getSenderEmail());
+        chatMessageDto.setSenderName(senderInfo.getUserName());
+        chatMessageDto.setUserProfileImageUrl(senderInfo.getProfileImageUrl());
+
 //        chatService.saveMessage(Long.parseLong(key), dto);
         messageTemplate.convertAndSend("/topic/"+key, chatMessageDto);
 
