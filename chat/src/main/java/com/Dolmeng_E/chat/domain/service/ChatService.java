@@ -181,6 +181,7 @@ public class ChatService {
             ChatSummaryDto summary = ChatSummaryDto.builder()
                     .roomId(room.getId())
                     .lastMessage(dto.getMessage())
+                    .lastSendTime(dto.getLastSendTime())
                     .lastSenderEmail(dto.getSenderEmail())
                     .unreadCount(unreadCount)
                     .build();

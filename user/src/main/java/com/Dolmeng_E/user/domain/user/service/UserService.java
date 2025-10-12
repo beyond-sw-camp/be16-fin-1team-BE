@@ -57,7 +57,7 @@ public class UserService {
         if(dto.getProfileImageUrl() != null && !dto.getProfileImageUrl().isEmpty()) {
             profileImgaeUrl = s3Uploader.upload(dto.getProfileImageUrl(), "user");
         }
-        
+
         User user = dto.toEntity(encodedPassword, profileImgaeUrl);
         userRepository.save(user);
     }
