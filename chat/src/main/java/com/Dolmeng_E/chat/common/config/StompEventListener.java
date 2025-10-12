@@ -58,32 +58,44 @@ public class StompEventListener {
     public void subscribeHandle(SessionSubscribeEvent event) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
 
-        String destination = accessor.getDestination();  // /topic/123
+        String destination = accessor.getDestination();  // 예: /topic/123 또는 /topic/summary/hong1@naver.com
         String bearerToken = accessor.getFirstNativeHeader("Authorization");
         String sessionId = accessor.getSessionId();
 
         if (bearerToken == null || destination == null) return;
 
         String accessToken = bearerToken.substring(7);
-
-        // 검증 없이 email만 추출
         String email = jwtParserUtil.extractEmailWithoutValidation(accessToken);
 
-        // destination에서 roomId 추출
-        String[] parts = destination.split("/");
-        String roomId = parts[parts.length - 1];
-
-        // room의 권한 체크 후 참여한 채팅방의 모든 메시지 읽음 처리
-        if(!chatService.isRoomParticipant(email, Long.parseLong(roomId))) {
-            throw new IllegalArgumentException("해당 room에 대한 권한이 없습니다.");
+        // summary 구독이면 검증 로직 스킵
+        if (destination.startsWith("/topic/summary")) {
+            log.info("subscribeHandle() - summary 구독 감지 (email: {}, session: {})", email, sessionId);
+            return;
         }
-        chatService.messageRead(Long.parseLong(roomId), email);
 
-        log.info("subscribeHandle() - 입장 roomId: {}, email: {}, session: {}", roomId, email, sessionId);
+        // 채팅방 구독 (/topic/{roomId}) 처리
+        String[] parts = destination.split("/");
+        String roomIdStr = parts[parts.length - 1];
 
-        redisTemplate.opsForSet().add("chat:room:" + roomId + ":users", email);
-        redisTemplate.opsForHash().put("chat:session:" + sessionId, "email", email);
-        redisTemplate.opsForHash().put("chat:session:" + sessionId, "roomId", roomId);
+        try {
+            Long roomId = Long.parseLong(roomIdStr);
+
+            // room 권한 검증 및 읽음 처리
+            if (!chatService.isRoomParticipant(email, roomId)) {
+                throw new IllegalArgumentException("해당 room에 대한 권한이 없습니다.");
+            }
+            chatService.messageRead(roomId, email);
+
+            log.info("subscribeHandle() - 입장 roomId: {}, email: {}, session: {}", roomId, email, sessionId);
+
+            // Redis 저장
+            redisTemplate.opsForSet().add("chat:room:" + roomId + ":users", email);
+            redisTemplate.opsForHash().put("chat:session:" + sessionId, "email", email);
+            redisTemplate.opsForHash().put("chat:session:" + sessionId, "roomId", roomId);
+
+        } catch (NumberFormatException e) {
+            log.warn("subscribeHandle() - 잘못된 roomId 형식: {}, destination: {}", roomIdStr, destination);
+        }
     }
 
     @EventListener

@@ -100,10 +100,35 @@ public class ChatService {
 
     // 채팅방 목록 조회
     public List<ChatRoomListResDto> getChatRoomListByWorkspace(String workspaceId, String email) {
-        UUID userId = userFeignClient.fetchUserInfo(email).getUserId();
-        List<ChatRoom> chatRoomList = chatRoomRepository.findAllByUserAndWorkspace(userId, workspaceId);
-        List<ChatRoomListResDto> chatRoomListResDtoList = chatRoomList.stream().map(c -> ChatRoomListResDto.fromEntity(c)).toList();
+        UserInfoResDto senderInfo = userFeignClient.fetchUserInfo(email);
+        // 워크스페이스에서 사용자가 포함된 채팅방 조회
+        List<ChatRoom> chatRoomList = chatRoomRepository.findAllByUserAndWorkspace(senderInfo.getUserId(), workspaceId);
 
+        List<ChatRoomListResDto> chatRoomListResDtoList = new ArrayList<>();
+
+        for (ChatRoom room : chatRoomList) {
+            ChatMessage chatMessage = room.getChatMessageList().get(room.getChatMessageList().size() - 1);
+            Long unreadCount = readStatusRepository
+                    .countByUserIdAndChatRoom_IdAndIsReadFalse(senderInfo.getUserId(), room.getId());
+
+            List<String> userProfileImageUrlList = new ArrayList<>();
+            for (ChatParticipant p : room.getChatParticipantList()) {
+                String userProfileImageUrl = userFeignClient.fetchUserInfoById(String.valueOf(p.getUserId())).getProfileImageUrl();
+                userProfileImageUrlList.add(userProfileImageUrl);
+            }
+
+            ChatRoomListResDto chatRoomDto = ChatRoomListResDto.builder()
+                    .roomId(room.getId())
+                    .roomName(room.getName())
+                    .participantCount(room.getChatParticipantList().size())
+                    .lastMessage(chatMessage.getContent())
+                    .lastSendTime(chatMessage.getCreatedAt())
+                    .unreadCount(unreadCount)
+                    .userProfileImageUrlList(userProfileImageUrlList)
+                    .build();
+
+            chatRoomListResDtoList.add(chatRoomDto);
+        }
         return chatRoomListResDtoList;
     }
 
