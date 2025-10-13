@@ -1,26 +1,21 @@
 package com.Dolmeng_E.chat.domain.dto;
 
-import com.Dolmeng_E.chat.domain.entity.ChatRoom;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class ChatRoomListResDto {
-    private Long roomId;
-    private String roomName;
-    private int participantCount; // 참여자 수
+public class ChatSummaryDto {
+    private Long roomId;           // 채팅방 ID
     private String lastMessage;    // 마지막 메시지 내용
     private LocalDateTime lastSendTime; // 마지막 메시지 시간
+    private String lastSenderEmail;     // 마지막 메시지 보낸 사람 이메일 or 이름
     private Long unreadCount;       // 현재 사용자의 안읽은 메시지 수
-    @Builder.Default
-    private List<String> userProfileImageUrlList = new ArrayList<>(); // 사용자의 프로필 이미지 리스트
 }
+
