@@ -1,6 +1,5 @@
 package com.Dolmeng_E.workspace.domain.project.entity;
 
-import com.Dolmeng_E.workspace.domain.user_group.entity.ProjectStatus;
 import com.Dolmeng_E.workspace.domain.workspace.entity.Workspace;
 import com.Dolmeng_E.workspace.domain.workspace.entity.WorkspaceParticipant;
 import com.example.modulecommon.domain.BaseTimeEntity;
