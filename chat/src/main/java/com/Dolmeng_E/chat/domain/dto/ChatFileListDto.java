@@ -4,17 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Data
 @AllArgsConstructor
 @Builder
 @NoArgsConstructor
-public class ChatFileListResDto {
-    private String fileUrl;
+public class ChatFileListDto {
+    private Long fileId;
     private String fileName;
     private Long fileSize;
+    private String fileUrl;
 }

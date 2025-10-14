@@ -29,6 +29,7 @@ public class ChatMessage extends BaseTimeEntity {
 
     @Column(nullable = false)
     @Builder.Default
+    @Enumerated(EnumType.STRING)
     private MessageType type = MessageType.TEXT;
 
     // todo - 나중에 User name 넣어서 반정규화
@@ -37,7 +38,7 @@ public class ChatMessage extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private ChatRoom chatRoom;
 
-    @OneToMany(mappedBy = "chatMessage", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "chatMessage", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<ChatFile> chatFileList = new ArrayList<>();
 }

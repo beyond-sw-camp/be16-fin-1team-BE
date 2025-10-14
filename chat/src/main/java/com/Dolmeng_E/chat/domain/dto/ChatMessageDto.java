@@ -21,10 +21,6 @@ public class ChatMessageDto {
     private String senderName;
     private LocalDateTime lastSendTime;
     private String userProfileImageUrl;
-
-    // 메시지 타입이랑
     private MessageType messageType;
-    // nullable한 파일 목록
-    @Builder.Default
-    private List<String> fileList = new ArrayList<>();
+    private List<ChatFileListDto> chatFileListDtoList = new ArrayList<>();
 }

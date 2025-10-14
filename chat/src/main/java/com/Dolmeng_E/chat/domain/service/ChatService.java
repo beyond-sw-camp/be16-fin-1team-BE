@@ -3,11 +3,9 @@ package com.Dolmeng_E.chat.domain.service;
 import com.Dolmeng_E.chat.common.dto.UserInfoResDto;
 import com.Dolmeng_E.chat.common.service.S3Uploader;
 import com.Dolmeng_E.chat.domain.dto.*;
-import com.Dolmeng_E.chat.domain.entity.ChatMessage;
-import com.Dolmeng_E.chat.domain.entity.ChatParticipant;
-import com.Dolmeng_E.chat.domain.entity.ChatRoom;
-import com.Dolmeng_E.chat.domain.entity.ReadStatus;
+import com.Dolmeng_E.chat.domain.entity.*;
 import com.Dolmeng_E.chat.domain.feignclient.UserFeignClient;
+import com.Dolmeng_E.chat.domain.repository.ChatFileRepository;
 import com.Dolmeng_E.chat.domain.repository.ChatMessageRepository;
 import com.Dolmeng_E.chat.domain.repository.ChatRoomRepository;
 import com.Dolmeng_E.chat.domain.repository.ReadStatusRepository;
@@ -36,8 +34,9 @@ public class ChatService {
     private final RedisTemplate<String, String> redisTemplate;
     private final SimpMessageSendingOperations messageTemplate;
     private final S3Uploader s3Uploader;
+    private final ChatFileRepository chatFileRepository;
 
-    public ChatService(ChatRoomRepository chatRoomRepository, ChatMessageRepository chatMessageRepository, ReadStatusRepository readStatusRepository, UserFeignClient userFeignClient, @Qualifier("rtInventory") RedisTemplate<String, String> redisTemplate, SimpMessageSendingOperations messageTemplate, S3Uploader s3Uploader) {
+    public ChatService(ChatRoomRepository chatRoomRepository, ChatMessageRepository chatMessageRepository, ReadStatusRepository readStatusRepository, UserFeignClient userFeignClient, @Qualifier("rtInventory") RedisTemplate<String, String> redisTemplate, SimpMessageSendingOperations messageTemplate, S3Uploader s3Uploader, ChatFileRepository chatFileRepository) {
         this.chatRoomRepository = chatRoomRepository;
         this.chatMessageRepository = chatMessageRepository;
         this.readStatusRepository = readStatusRepository;
@@ -45,10 +44,15 @@ public class ChatService {
         this.redisTemplate = redisTemplate;
         this.messageTemplate = messageTemplate;
         this.s3Uploader = s3Uploader;
+        this.chatFileRepository = chatFileRepository;
     }
 
     // 채팅 메시지 저장
-    public void saveMessage(Long roomId, ChatMessageDto chatMessageDto) {
+    public ChatMessageDto saveMessage(Long roomId, ChatMessageDto chatMessageDto) {
+        // 반환을 위한 dto
+        ChatMessageDto newChatMessageDto = chatMessageDto;
+        newChatMessageDto.setRoomId(roomId);
+
         // 채팅방 조회
         ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("없는 채팅방입니다."));
 
@@ -60,6 +64,7 @@ public class ChatService {
                 .chatRoom(chatRoom)
                 .userId(senderInfo.getUserId())
                 .content(chatMessageDto.getMessage())
+                .type(chatMessageDto.getMessageType())
                 .build();
         chatMessageRepository.save(chatMessage);
 
@@ -76,6 +81,20 @@ public class ChatService {
                     .build();
             readStatusRepository.save(readStatus);
         }
+
+        // 파일 있으면 파일 저장
+        if(chatMessageDto.getMessageType() != MessageType.TEXT) {
+            List<ChatFileListDto> fileListCopy = new ArrayList<>(chatMessageDto.getChatFileListDtoList());
+            for (ChatFileListDto chatFileListDto : fileListCopy) {
+                ChatFile chatFile = getChatFile(chatFileListDto.getFileId());
+                chatFile.setChatMessage(chatMessage);
+
+                chatFileListDto.setFileName(chatFile.getFileName());
+                chatFileListDto.setFileSize(chatFile.getFileSize());
+                chatFileListDto.setFileUrl(chatFile.getFileUrl());
+            }
+        }
+        return newChatMessageDto;
     }
 
     // 채팅방 생성
@@ -200,22 +219,30 @@ public class ChatService {
     }
 
     // 파일 업로드
-    public List<ChatFileListResDto> uploadFileList(List<MultipartFile> fileList) {
-        List<ChatFileListResDto> chatFileListResDtoList = new ArrayList<>();
+    public List<ChatFileListDto> uploadFileList(List<MultipartFile> fileList) {
+        List<ChatFileListDto> chatFileListDtoList = new ArrayList<>();
 
         for(MultipartFile file : fileList) {
-            System.out.println("fileName = " + file.getOriginalFilename() + "fileSize = " + file.getSize());
             String fileUrl = s3Uploader.upload(file, "chat");
-            ChatFileListResDto dto = ChatFileListResDto.builder()
-                            .fileName(file.getOriginalFilename())
-                            .fileSize(file.getSize())
-                            .fileUrl(fileUrl)
-                            .build();
-            chatFileListResDtoList.add(dto);
+
+            ChatFile chatFile = ChatFile.builder()
+                    .fileName(file.getOriginalFilename())
+                    .fileSize(file.getSize())
+                    .fileUrl(fileUrl)
+                    .build();
+
+            chatFileRepository.save(chatFile);
+
+            chatFileListDtoList.add(ChatFileListDto.builder().fileId(chatFile.getId()).build());
         }
 
-        return chatFileListResDtoList;
+        return chatFileListDtoList;
     }
+
+    public ChatFile getChatFile(Long id) {
+        return chatFileRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("없는 파일입니다."));
+    }
+
 
 
 }
