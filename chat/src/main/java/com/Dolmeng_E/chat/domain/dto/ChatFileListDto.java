@@ -1,5 +1,6 @@
 package com.Dolmeng_E.chat.domain.dto;
 
+import com.Dolmeng_E.chat.domain.entity.ChatFile;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,4 +15,13 @@ public class ChatFileListDto {
     private String fileName;
     private Long fileSize;
     private String fileUrl;
+
+    static public ChatFileListDto fromEntity(ChatFile chatFile) {
+        return ChatFileListDto.builder()
+                .fileId(chatFile.getId())
+                .fileName(chatFile.getFileName())
+                .fileSize(chatFile.getFileSize())
+                .fileUrl(chatFile.getFileUrl())
+                .build();
+    }
 }

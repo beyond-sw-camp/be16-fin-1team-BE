@@ -176,6 +176,8 @@ public class ChatService {
                     .message(c.getContent())
                     .lastSendTime(c.getCreatedAt())
                     .userProfileImageUrl(senderInfo.getProfileImageUrl())
+                    .messageType(c.getType())
+                    .chatFileListDtoList(c.getChatFileList().stream().map(chatFile -> ChatFileListDto.fromEntity(chatFile)).toList())
                     .build();
 
             chatMessageDtoList.add(chatMessageDto);
