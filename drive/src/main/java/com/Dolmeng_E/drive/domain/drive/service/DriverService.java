@@ -1,5 +1,7 @@
 package com.Dolmeng_E.drive.domain.drive.service;
 
+import com.Dolmeng_E.drive.common.service.S3Uploader;
+import com.Dolmeng_E.drive.domain.drive.dto.DocumentResDto;
 import com.Dolmeng_E.drive.domain.drive.dto.FolderContentsDto;
 import com.Dolmeng_E.drive.domain.drive.dto.FolderSaveDto;
 import com.Dolmeng_E.drive.domain.drive.dto.FolderUpdateNameDto;
@@ -9,16 +11,17 @@ import com.Dolmeng_E.drive.domain.drive.entity.Folder;
 import com.Dolmeng_E.drive.domain.drive.repository.DocumentRepository;
 import com.Dolmeng_E.drive.domain.drive.repository.FileRepository;
 import com.Dolmeng_E.drive.domain.drive.repository.FolderRepository;
-import com.example.modulecommon.service.S3Uploader;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional
@@ -29,6 +32,7 @@ public class DriverService {
     private final S3Uploader s3Uploader;
     private final FileRepository fileRepository;
     private final DocumentRepository documentRepository;
+    private final ObjectMapper objectMapper;
 
     // 폴더 생성
     public String createFolder(FolderSaveDto folderSaveDto){
@@ -142,12 +146,26 @@ public class DriverService {
         if(documentRepository.findByFolderAndTitleAndIsDeleteFalse(folder, documentTitle).isPresent()){
             throw new IllegalArgumentException("동일한 이름의 문서가 존재합니다.");
         }
-        Document document = Document.builder()
-                .createdBy("회원ID")
-                .title(documentTitle)
-                .folder(folder)
-                .build();
-        return documentRepository.save(document).getId();
+        Map<String, Object> defaultContent = Map.of(
+                "type", "doc",
+                "content", List.of(Map.of(
+                        "type", "paragraph"
+                ))
+        );
+        Document document = new Document();
+        try {
+            String contentJson = objectMapper.writeValueAsString(defaultContent);
+            document = Document.builder()
+                    .createdBy("회원ID")
+                    .title(documentTitle)
+                    .folder(folder)
+                    .content(contentJson)
+                    .build();
+            documentRepository.save(document);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("JSON 변환 에러", e);
+        }
+        return document.getId();
     }
 
     // 문서 삭제(소프트)
@@ -155,5 +173,33 @@ public class DriverService {
         Document document = documentRepository.findById(documentId).orElseThrow(()->new EntityNotFoundException("해당 문서가 존재하지 않습니다."));
         document.updateIsDelete();
         return document.getTitle();
+    }
+
+    // 문서 조회
+    public Object findDocument(String documentId){
+        Document document = documentRepository.findById(documentId).orElseThrow(()->new EntityNotFoundException(("해당 문서가 존재하지 않습니다.")));
+        try {
+            return DocumentResDto.builder()
+                    .title(document.getTitle())
+                    .content(objectMapper.readValue(document.getContent(), Object.class))
+                    .build();
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("JSON 변환 에러");
+        }
+    }
+
+    // 문서 업데이트
+    public void updateDocument(String documentId, Object content) {
+        Document document = documentRepository.findById(documentId)
+                .orElseThrow(() -> new IllegalArgumentException("문서를 찾을 수 없습니다: " + documentId));
+
+        try {
+            // 객체를 JSON 문자열로 변환하여 저장 (직렬화)
+            String contentJson = objectMapper.writeValueAsString(content);
+            document.setContent(contentJson);
+            documentRepository.save(document);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("JSON 변환 에러");
+        }
     }
 }
