@@ -1,8 +1,6 @@
 package com.Dolmeng_E.workspace.domain.workspace.service;
 
-import com.Dolmeng_E.workspace.common.dto.UserIdListDto;
-import com.Dolmeng_E.workspace.common.dto.UserInfoListResDto;
-import com.Dolmeng_E.workspace.common.dto.UserInfoResDto;
+import com.Dolmeng_E.workspace.common.dto.*;
 import com.Dolmeng_E.workspace.common.service.UserFeign;
 import com.Dolmeng_E.workspace.domain.access_group.entity.AccessGroup;
 import com.Dolmeng_E.workspace.domain.access_group.repository.AccessGroupRepository;
@@ -296,6 +294,16 @@ public void updateWorkspaceName(String userEmail, String workspaceId, WorkspaceN
                 workspaceParticipantRepository.save(target);
             }
         }
+    }
+
+//    워크스페이스 정보 반환 api
+    public WorkspaceInfoResDto fetchWorkspaceInfo (String userId, WorkspaceNameDto workspaceName) {
+        Workspace workspace = workspaceRepository.findByUserIdAndWorkspaceName(UUID.fromString(userId), workspaceName.getWorkspaceName());
+
+        return WorkspaceInfoResDto.builder()
+                .workspaceId(workspace.getId())
+                .workspaceName(workspace.getWorkspaceName())
+                .build();
     }
 
 }
