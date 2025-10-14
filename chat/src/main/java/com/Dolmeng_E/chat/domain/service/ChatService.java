@@ -5,10 +5,7 @@ import com.Dolmeng_E.chat.common.service.S3Uploader;
 import com.Dolmeng_E.chat.domain.dto.*;
 import com.Dolmeng_E.chat.domain.entity.*;
 import com.Dolmeng_E.chat.domain.feignclient.UserFeignClient;
-import com.Dolmeng_E.chat.domain.repository.ChatFileRepository;
-import com.Dolmeng_E.chat.domain.repository.ChatMessageRepository;
-import com.Dolmeng_E.chat.domain.repository.ChatRoomRepository;
-import com.Dolmeng_E.chat.domain.repository.ReadStatusRepository;
+import com.Dolmeng_E.chat.domain.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -35,8 +32,9 @@ public class ChatService {
     private final SimpMessageSendingOperations messageTemplate;
     private final S3Uploader s3Uploader;
     private final ChatFileRepository chatFileRepository;
+    private final ChatParticipantRepository chatParticipantRepository;
 
-    public ChatService(ChatRoomRepository chatRoomRepository, ChatMessageRepository chatMessageRepository, ReadStatusRepository readStatusRepository, UserFeignClient userFeignClient, @Qualifier("rtInventory") RedisTemplate<String, String> redisTemplate, SimpMessageSendingOperations messageTemplate, S3Uploader s3Uploader, ChatFileRepository chatFileRepository) {
+    public ChatService(ChatRoomRepository chatRoomRepository, ChatMessageRepository chatMessageRepository, ReadStatusRepository readStatusRepository, UserFeignClient userFeignClient, @Qualifier("rtInventory") RedisTemplate<String, String> redisTemplate, SimpMessageSendingOperations messageTemplate, S3Uploader s3Uploader, ChatFileRepository chatFileRepository, ChatParticipantRepository chatParticipantRepository) {
         this.chatRoomRepository = chatRoomRepository;
         this.chatMessageRepository = chatMessageRepository;
         this.readStatusRepository = readStatusRepository;
@@ -45,6 +43,7 @@ public class ChatService {
         this.messageTemplate = messageTemplate;
         this.s3Uploader = s3Uploader;
         this.chatFileRepository = chatFileRepository;
+        this.chatParticipantRepository = chatParticipantRepository;
     }
 
     // 채팅 메시지 저장
@@ -245,6 +244,16 @@ public class ChatService {
         return chatFileRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("없는 파일입니다."));
     }
 
+    public List<ChatParticipantListResDto> getParticipantListByRoom(Long roomId) {
+        List<ChatParticipant> chatParticipantList = chatParticipantRepository.findByChatRoomId(roomId);
+        List<ChatParticipantListResDto> chatParticipantListResDtoList = new ArrayList<>();
 
+        for(ChatParticipant p : chatParticipantList) {
+            UserInfoResDto senderInfo = userFeignClient.fetchUserInfoById(String.valueOf(p.getUserId()));
+            chatParticipantListResDtoList.add(ChatParticipantListResDto.from(senderInfo));
+        }
+
+        return chatParticipantListResDtoList;
+    }
 
 }

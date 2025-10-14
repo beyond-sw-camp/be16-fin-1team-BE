@@ -1,9 +1,6 @@
 package com.Dolmeng_E.chat.domain.controller;
 
-import com.Dolmeng_E.chat.domain.dto.ChatCreateReqDto;
-import com.Dolmeng_E.chat.domain.dto.ChatFileListDto;
-import com.Dolmeng_E.chat.domain.dto.ChatMessageDto;
-import com.Dolmeng_E.chat.domain.dto.ChatRoomListResDto;
+import com.Dolmeng_E.chat.domain.dto.*;
 import com.Dolmeng_E.chat.domain.service.ChatService;
 import com.example.modulecommon.dto.CommonSuccessDto;
 import jakarta.validation.Valid;
@@ -56,5 +53,11 @@ public class ChatController {
         return new ResponseEntity<>(new CommonSuccessDto(chatFileListResDtoIdList, HttpStatus.OK.value(), "파일 업로드 성공"), HttpStatus.OK);
     }
 
+    // 채팅방 참여자 목록 조회
+    @GetMapping("/room/{roomId}/participants")
+    public ResponseEntity<?> getParticipantListByRoom (@PathVariable("roomId") Long roomId) {
+        List<ChatParticipantListResDto> participantListDto = chatService.getParticipantListByRoom(roomId);
+        return new ResponseEntity<>(new CommonSuccessDto(participantListDto, HttpStatus.OK.value(), "채팅방 참여자 목록 조회 성공"), HttpStatus.OK);
+    }
 
 }
