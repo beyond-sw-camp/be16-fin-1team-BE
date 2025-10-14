@@ -60,7 +60,8 @@ public class Project extends BaseTimeEntity {
     private LocalDateTime endTime;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "project_status", nullable = false)
-    private ProjectStatus projectStatus;
+    @Column(name = "project_status")
+    @Builder.Default
+    private ProjectStatus projectStatus = ProjectStatus.PROGRESS; // PROGRESS,COMPLETED,STORAGE
 
 }

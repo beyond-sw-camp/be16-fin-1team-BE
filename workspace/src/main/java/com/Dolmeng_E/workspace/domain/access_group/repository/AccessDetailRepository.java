@@ -6,8 +6,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.ListCrudRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface AccessDetailRepository extends JpaRepository<AccessDetail,String> {
     List<AccessDetail> findByAccessGroup(AccessGroup accessGroup);
     void deleteAllByAccessGroup(AccessGroup accessGroup);
+    Optional<AccessDetail> findByAccessGroupAndAccessListId(AccessGroup accessGroup, String accessListId);
 }
