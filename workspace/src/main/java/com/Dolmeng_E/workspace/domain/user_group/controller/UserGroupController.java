@@ -12,7 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/user-groups")
+@RequestMapping("/groups")
 @RequiredArgsConstructor
 public class UserGroupController {
     private final UserGroupService userGroupService;
@@ -50,7 +50,7 @@ public class UserGroupController {
 
     }
     // 사용자 그룹에 추가
-    @PostMapping("/{groupId}/users")
+    @PostMapping("/{groupId}/grouping")
     public ResponseEntity<?> addUsersToGroup(
             @RequestHeader("X-User_id") String userId,
             @PathVariable String groupId,
