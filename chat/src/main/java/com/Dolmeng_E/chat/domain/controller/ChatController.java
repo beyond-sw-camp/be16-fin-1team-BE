@@ -1,6 +1,7 @@
 package com.Dolmeng_E.chat.domain.controller;
 
 import com.Dolmeng_E.chat.domain.dto.ChatCreateReqDto;
+import com.Dolmeng_E.chat.domain.dto.ChatFileListResDto;
 import com.Dolmeng_E.chat.domain.dto.ChatMessageDto;
 import com.Dolmeng_E.chat.domain.dto.ChatRoomListResDto;
 import com.Dolmeng_E.chat.domain.service.ChatService;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -46,5 +48,21 @@ public class ChatController {
         chatService.messageRead(roomId, userId);
         return new ResponseEntity<>(new CommonSuccessDto(userId, HttpStatus.OK.value(), "채팅방 전체채팅 읽음 성공"), HttpStatus.OK);
     }
+
+    // 파일 업로드
+    @PostMapping("/upload")
+    public ResponseEntity<?> uploadFileList(@RequestParam("fileList") List<MultipartFile> fileList) {
+
+        List<ChatFileListResDto> chatFileListResDtoList = chatService.uploadFileList(fileList);
+
+//        for (MultipartFile file : files) {
+//            log.info("파일명: {}", file.getOriginalFilename());
+//            log.info("크기: {} bytes", file.getSize());
+//            // 파일 저장 로직 (예: S3, 로컬 등)
+//
+//        }
+        return new ResponseEntity<>(new CommonSuccessDto(chatFileListResDtoList, HttpStatus.OK.value(), "파일 업로드 성공"), HttpStatus.OK);
+    }
+
 
 }

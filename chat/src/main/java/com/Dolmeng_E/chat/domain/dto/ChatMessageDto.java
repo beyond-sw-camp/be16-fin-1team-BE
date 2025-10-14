@@ -18,4 +18,7 @@ public class ChatMessageDto {
     private String senderName;
     private LocalDateTime lastSendTime;
     private String userProfileImageUrl;
+
+    // 메시지 타입이랑
+    // nullable한 파일 목록
 }

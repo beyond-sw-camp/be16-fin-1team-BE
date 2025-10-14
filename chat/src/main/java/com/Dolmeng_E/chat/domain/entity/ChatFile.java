@@ -11,13 +11,19 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Getter
 @Builder
-public class ChatMedia {
+public class ChatFile {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private String mediaUrl;
+    private String fileUrl;
+
+    @Column(nullable = false)
+    private String fileName;
+
+    @Column(nullable = false)
+    private Long fileSize;
 
     @JoinColumn(name = "chat_message")
     @ManyToOne(fetch = FetchType.LAZY)

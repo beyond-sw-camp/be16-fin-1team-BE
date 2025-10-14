@@ -39,5 +39,5 @@ public class ChatMessage extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "chatMessage", fetch = FetchType.LAZY)
     @Builder.Default
-    private List<ChatMedia> chatMediaList = new ArrayList<>();
+    private List<ChatFile> chatFileList = new ArrayList<>();
 }

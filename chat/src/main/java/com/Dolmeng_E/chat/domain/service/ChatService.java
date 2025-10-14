@@ -1,10 +1,8 @@
 package com.Dolmeng_E.chat.domain.service;
 
 import com.Dolmeng_E.chat.common.dto.UserInfoResDto;
-import com.Dolmeng_E.chat.domain.dto.ChatCreateReqDto;
-import com.Dolmeng_E.chat.domain.dto.ChatMessageDto;
-import com.Dolmeng_E.chat.domain.dto.ChatRoomListResDto;
-import com.Dolmeng_E.chat.domain.dto.ChatSummaryDto;
+import com.Dolmeng_E.chat.common.service.S3Uploader;
+import com.Dolmeng_E.chat.domain.dto.*;
 import com.Dolmeng_E.chat.domain.entity.ChatMessage;
 import com.Dolmeng_E.chat.domain.entity.ChatParticipant;
 import com.Dolmeng_E.chat.domain.entity.ChatRoom;
@@ -20,6 +18,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,14 +35,16 @@ public class ChatService {
     private final UserFeignClient userFeignClient;
     private final RedisTemplate<String, String> redisTemplate;
     private final SimpMessageSendingOperations messageTemplate;
+    private final S3Uploader s3Uploader;
 
-    public ChatService(ChatRoomRepository chatRoomRepository, ChatMessageRepository chatMessageRepository, ReadStatusRepository readStatusRepository, UserFeignClient userFeignClient, @Qualifier("rtInventory") RedisTemplate<String, String> redisTemplate, SimpMessageSendingOperations messageTemplate) {
+    public ChatService(ChatRoomRepository chatRoomRepository, ChatMessageRepository chatMessageRepository, ReadStatusRepository readStatusRepository, UserFeignClient userFeignClient, @Qualifier("rtInventory") RedisTemplate<String, String> redisTemplate, SimpMessageSendingOperations messageTemplate, S3Uploader s3Uploader) {
         this.chatRoomRepository = chatRoomRepository;
         this.chatMessageRepository = chatMessageRepository;
         this.readStatusRepository = readStatusRepository;
         this.userFeignClient = userFeignClient;
         this.redisTemplate = redisTemplate;
         this.messageTemplate = messageTemplate;
+        this.s3Uploader = s3Uploader;
     }
 
     // 채팅 메시지 저장
@@ -198,8 +199,23 @@ public class ChatService {
         }
     }
 
-    // 파일 전송
-    
+    // 파일 업로드
+    public List<ChatFileListResDto> uploadFileList(List<MultipartFile> fileList) {
+        List<ChatFileListResDto> chatFileListResDtoList = new ArrayList<>();
+
+        for(MultipartFile file : fileList) {
+            System.out.println("fileName = " + file.getOriginalFilename() + "fileSize = " + file.getSize());
+            String fileUrl = s3Uploader.upload(file, "chat");
+            ChatFileListResDto dto = ChatFileListResDto.builder()
+                            .fileName(file.getOriginalFilename())
+                            .fileSize(file.getSize())
+                            .fileUrl(fileUrl)
+                            .build();
+            chatFileListResDtoList.add(dto);
+        }
+
+        return chatFileListResDtoList;
+    }
 
 
 }
