@@ -28,8 +28,8 @@ public class ChatController {
 
     // 채팅방 목록 조회
     @GetMapping("/room/list/{workspaceId}")
-    public ResponseEntity<?> getChatRoomListByWorkspace(@PathVariable String workspaceId, @RequestHeader("X-User-Email")String email) {
-        List<ChatRoomListResDto> chatRoomList = chatService.getChatRoomListByWorkspace(workspaceId, email);
+    public ResponseEntity<?> getChatRoomListByWorkspace(@PathVariable String workspaceId, @RequestHeader("X-User-Id")String userId) {
+        List<ChatRoomListResDto> chatRoomList = chatService.getChatRoomListByWorkspace(workspaceId, userId);
         return new ResponseEntity<>(new CommonSuccessDto(chatRoomList, HttpStatus.OK.value(), "채팅방 목록 조회 성공"), HttpStatus.OK);
     }
 
@@ -42,9 +42,9 @@ public class ChatController {
 
     // 특정 room의 모든 메시지 읽음 처리
     @PostMapping("/room/{roomId}/read_status")
-    public ResponseEntity<?> messageRead(@PathVariable("roomId") Long roomId, @RequestHeader("X-User-Email")String email) {
-        chatService.messageRead(roomId, email);
-        return new ResponseEntity<>(new CommonSuccessDto(email, HttpStatus.OK.value(), "채팅방 전체채팅 읽음 성공"), HttpStatus.OK);
+    public ResponseEntity<?> messageRead(@PathVariable("roomId") Long roomId, @RequestHeader("X-User-Id")String userId) {
+        chatService.messageRead(roomId, userId);
+        return new ResponseEntity<>(new CommonSuccessDto(userId, HttpStatus.OK.value(), "채팅방 전체채팅 읽음 성공"), HttpStatus.OK);
     }
 
 }

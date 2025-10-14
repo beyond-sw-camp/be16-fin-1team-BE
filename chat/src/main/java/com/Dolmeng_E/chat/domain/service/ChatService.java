@@ -99,8 +99,8 @@ public class ChatService {
     }
 
     // 채팅방 목록 조회
-    public List<ChatRoomListResDto> getChatRoomListByWorkspace(String workspaceId, String email) {
-        UserInfoResDto senderInfo = userFeignClient.fetchUserInfo(email);
+    public List<ChatRoomListResDto> getChatRoomListByWorkspace(String workspaceId, String userId) {
+        UserInfoResDto senderInfo = userFeignClient.fetchUserInfoById(userId);
         // 워크스페이스에서 사용자가 포함된 채팅방 조회
         List<ChatRoom> chatRoomList = chatRoomRepository.findAllByUserAndWorkspace(senderInfo.getUserId(), workspaceId);
 
@@ -167,9 +167,9 @@ public class ChatService {
     }
 
     // 특정 room의 모든 메시지 읽음 처리
-    public void messageRead(Long roomId, String email) {
+    public void messageRead(Long roomId, String userId) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("없는 채팅방입니다."));
-        UserInfoResDto userInfo = userFeignClient.fetchUserInfo(email);
+        UserInfoResDto userInfo = userFeignClient.fetchUserInfoById(userId);
 
         // 채팅방에 접속한 사용자의 모든 읽음 여부 가져와 true 설정 (접속한 채팅방의 읽음 여부)
         List<ReadStatus> readStatuses = chatRoom.getReadStatusList().stream().filter(r -> r.getUserId().equals(userInfo.getUserId())).toList();
