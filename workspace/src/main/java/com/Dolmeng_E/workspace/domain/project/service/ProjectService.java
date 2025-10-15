@@ -9,7 +9,7 @@ import com.Dolmeng_E.workspace.domain.project.dto.ProjectListDto;
 import com.Dolmeng_E.workspace.domain.project.dto.ProjectModifyDto;
 import com.Dolmeng_E.workspace.domain.project.entity.Project;
 import com.Dolmeng_E.workspace.domain.project.entity.ProjectStatus;
-import com.Dolmeng_E.workspace.domain.project.repository.StoneParticipantRepository;
+import com.Dolmeng_E.workspace.domain.stone.repository.StoneParticipantRepository;
 import com.Dolmeng_E.workspace.domain.project.repository.ProjectParticipantRepository;
 import com.Dolmeng_E.workspace.domain.project.repository.ProjectRepository;
 import com.Dolmeng_E.workspace.domain.stone.dto.TopStoneCreateDto;
@@ -150,7 +150,7 @@ public class ProjectService {
         project.deleteProject();
     }
 
-// 프로젝트 안보임 설정(프로젝트 캘린더 조회용 API)
+// 프로젝트가 프로젝트 캘린더에 노출 여부 설정(프로젝트 캘린더 조회용 API)
 
 // 내 프로젝트 목록 조회
 

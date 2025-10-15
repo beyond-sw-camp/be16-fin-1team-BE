@@ -2,13 +2,14 @@ package com.Dolmeng_E.workspace.domain.stone.dto;
 
 import lombok.Builder;
 import lombok.Data;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
 
-@Data
 @Builder
-public class StoneCreateDto {
+@Data
+public class StoneModifyDto {
     private String parentStoneId;
     private String stoneName;
     private LocalDateTime startTime;

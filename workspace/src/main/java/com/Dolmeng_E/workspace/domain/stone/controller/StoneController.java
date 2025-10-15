@@ -1,7 +1,6 @@
 package com.Dolmeng_E.workspace.domain.stone.controller;
 
-import com.Dolmeng_E.workspace.domain.stone.dto.StoneCreateDto;
-import com.Dolmeng_E.workspace.domain.stone.dto.TopStoneCreateDto;
+import com.Dolmeng_E.workspace.domain.stone.dto.*;
 import com.Dolmeng_E.workspace.domain.stone.service.StoneService;
 import com.example.modulecommon.dto.CommonSuccessDto;
 import lombok.RequiredArgsConstructor;
@@ -43,18 +42,49 @@ public class StoneController {
     }
 
     // 스톤 참여자 추가
+    @PatchMapping("/join")
+    public ResponseEntity<?> joinStoneParticipant(
+            @RequestHeader("X-User-Id") String userId,
+            @RequestBody StoneParticipantListDto dto
+    ) {
+        stoneService.joinStoneParticipant(userId, dto);
+        return new ResponseEntity<>(CommonSuccessDto.builder()
+                .statusMessage("스톤 참여자 추가 완료")
+                .result(HttpStatus.OK)
+                .statusCode(HttpStatus.OK.value())
+                .build()
+                ,HttpStatus.OK);
+    }
 
-    // 스톤 안보임 설정(프로젝트 캘린더 조회용 API)
+    // 스톤 프로젝트 캘린더에 노출 여부 설정(프로젝트 캘린더 조회용 API)
+    @PatchMapping("/setting")
+    public ResponseEntity<?> settingStone(@RequestHeader("X-User-Id") String userId,
+                                         @RequestBody StoneSettingDto dto) {
+        stoneService.settingStone(userId, dto);
+        return new ResponseEntity<>(CommonSuccessDto.builder()
+                .statusMessage("스톤 노출여부 설정 완료")
+                .result(HttpStatus.OK)
+                .statusCode(HttpStatus.OK.value())
+                .build()
+                ,HttpStatus.OK);
+    }
 
-    // 내 스톤 목록 조회
+    // 스톤 수정(스톤 담당자, 참여자 수정 포함)
+    @PatchMapping("")
+    public ResponseEntity<?> modifyStone(@RequestHeader("X-User-Id") String userId,
+                                         @RequestBody StoneModifyDto dto
+    ) {
 
-    // 스톤 수정
+        return null;
+    }
+
+    // 내 마일스톤 목록 조회(삭제되지 않은 스톤 조회)
 
     // 스톤 삭제
 
-    // 스톤 목록? 스톤들 뿌리처럼 보이는 거
-
     // 스톤 상세 정보 조회
+
+    // 스톤 참여자 목록 조회
 
     // 태스크 생성
 
