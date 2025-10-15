@@ -16,6 +16,7 @@ import com.Dolmeng_E.workspace.domain.stone.repository.StoneRepository;
 import com.Dolmeng_E.workspace.domain.stone.repository.TaskRepository;
 import com.Dolmeng_E.workspace.domain.workspace.entity.Workspace;
 import com.Dolmeng_E.workspace.domain.workspace.entity.WorkspaceParticipant;
+import com.Dolmeng_E.workspace.domain.workspace.entity.WorkspaceRole;
 import com.Dolmeng_E.workspace.domain.workspace.repository.WorkspaceParticipantRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -101,9 +102,11 @@ public class StoneService {
                 .findByWorkspaceIdAndUserId(workspace.getId(), UUID.fromString(userId))
                 .orElseThrow(() -> new EntityNotFoundException("워크스페이스 참여자가 아닙니다."));
 
-        // 4. 권한 검증 (프로젝트 담당자이거나, 스톤 생성 권한이 있어야 함)
-        if (!project.getWorkspaceParticipant().getId().equals(participant.getId())) {
-            accessCheckService.validateAccess(participant, "ws_acc_list_3");
+        // 4. 권한 검증 (프로젝트 담당자이거나, 스톤 생성 권한이 있어야 함, 혹은 관리자)
+        if (!participant.getWorkspaceRole().equals(WorkspaceRole.ADMIN)) {
+            if (!project.getWorkspaceParticipant().getId().equals(participant.getId())) {
+                accessCheckService.validateAccess(participant, "ws_acc_list_3");
+            }
         }
 
         // 5. 스톤 참여자들 중 프로젝트 참여자에 아직 등록되지 않은 경우 자동 등록
@@ -194,10 +197,12 @@ public class StoneService {
                 .findByWorkspaceIdAndUserId(project.getWorkspace().getId(), UUID.fromString(userId))
                 .orElseThrow(() -> new EntityNotFoundException("워크스페이스 참여자가 아닙니다."));
 
-        // 4. 스톤 관련 권한 검증(프로젝트 담당자와 스톤 담당자만 참여자 추가 가능하도록)
-        if (!project.getWorkspaceParticipant().getId().equals(participant.getId())
-                && !stone.getStoneParticipant().getId().equals(participant.getId())) {
-            throw new IllegalArgumentException("프로젝트 담당자 혹은 스톤 담당자가 아닙니다.");
+        // 4. 스톤 관련 권한 검증(프로젝트 담당자와 스톤 담당자만 참여자 추가 가능하도록 혹은 관리자)
+        if (!participant.getWorkspaceRole().equals(WorkspaceRole.ADMIN)) {
+            if (!project.getWorkspaceParticipant().getId().equals(participant.getId())
+                    && !stone.getStoneParticipant().getId().equals(participant.getId())) {
+                throw new IllegalArgumentException("관리자나 프로젝트 담당자 혹은 스톤 담당자가 아닙니다.");
+            }
         }
 
         // 5. 프로젝트 참여자에 추가
@@ -273,12 +278,13 @@ public class StoneService {
                 .findByWorkspaceIdAndUserId(project.getWorkspace().getId(), UUID.fromString(userId))
                 .orElseThrow(() -> new EntityNotFoundException("워크스페이스 참여자가 아닙니다."));
 
-        // 4. 권한 검증 (프로젝트 담당자 or 스톤 담당자)
-        if (!project.getWorkspaceParticipant().getId().equals(requester.getId())
-                && !stone.getStoneParticipant().getId().equals(requester.getId())) {
-            throw new IllegalArgumentException("프로젝트 담당자 혹은 스톤 담당자가 아닙니다.");
+        // 4. 권한 검증 (프로젝트 담당자 or 스톤 담당자 or 관리자)
+        if (!requester.getWorkspaceRole().equals(WorkspaceRole.ADMIN)) {
+            if (!project.getWorkspaceParticipant().getId().equals(requester.getId())
+                    && !stone.getStoneParticipant().getId().equals(requester.getId())) {
+                throw new IllegalArgumentException("프로젝트 담당자 혹은 스톤 담당자가 아닙니다.");
+            }
         }
-
         // 5. 스톤 참여자 삭제 (일괄 처리)
         if (dto.getStoneParticipantList() != null && !dto.getStoneParticipantList().isEmpty()) {
 
@@ -324,9 +330,11 @@ public class StoneService {
                 .orElseThrow(() -> new EntityNotFoundException("워크스페이스 참여자가 아닙니다."));
 
         // 4. 권한 검증 (프로젝트 담당자 or 스톤 담당자만 가능)
-        if (!project.getWorkspaceParticipant().getId().equals(participant.getId())
-                && !stone.getStoneParticipant().getId().equals(participant.getId())) {
-            throw new IllegalArgumentException("프로젝트 담당자 혹은 스톤 담당자가 아닙니다.");
+        if (!participant.getWorkspaceRole().equals(WorkspaceRole.ADMIN)) {
+            if (!project.getWorkspaceParticipant().getId().equals(participant.getId())
+                    && !stone.getStoneParticipant().getId().equals(participant.getId())) {
+                throw new IllegalArgumentException("관리자이거나 프로젝트 담당자 혹은 스톤 담당자가 아닙니다.");
+            }
         }
 
         // 5. 스톤 참여자 전체 삭제
@@ -387,9 +395,11 @@ public class StoneService {
                 .orElseThrow(() -> new EntityNotFoundException("워크스페이스 참여자가 아닙니다."));
 
         // 4. 스톤 관련 권한 검증(프로젝트 담당자와 스톤 담당자만 참여자 추가 가능하도록)
-        if (!project.getWorkspaceParticipant().getId().equals(participant.getId())
-                && !stone.getStoneParticipant().getId().equals(participant.getId())) {
-            throw new IllegalArgumentException("프로젝트 담당자 혹은 스톤 담당자가 아닙니다.");
+        if (!participant.getWorkspaceRole().equals(WorkspaceRole.ADMIN)) {
+            if (!project.getWorkspaceParticipant().getId().equals(participant.getId())
+                    && !stone.getStoneParticipant().getId().equals(participant.getId())) {
+                throw new IllegalArgumentException("관리자이거나 프로젝트 담당자 혹은 스톤 담당자가 아닙니다.");
+            }
         }
 
         // 5. 기본 필드 수정 (null 체크해서 들어온 값만 반영)
