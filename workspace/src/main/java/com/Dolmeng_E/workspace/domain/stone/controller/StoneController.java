@@ -1,5 +1,6 @@
 package com.Dolmeng_E.workspace.domain.stone.controller;
 
+import com.Dolmeng_E.workspace.domain.stone.dto.StoneCreateDto;
 import com.Dolmeng_E.workspace.domain.stone.dto.TopStoneCreateDto;
 import com.Dolmeng_E.workspace.domain.stone.service.StoneService;
 import com.example.modulecommon.dto.CommonSuccessDto;
@@ -16,18 +17,30 @@ public class StoneController {
 
     // 최상위 스톤 생성(프로젝트 생성 시 자동 생성)
     @PostMapping("/top")
-    public ResponseEntity<?> createStone(
+    public ResponseEntity<?> createTopStone(
             @RequestBody TopStoneCreateDto dto
     ) {
         return new ResponseEntity<>(CommonSuccessDto.builder()
                 .statusMessage("최상위 스톤 생성 완료")
-                .result(stoneService.createStone(dto))
+                .result(stoneService.createTopStone(dto))
                 .statusCode(HttpStatus.CREATED.value())
                 .build()
                 ,HttpStatus.CREATED);
     }
 
     // 일반 스톤 생성
+    @PostMapping("")
+    public ResponseEntity<?> createStone(
+            @RequestHeader("X-User-Id") String userId,
+            @RequestBody StoneCreateDto dto
+    ) {
+        return new ResponseEntity<>(CommonSuccessDto.builder()
+                .statusMessage("스톤 생성 완료")
+                .result(stoneService.createStone(userId, dto))
+                .statusCode(HttpStatus.CREATED.value())
+                .build()
+                ,HttpStatus.CREATED);
+    }
 
     // 스톤 수정
 

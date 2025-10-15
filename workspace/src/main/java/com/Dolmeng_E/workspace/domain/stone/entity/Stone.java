@@ -68,7 +68,7 @@ public class Stone extends BaseTimeEntity {
     // 태스크 생성 여부
     @Column(name = "task_creation", nullable = false)
     @Builder.Default
-    private Boolean taskCreation = false;
+    private Boolean taskCreation = true;
 
     // 진행 상태
     @Enumerated(EnumType.STRING)

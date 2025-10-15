@@ -71,7 +71,7 @@ public class ProjectService {
         projectRepository.save(project);
 
         // 5. 스톤 생성
-        stoneService.createStone(
+        stoneService.createTopStone(
                 TopStoneCreateDto.builder()
                         .projectId(project.getId())
                         .participantId(projectManager.getId())
@@ -79,7 +79,6 @@ public class ProjectService {
                         .workspaceId(workspace.getId())
                         .startTime(project.getStartTime())
                         .endTime(project.getEndTime())
-                        .chatCreation(dto.getChatCreation())
                         .chatCreation(dto.getChatCreation())
                         .build()
         );
