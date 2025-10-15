@@ -1,5 +1,7 @@
 package com.Dolmeng_E.workspace.domain.workspace.controller;
 
+import com.Dolmeng_E.workspace.common.dto.WorkspaceInfoResDto;
+import com.Dolmeng_E.workspace.common.dto.WorkspaceNameDto;
 import com.Dolmeng_E.workspace.domain.workspace.dto.*;
 import com.Dolmeng_E.workspace.domain.workspace.service.WorkspaceService;
 import com.example.modulecommon.dto.CommonSuccessDto;
@@ -156,6 +158,13 @@ public class WorkspaceController {
                 .result(HttpStatus.OK)
                 .build(),
                 HttpStatus.OK);
+    }
+
+    //    workspace 정보 반환 api
+    @PostMapping("/return")
+    public WorkspaceInfoResDto fetchWorkspaceInfo(@RequestHeader("X-User-Id")String userId, @RequestBody WorkspaceNameDto workspaceName) {
+        WorkspaceInfoResDto workspaceInfoResDto =  workspaceService.fetchWorkspaceInfo(userId, workspaceName);
+        return workspaceInfoResDto;
     }
 
 }
