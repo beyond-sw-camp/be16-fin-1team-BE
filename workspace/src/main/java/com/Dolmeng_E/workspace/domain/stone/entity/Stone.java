@@ -36,7 +36,7 @@ public class Stone extends BaseTimeEntity {
     @JoinColumn(name = "project_id")
     private Project project;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "stone_participant_id")
     private WorkspaceParticipant stoneParticipant;
 
@@ -68,7 +68,7 @@ public class Stone extends BaseTimeEntity {
     // 태스크 생성 여부
     @Column(name = "task_creation", nullable = false)
     @Builder.Default
-    private Boolean taskCreation = false;
+    private Boolean taskCreation = true;
 
     // 진행 상태
     @Enumerated(EnumType.STRING)
