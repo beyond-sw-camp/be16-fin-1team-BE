@@ -61,6 +61,14 @@ public class StoneService {
         }
         */
 
+        // 스톤 담당자 프로젝트 참여자에 추가
+        projectParticipantRepository.save(
+                ProjectParticipant.builder()
+                        .workspaceParticipant(participant)
+                        .project(project)
+                        .build()
+        );
+
         // 3. 스톤생성 후 ID 리턴
         return stoneRepository.save( Stone.builder()
                 .stoneName(dto.getStoneName())
@@ -98,7 +106,7 @@ public class StoneService {
             accessCheckService.validateAccess(participant, "ws_acc_list_3");
         }
 
-        // 5. 스톤 참여자들 중 프로젝트에 아직 등록되지 않은 경우 자동 등록
+        // 5. 스톤 참여자들 중 프로젝트 참여자에 아직 등록되지 않은 경우 자동 등록
         if (dto.getParticipantIds() != null && !dto.getParticipantIds().isEmpty()) {
             for (String participantId : dto.getParticipantIds()) {
                 WorkspaceParticipant wp = workspaceParticipantRepository.findById(participantId)
@@ -116,6 +124,14 @@ public class StoneService {
                 }
             }
         }
+
+        // 스톤 담당자 프로젝트 참여자에 추가
+        projectParticipantRepository.save(
+                ProjectParticipant.builder()
+                        .workspaceParticipant(participant)
+                        .project(project)
+                        .build()
+        );
 
         // 6. 자식 스톤 생성
         Stone childStone = stoneRepository.save(
@@ -292,7 +308,7 @@ public class StoneService {
         }
     }
 
-    // 스톤 참여자 전체 삭제
+// 스톤 참여자 전체 삭제
     public void deleteAllStoneParticipants(String userId, String stoneId) {
 
         // 1. 스톤 조회
@@ -328,7 +344,7 @@ public class StoneService {
     }
 
 
-    // 스톤 보임/안보임 설정(프로젝트 캘린더 조회용 API)
+// 스톤 보임/안보임 설정(프로젝트 캘린더 조회용 API)
     public void settingStone(String userId, StoneSettingDto dto) {
 
         // 1. 스톤 조회

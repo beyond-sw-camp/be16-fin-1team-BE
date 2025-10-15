@@ -114,6 +114,20 @@ public class StoneController {
     }
 
     // 스톤 담당자 수정
+    @PatchMapping("/manager")
+    public ResponseEntity<?> modifyStoneManager(
+            @RequestHeader("X-User-Id") String userId,
+            @RequestBody StoneManagerModifyDto dto
+    ) {
+        stoneService.modifyStoneManager(userId, dto);
+        return new ResponseEntity<>(CommonSuccessDto.builder()
+                .statusMessage("스톤 담당자 수정 완료")
+                .result(HttpStatus.OK)
+                .statusCode(HttpStatus.OK.value())
+                .build(),
+                HttpStatus.OK);
+    }
+
 
     // 내 마일스톤 목록 조회(삭제되지 않은 스톤 조회)
 
