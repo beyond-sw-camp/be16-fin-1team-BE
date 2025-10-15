@@ -1,5 +1,6 @@
 package com.Dolmeng_E.drive.domain.drive.service;
 
+import com.Dolmeng_E.drive.common.service.RedisUtil;
 import com.Dolmeng_E.drive.common.service.S3Uploader;
 import com.Dolmeng_E.drive.domain.drive.dto.DocumentResDto;
 import com.Dolmeng_E.drive.domain.drive.dto.FolderContentsDto;
@@ -33,6 +34,7 @@ public class DriverService {
     private final FileRepository fileRepository;
     private final DocumentRepository documentRepository;
     private final ObjectMapper objectMapper;
+    private final RedisUtil redisUtil;
 
     // 폴더 생성
     public String createFolder(FolderSaveDto folderSaveDto){
@@ -178,14 +180,18 @@ public class DriverService {
     // 문서 조회
     public Object findDocument(String documentId){
         Document document = documentRepository.findById(documentId).orElseThrow(()->new EntityNotFoundException(("해당 문서가 존재하지 않습니다.")));
-        try {
-            return DocumentResDto.builder()
-                    .title(document.getTitle())
-                    .content(objectMapper.readValue(document.getContent(), Object.class))
-                    .build();
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("JSON 변환 에러");
-        }
+//        try {
+//            return DocumentResDto.builder()
+//                    .title(document.getTitle())
+//                    .content(objectMapper.readValue(document.getContent(), Object.class))
+//                    .build();
+//        } catch (JsonProcessingException e) {
+//            throw new RuntimeException("JSON 변환 에러");
+//        }
+        return DocumentResDto.builder()
+                .title(document.getTitle())
+                .content(redisUtil.getData(documentId))
+                .build();
     }
 
     // 문서 업데이트

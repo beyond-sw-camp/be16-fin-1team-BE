@@ -19,8 +19,9 @@ public class EditorController {
     // 클라이언트가 /app/editor/update 경로로 메시지를 보내면 이 메서드가 처리
     @MessageMapping("/editor/update")
     public void handleUpdate(@Payload EditorMessageDto message) {
-        driverService.updateDocument(message.getDocumentId(), message.getContent());
+//        driverService.updateDocument(message.getDocumentId(), message.getContent());
         // 받은 메시지를 "document-updates" 채널로 발행(publish)
+        redisTemplate.opsForValue().set(message.getDocumentId(), message.getContent());
         redisTemplate.convertAndSend("document-updates", message);
     }
 
