@@ -16,6 +16,7 @@ import com.Dolmeng_E.workspace.domain.stone.dto.TopStoneCreateDto;
 import com.Dolmeng_E.workspace.domain.stone.service.StoneService;
 import com.Dolmeng_E.workspace.domain.workspace.entity.Workspace;
 import com.Dolmeng_E.workspace.domain.workspace.entity.WorkspaceParticipant;
+import com.Dolmeng_E.workspace.domain.workspace.entity.WorkspaceRole;
 import com.Dolmeng_E.workspace.domain.workspace.repository.WorkspaceParticipantRepository;
 import com.Dolmeng_E.workspace.domain.workspace.repository.WorkspaceRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -50,7 +51,9 @@ public class ProjectService {
 
         // 2. 권한 검증 (공통 메서드)
         // 커스터마이징 필요한 부분 ex. 프로젝트 관련 -> ws_acc_list_2 , 스톤 관련 -> ws_acc_list_3 등등
-        accessCheckService.validateAccess(participant, "ws_acc_list_2");
+        if (!participant.getWorkspaceRole().equals(WorkspaceRole.ADMIN)) {
+            accessCheckService.validateAccess(participant, "ws_acc_list_2");
+        }
 
         // 3. 워크스페이스 담당자 객체 생성
         WorkspaceParticipant projectManager = workspaceParticipantRepository.findById(dto.getProjectManagerId())
@@ -93,9 +96,11 @@ public class ProjectService {
         Project project = projectRepository.findById(dto.getProjectId())
                 .orElseThrow(() -> new EntityNotFoundException("프로젝트를 찾을 수 없습니다."));
 
-        // 3. 권한 검증: 담당자 or 권한그룹
-        if (!project.getWorkspaceParticipant().getId().equals(participant.getId())) {
-            accessCheckService.validateAccess(participant, "ws_acc_list_2");
+        // 3. 권한 검증: 담당자 or 권한그룹 or 관리자
+        if (!participant.getWorkspaceRole().equals(WorkspaceRole.ADMIN)) {
+            if (!project.getWorkspaceParticipant().getId().equals(participant.getId())) {
+                accessCheckService.validateAccess(participant, "ws_acc_list_2");
+            }
         }
 
         // 4. 담당자 변경 처리 (선택)
@@ -141,9 +146,11 @@ public class ProjectService {
         Project project = projectRepository.findById(dto.getProjectId())
                 .orElseThrow(() -> new EntityNotFoundException("프로젝트를 찾을 수 없습니다."));
 
-        // 3. 권한 검증: 담당자 or 권한그룹
-        if (!project.getWorkspaceParticipant().getId().equals(participant.getId())) {
-            accessCheckService.validateAccess(participant, "ws_acc_list_2");
+        // 3. 권한 검증: 담당자 or 권한그룹 or 관리자
+        if (!participant.getWorkspaceRole().equals(WorkspaceRole.ADMIN)) {
+            if (!project.getWorkspaceParticipant().getId().equals(participant.getId())) {
+                accessCheckService.validateAccess(participant, "ws_acc_list_2");
+            }
         }
 
         // 4. 삭제
