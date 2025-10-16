@@ -32,4 +32,11 @@ public class DocumentLine extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "document_id")
     private Document document;
+
+    public void updateContent(String content) {
+        this.content = content;
+    }
+    public void updatePrevId(String prevId){
+        this.prevId = prevId;
+    }
 }

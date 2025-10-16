@@ -1,5 +1,6 @@
 package com.Dolmeng_E.drive.domain.drive.service;
 
+import com.Dolmeng_E.drive.common.dto.EditorMessageDto;
 import com.Dolmeng_E.drive.domain.drive.dto.DocumentLineResDto;
 import com.Dolmeng_E.drive.domain.drive.entity.Document;
 import com.Dolmeng_E.drive.domain.drive.entity.DocumentLine;
@@ -10,16 +11,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class DocumentLineService {
     private final DocumentLineRepository documentLineRepository;
+    private final DocumentRepository documentRepository;
 
     // 문서에서 모든 라인 가져오기
     @Transactional(readOnly = true)
@@ -58,5 +57,32 @@ public class DocumentLineService {
             }
         }
         return sortedLineList;
+    }
+
+    public void updateDocumentLine(EditorMessageDto message){
+        DocumentLine documentLine = documentLineRepository.findByLineId(message.getLineId())
+                .orElseThrow(()->new EntityNotFoundException("해당 라인이 존재하지 않습니다." + message.getLineId()));
+        documentLine.updateContent(message.getContent());
+    }
+
+    public void createDocumentLine(EditorMessageDto message){
+        Document document = documentRepository.findById(message.getDocumentId())
+                .orElseThrow(()->new EntityNotFoundException("해당 문서가 존재하지 않습니다."));
+
+        // 만약 중간에 끼어들어갈 경우 순서 바꿔주기
+        Optional<DocumentLine> documentLine = documentLineRepository.findByPrevId(message.getPrevLineId());
+        documentLine.ifPresent(line -> line.updatePrevId(message.getLineId()));
+
+        // 1. DTO를 Entity로 변환합니다.
+        DocumentLine newDocumentLine = null;
+        newDocumentLine = DocumentLine.builder()
+                .prevId(message.getPrevLineId())
+                .document(document)
+                .lineId(message.getLineId())
+                .content(message.getContent())
+                .build();
+
+        // 2. Repository를 통해 데이터베이스에 저장합니다.
+        documentLineRepository.save(newDocumentLine);
     }
 }
