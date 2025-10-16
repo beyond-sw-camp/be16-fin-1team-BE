@@ -17,16 +17,14 @@ import com.Dolmeng_E.workspace.domain.workspace.entity.Workspace;
 import com.Dolmeng_E.workspace.domain.workspace.entity.WorkspaceParticipant;
 import com.Dolmeng_E.workspace.domain.workspace.entity.WorkspaceRole;
 import com.Dolmeng_E.workspace.domain.workspace.repository.WorkspaceParticipantRepository;
+import com.Dolmeng_E.workspace.domain.workspace.repository.WorkspaceRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,6 +38,7 @@ public class StoneService {
     private final ProjectRepository projectRepository;
     private final StoneParticipantRepository stoneParticipantRepository;
     private final ProjectParticipantRepository projectParticipantRepository;
+    private final WorkspaceRepository workspaceRepository;
 
 // 최상위 스톤 생성(프로젝트 생성 시 자동 생성)
     public String createTopStone(TopStoneCreateDto dto) {
@@ -565,15 +564,61 @@ public void deleteStone(String userId, String stoneId) {
         stone.setMilestone(BigDecimal.valueOf(100.0));
     }
 
-    // 마일스톤 진행률 변경
+// 프로젝트 별 내 마일스톤 조회(isDelete = true 제외, stoneStatus Completed 제외)
+    public List<ProjectMilestoneResDto> milestoneList(String userId, String workspaceId) {
 
-    // 내 마일스톤 목록 조회(삭제되지 않은 스톤 조회)
+        // 1. 워크스페이스, 사용자 검증
+        Workspace workspace = workspaceRepository.findById(workspaceId)
+                .orElseThrow(() -> new EntityNotFoundException("워크스페이스가 존재하지 않습니다."));
+
+        WorkspaceParticipant participant = workspaceParticipantRepository
+                .findByWorkspaceIdAndUserId(workspaceId, UUID.fromString(userId))
+                .orElseThrow(() -> new EntityNotFoundException("워크스페이스 참여자가 존재하지 않습니다."));
+
+        // 2. fetch join으로 프로젝트 + 스톤을 한 번에 로드
+        // 이전 구조는 for문을 통해 객체를 구해서 N + 1 이슈가 있었습니다.
+        List<ProjectParticipant> projectParticipants =
+                // 내가 속한 프로젝트와 그 안의 스톤들을 조회하는 쿼리문
+                projectParticipantRepository.findAllWithStonesByWorkspaceParticipant(participant);
+
+        // 3. DTO 변환
+
+        // 리턴용 리스트 생성
+        List<ProjectMilestoneResDto> result = new ArrayList<>();
+
+        for (ProjectParticipant pp : projectParticipants) {
+            Project project = pp.getProject();
+
+            // 프로젝트의 스톤 리스트 가져오기 (fetch join으로 이미 로드됨)
+            List<Stone> stones = project.getStones();
+
+            List<StoneParticipant> activeStoneParticipants =
+                    //내가 참여 중인 스톤들만 미리 캐싱하는 쿼리문
+                    stoneParticipantRepository.findAllActiveWithStoneByWorkspaceParticipant(participant);
+
+            List<MilestoneResDto> milestoneDtos = activeStoneParticipants.stream()
+                    .filter(sp -> !sp.getIsMilestoneHidden())
+                    .map(sp -> MilestoneResDto.fromEntity(sp.getStone()))
+                    .toList();
+
+            // 프로젝트별 마일스톤 응답 DTO 조립
+            ProjectMilestoneResDto dto = ProjectMilestoneResDto.builder()
+                    .projectId(project.getId())
+                    .projectName(project.getProjectName())
+                    .milestoneResDtoList(milestoneDtos)
+                    .build();
+
+            result.add(dto);
+        }
+
+        return result;
+    }
+
 
     // 스톤 상세 정보 조회
 
     // 스톤 참여자 목록 조회
 
-
-    // To-Do: 다 하면 프로젝트 쪽 로직 완성
+    //ToDo: 다 하면 프로젝트 쪽 로직 완성
 
 }
