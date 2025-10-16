@@ -1,6 +1,7 @@
 package com.Dolmeng_E.workspace.domain.task.controller;
 
 import com.Dolmeng_E.workspace.domain.task.dto.TaskCreateDto;
+import com.Dolmeng_E.workspace.domain.task.dto.TaskModifyDto;
 import com.Dolmeng_E.workspace.domain.task.service.TaskService;
 import com.example.modulecommon.dto.CommonSuccessDto;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,19 @@ public class TaskController {
                 ,HttpStatus.CREATED);
     }
     // 태스크 수정
+    @PatchMapping("")
+    public ResponseEntity<?> modifyTask(
+            @RequestHeader("X-User-Id") String userId,
+            @RequestBody TaskModifyDto dto
+    ) {
+        taskService.modifyTask(userId, dto);
+        return new ResponseEntity<>(CommonSuccessDto.builder()
+                .statusMessage("태스크 수정 완료")
+                .result(HttpStatus.OK)
+                .statusCode(HttpStatus.OK.value())
+                .build()
+                ,HttpStatus.OK);
+    }
 
     // 태스크 삭제(삭제시 스톤의 task수 반영 필요)
 
