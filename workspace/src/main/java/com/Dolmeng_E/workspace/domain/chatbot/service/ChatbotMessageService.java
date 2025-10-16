@@ -1,6 +1,7 @@
 package com.Dolmeng_E.workspace.domain.chatbot.service;
 
 import com.Dolmeng_E.workspace.common.service.RestTemplateClient;
+import com.Dolmeng_E.workspace.domain.chatbot.dto.ChatbotMessageListResDto;
 import com.Dolmeng_E.workspace.domain.chatbot.dto.ChatbotMessageUserReqDto;
 import com.Dolmeng_E.workspace.domain.chatbot.dto.N8nAgentReqDto;
 import com.Dolmeng_E.workspace.domain.chatbot.entity.ChatbotMessage;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -26,6 +28,7 @@ public class ChatbotMessageService {
     private final WorkspaceParticipantRepository workspaceParticipantRepository;
     private final RestTemplateClient restTemplateClient;
 
+    // 사용자가 챗봇에게 메시지 전송
     public String sendMessage(String userId, ChatbotMessageUserReqDto reqDto) {
         // 워크스페이스 참여자 검증
         WorkspaceParticipant participant = workspaceParticipantRepository
@@ -61,4 +64,18 @@ public class ChatbotMessageService {
 
         return response.getBody();
     }
+
+    // 사용자와 챗봇의 대화 조회
+    public List<ChatbotMessageListResDto> getUserMessageList(String userId, String workspaceId) {
+        // 워크스페이스 참여자 검증
+        WorkspaceParticipant participant = workspaceParticipantRepository
+                .findByWorkspaceIdAndUserId(workspaceId, UUID.fromString(userId))
+                .orElseThrow(() -> new EntityNotFoundException("워크스페이스 참여자가 아닙니다."));
+
+        // participant의 챗봇과의 메시지 리스트 반환
+        List<ChatbotMessage> chatbotMessageList = chatbotMessageRepository.findByWorkspaceParticipant(participant);
+
+        return chatbotMessageList.stream().map(c -> ChatbotMessageListResDto.fromEntity(c)).toList();
+    }
+
 }
