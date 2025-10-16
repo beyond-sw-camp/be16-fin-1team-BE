@@ -33,7 +33,10 @@ public class TaskResDto {
         return TaskResDto.builder()
                 .taskId(task.getId())
                 .taskName(task.getTaskName())
-
+                .startTime(task.getStartTime())
+                .endTime(task.getEndTime())
+                .isDone(task.getIsDone())
+                .taskManagerName(task.getTaskManager().getUserName())
                 .build();
     }
 
