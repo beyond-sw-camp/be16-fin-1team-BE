@@ -157,9 +157,19 @@ public class StoneController {
                 ,HttpStatus.OK);
     }
 
-    // 마일스톤 진행률 변경
-
-    // 내 마일스톤 목록 조회(삭제되지 않은 스톤 조회)
+    // 프로젝트 별 내 마일스톤 조회(isDelete = true 제외, stoneStatus Completed 제외)
+    @GetMapping("/milestone/{workspaceId}")
+    public ResponseEntity<?> milestoneList(
+            @RequestHeader("X-User-Id") String userId,
+            @PathVariable String workspaceId
+    ) {
+        return new ResponseEntity<>(CommonSuccessDto.builder()
+                .statusMessage("프로젝트별 내 마일스톤 조회 성공")
+                .result(stoneService.milestoneList(userId, workspaceId))
+                .statusCode(HttpStatus.OK.value())
+                .build()
+                ,HttpStatus.OK);
+    }
 
     // 스톤 상세 정보 조회
 
