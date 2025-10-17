@@ -125,7 +125,11 @@ public class ChatService {
         List<ChatRoomListResDto> chatRoomListResDtoList = new ArrayList<>();
 
         for (ChatRoom room : chatRoomList) {
-            ChatMessage chatMessage = room.getChatMessageList().get(room.getChatMessageList().size() - 1);
+            ChatMessage chatMessage = null;
+            if(!room.getChatMessageList().isEmpty()) {
+                chatMessage = room.getChatMessageList().get(room.getChatMessageList().size() - 1);
+            }
+
             Long unreadCount = readStatusRepository
                     .countByUserIdAndChatRoom_IdAndIsReadFalse(senderInfo.getUserId(), room.getId());
 
@@ -139,8 +143,8 @@ public class ChatService {
                     .roomId(room.getId())
                     .roomName(room.getName())
                     .participantCount(room.getChatParticipantList().size())
-                    .lastMessage(chatMessage.getContent())
-                    .lastSendTime(chatMessage.getCreatedAt())
+                    .lastMessage(chatMessage != null ? chatMessage.getContent() : "메시지가 없습니다.")
+                    .lastSendTime(chatMessage != null ? chatMessage.getCreatedAt() : null)
                     .unreadCount(unreadCount)
                     .userProfileImageUrlList(userProfileImageUrlList)
                     .build();
