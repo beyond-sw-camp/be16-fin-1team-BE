@@ -9,13 +9,9 @@ import com.Dolmeng_E.workspace.domain.chatbot.entity.ChatbotMessage;
 import com.Dolmeng_E.workspace.domain.chatbot.entity.ChatbotMessageType;
 import com.Dolmeng_E.workspace.domain.chatbot.repository.ChatbotMessageRepository;
 import com.Dolmeng_E.workspace.domain.project.entity.Project;
-import com.Dolmeng_E.workspace.domain.project.entity.ProjectParticipant;
-import com.Dolmeng_E.workspace.domain.project.entity.ProjectStatus;
-import com.Dolmeng_E.workspace.domain.project.repository.ProjectParticipantRepository;
 import com.Dolmeng_E.workspace.domain.project.repository.ProjectRepository;
-import com.Dolmeng_E.workspace.domain.stone.entity.Stone;
-import com.Dolmeng_E.workspace.domain.stone.entity.StoneStatus;
 import com.Dolmeng_E.workspace.domain.task.entity.Task;
+import com.Dolmeng_E.workspace.domain.task.repository.TaskRepository;
 import com.Dolmeng_E.workspace.domain.workspace.entity.WorkspaceParticipant;
 import com.Dolmeng_E.workspace.domain.workspace.repository.WorkspaceParticipantRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -38,7 +34,7 @@ public class ChatbotMessageService {
     private final WorkspaceParticipantRepository workspaceParticipantRepository;
     private final RestTemplateClient restTemplateClient;
     private final ProjectRepository projectRepository;
-    private final ProjectParticipantRepository projectParticipantRepository;
+    private final TaskRepository taskRepository;
 
     // 사용자가 챗봇에게 메시지 전송
     public String sendMessage(String userId, ChatbotMessageUserReqDto reqDto) {
@@ -109,46 +105,22 @@ public class ChatbotMessageService {
 
     // 사용자가 할당 된 모든 task리스트 반환
     public String getTaskList(ChatbotTaskListReqDto reqDto) {
-        // 워크스페이스, 회원, 날짜
-        // 워크스페이스 내부에서 해당 회원이 포함된 모든 프로젝트 조회
-
         LocalDateTime dtoEndTime = LocalDateTime.parse(reqDto.getEndTime());
-
         String taskList = "";
-
 
         // 워크스페이스 참여자 검증
         WorkspaceParticipant participant = workspaceParticipantRepository
                 .findByWorkspaceIdAndUserId(reqDto.getWorkspaceId(), UUID.fromString(reqDto.getUserId()))
                 .orElseThrow(() -> new EntityNotFoundException("워크스페이스 참여자가 아닙니다."));
 
-        List<ProjectParticipant> projectParticipantList = projectParticipantRepository.findAllByWorkspaceParticipant(participant);
+        // 참여자가 할당된 task 목록 가져오기, 필터링: 완료여부, 날짜
+        List<Task> tasks = taskRepository.findUnfinishedTasksBeforeDate(participant, dtoEndTime);
 
-        int projectIndex = 1;
-        for(ProjectParticipant projectParticipant : projectParticipantList) {
-            Project project = projectParticipant.getProject();
-
-            if(!project.getIsDelete() && project.getProjectStatus() == ProjectStatus.PROGRESS) {
-                taskList += projectIndex++ + ". 프로젝트명: " + project.getProjectName() + "\n";
-
-                int stoneIndex = 1;
-                for(Stone stone : project.getStones()) {
-                    if(!stone.getIsDelete()
-                            && stone.getStatus() == StoneStatus.PROGRESS
-                            && stone.getTaskCount() != 0
-                            && dtoEndTime.isBefore(stone.getEndTime())) {
-                        taskList += stoneIndex++ + ". 스톤명: " + stone.getStoneName() + "\n";
-
-                        int taskIndex = 1;
-                        for(Task task : stone.getTasks()) {
-                            if(!task.getIsDone()) {
-                                taskList += taskIndex++ + ". task명: " + task.getTaskName();
-                            }
-                        }
-                    }
-                }
-            }
+        int taskIndex = 1;
+        for(Task task : tasks) {
+            taskList += taskIndex++ + ". " + task.getTaskName() + ", 만료기한: " + task.getEndTime() + "\n";
         }
+
         return taskList;
     }
 }
