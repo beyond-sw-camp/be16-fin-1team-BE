@@ -1,6 +1,6 @@
 package com.Dolmeng_E.drive.common.service;
 
-import com.Dolmeng_E.drive.common.dto.EditorMessageDto;
+import com.Dolmeng_E.drive.common.dto.EditorBatchMessageDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -32,7 +32,7 @@ public class EditorWebSocketHandler extends TextWebSocketHandler {
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         String payload = message.getPayload();
-        EditorMessageDto editorMessage = objectMapper.readValue(payload, EditorMessageDto.class);
+        EditorBatchMessageDto editorMessage = objectMapper.readValue(payload, EditorBatchMessageDto.class);
 
         String documentId = editorMessage.getDocumentId();
 
