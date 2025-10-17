@@ -1,5 +1,6 @@
 package com.Dolmeng_E.workspace.domain.chatbot.service;
 
+import com.Dolmeng_E.workspace.common.service.ChatFeign;
 import com.Dolmeng_E.workspace.common.service.RestTemplateClient;
 import com.Dolmeng_E.workspace.domain.chatbot.dto.*;
 import com.Dolmeng_E.workspace.domain.chatbot.entity.ChatbotMessage;
@@ -11,6 +12,8 @@ import com.Dolmeng_E.workspace.domain.task.entity.Task;
 import com.Dolmeng_E.workspace.domain.task.repository.TaskRepository;
 import com.Dolmeng_E.workspace.domain.workspace.entity.WorkspaceParticipant;
 import com.Dolmeng_E.workspace.domain.workspace.repository.WorkspaceParticipantRepository;
+import com.example.modulecommon.dto.CommonSuccessDto;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,12 +29,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ChatbotMessageService {
     static final String AGENT_URL = "http://localhost:5678/webhook/chatbot-agent";
+    static final String AGENT_URL_CHAT = "http://localhost:5678/webhook-test/chatbot-agent/chat-summary";
 
     private final ChatbotMessageRepository chatbotMessageRepository;
     private final WorkspaceParticipantRepository workspaceParticipantRepository;
     private final RestTemplateClient restTemplateClient;
     private final ProjectRepository projectRepository;
     private final TaskRepository taskRepository;
+    private final ChatFeign chatFeign;
 
     // 사용자가 챗봇에게 메시지 전송
     public N8nResDto sendMessage(String userId, ChatbotMessageUserReqDto reqDto) {
@@ -56,7 +61,7 @@ public class ChatbotMessageService {
                 .userName(participant.getUserName())
                 .today(String.valueOf(LocalDateTime.now()))
                 .build();
-        
+
         // agent에게 요청 및 응답 받아오기
         ResponseEntity<N8nResDto> response =
                 restTemplateClient.post(AGENT_URL, n8nAgentReqDto, N8nResDto.class);
@@ -69,6 +74,25 @@ public class ChatbotMessageService {
                 .workspaceParticipant(participant)
                 .build();
         chatbotMessageRepository.save(chatbotBotMessage);
+
+        return result;
+    }
+
+    public N8nResDto sendRequestForChat(String userId, Long roomId) {
+        ResponseEntity<CommonSuccessDto> response1 = chatFeign.getUnreadMessageListByRoom(roomId, userId);
+        CommonSuccessDto body = response1.getBody();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String unreadMessages = objectMapper.convertValue(body.getResult(), String.class);
+
+        N8nAgentReqDto n8nAgentReqDto = N8nAgentReqDto.builder()
+                .userId(userId)
+                .content(unreadMessages)
+                .build();
+
+        // agent에게 요청 및 응답 받아오기
+        ResponseEntity<N8nResDto> response2 =
+                restTemplateClient.post(AGENT_URL_CHAT, n8nAgentReqDto, N8nResDto.class);
+        N8nResDto result = response2.getBody();
 
         return result;
     }

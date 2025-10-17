@@ -27,6 +27,13 @@ public class ChatbotMessageController {
         return new ResponseEntity<>(new CommonSuccessDto(response, HttpStatus.OK.value(), "챗봇에게 메시지 전송 성공"),  HttpStatus.OK);
     }
 
+    // 프론트 -> 서버 -> agent -> 응답 반환
+    @GetMapping("/message/chat-room/{roomId}")
+    public ResponseEntity<?> sendRequestForChat(@RequestHeader("X-User-Id") String userId, @PathVariable("roomId") Long roomId) {
+        N8nResDto response = chatbotMessageService.sendRequestForChat(userId, roomId);
+        return new ResponseEntity<>(new CommonSuccessDto(response, HttpStatus.OK.value(), "Agent에게 메시지 전송 성공"),  HttpStatus.OK);
+    }
+
     // 사용자와 챗봇의 대화 조회
     @GetMapping("/workspaces/{workspaceId}/chat/messages")
     public ResponseEntity<?> getUserMessageList(@RequestHeader("X-User-Id") String userId, @PathVariable String workspaceId) {
