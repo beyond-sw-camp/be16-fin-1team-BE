@@ -62,6 +62,7 @@ public class ChatService {
         ChatMessage chatMessage = ChatMessage.builder()
                 .chatRoom(chatRoom)
                 .userId(senderInfo.getUserId())
+                .userName(senderInfo.getUserName())
                 .content(chatMessageDto.getMessage())
                 .type(chatMessageDto.getMessageType())
                 .build();
@@ -267,4 +268,21 @@ public class ChatService {
         List<ChatFileListDto> chatFileListDtoList = chatFileList.stream().map(chatFile -> ChatFileListDto.fromEntity(chatFile)).toList();
         return chatFileListDtoList;
     }
+
+    // Agent 겸용 기능
+    public String getUnreadMessageListByRoom(Long roomId, String userId) {
+        ChatRoom room = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new EntityNotFoundException("없는 채팅방입니다."));
+
+        // room이랑 user로 안 읽은 메시지 목록 먼저 가져오고, 그거에 매핑되는 메시지
+        List<ChatMessage> chatMessageList = readStatusRepository.findUnreadMessagesByChatRoomAndUserId(room, UUID.fromString(userId));
+
+        String unreadMessageList = "";
+        for(ChatMessage chatMessage : chatMessageList) {
+            unreadMessageList += chatMessage.getUserName() + " : " + chatMessage.getContent() + "\n";
+        }
+
+        return unreadMessageList;
+    }
+
 }
