@@ -5,6 +5,10 @@ import com.Dolmeng_E.workspace.common.service.UserFeign;
 import com.Dolmeng_E.workspace.domain.access_group.entity.AccessGroup;
 import com.Dolmeng_E.workspace.domain.access_group.repository.AccessGroupRepository;
 import com.Dolmeng_E.workspace.domain.access_group.service.AccessGroupService;
+import com.Dolmeng_E.workspace.domain.project.dto.ProjectProgressResDto;
+import com.Dolmeng_E.workspace.domain.project.entity.Project;
+import com.Dolmeng_E.workspace.domain.project.entity.ProjectParticipant;
+import com.Dolmeng_E.workspace.domain.project.repository.ProjectParticipantRepository;
 import com.Dolmeng_E.workspace.domain.workspace.dto.*;
 import com.Dolmeng_E.workspace.domain.workspace.entity.Workspace;
 import com.Dolmeng_E.workspace.domain.workspace.entity.WorkspaceInvite;
@@ -21,7 +25,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -34,6 +40,7 @@ public class WorkspaceService {
     private final AccessGroupRepository accessGroupRepository;
     private final EmailService emailService;
     private final WorkspaceInviteRepository workspaceInviteRepository;
+    private final ProjectParticipantRepository projectParticipantRepository;
 
 //    워크스페이스 생성
     public String createWorkspace(WorkspaceCreateDto workspaceCreateDto, String userId) {
@@ -350,5 +357,46 @@ public List<WorkspaceListResDto> getWorkspaceList(String userId) {
                 .workspaceName(workspace.getWorkspaceName())
                 .build();
     }
+
+//    워크스페이스 전체 프로젝트별 마일스톤 조회
+    public List<ProjectProgressResDto> getWorkspaceProjectProgress(String userId, String workspaceId) {
+
+        // 1. 워크스페이스 검증
+        Workspace workspace = workspaceRepository.findById(workspaceId)
+                .orElseThrow(() -> new EntityNotFoundException("워크스페이스를 찾을 수 없습니다."));
+
+        // 2. 요청자 검증
+        WorkspaceParticipant requester = workspaceParticipantRepository
+                .findByWorkspaceIdAndUserId(workspaceId, UUID.fromString(userId))
+                .orElseThrow(() -> new EntityNotFoundException("워크스페이스 참여자가 아닙니다."));
+
+        // 3. 관리자 권한 검증
+        if (!requester.getWorkspaceRole().equals(WorkspaceRole.ADMIN)) {
+            throw new IllegalArgumentException("관리자만 접근할 수 있습니다.");
+        }
+
+        // 4. 관리자 권한이므로 workspace 전체 프로젝트 조회 (스톤 없어도 다 가져오기)
+        List<ProjectParticipant> projectParticipants =
+                projectParticipantRepository.findAllWithOptionalStonesByWorkspaceParticipant(requester);
+
+        // 5. DTO 변환용 중복 제거 (동일 프로젝트 중복 방지)
+        Set<Project> uniqueProjects = projectParticipants.stream()
+                .map(ProjectParticipant::getProject)
+                .collect(Collectors.toSet());
+
+        // 6. 마일스톤 최신화 및 DTO 변환
+        List<ProjectProgressResDto> result = uniqueProjects.stream()
+                .map(project -> {
+                    project.updateMilestone(); // 완료/전체 비율 재계산
+                    return ProjectProgressResDto.fromEntity(project);
+                })
+                .toList();
+
+        return result;
+    }
+
+// 워크스페이스별 프로젝트 개수 및 상태 조회
+
+
 
 }

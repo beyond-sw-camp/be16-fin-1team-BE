@@ -2,6 +2,8 @@ package com.Dolmeng_E.workspace.domain.workspace.controller;
 
 import com.Dolmeng_E.workspace.common.dto.WorkspaceInfoResDto;
 import com.Dolmeng_E.workspace.common.dto.WorkspaceNameDto;
+import com.Dolmeng_E.workspace.domain.project.dto.ProjectProgressResDto;
+import com.Dolmeng_E.workspace.domain.project.service.ProjectService;
 import com.Dolmeng_E.workspace.domain.workspace.dto.*;
 import com.Dolmeng_E.workspace.domain.workspace.service.WorkspaceService;
 import com.example.modulecommon.dto.CommonSuccessDto;
@@ -166,5 +168,27 @@ public class WorkspaceController {
         WorkspaceInfoResDto workspaceInfoResDto =  workspaceService.fetchWorkspaceInfo(userId, workspaceName);
         return workspaceInfoResDto;
     }
+
+
+    //    워크스페이스 전체 프로젝트별 마일스톤 조회
+    @GetMapping("/admin/{workspaceId}")
+    public ResponseEntity<?> getWorkspaceProjectProgress(
+            @RequestHeader("X-User-Id") String userId,
+            @PathVariable String workspaceId
+    ) {
+        List<ProjectProgressResDto> result = workspaceService.getWorkspaceProjectProgress(userId, workspaceId);
+
+        return new ResponseEntity<>(
+                CommonSuccessDto.builder()
+                        .statusMessage("프로젝트 진행률 조회 완료")
+                        .result(result)
+                        .statusCode(HttpStatus.OK.value())
+                        .build(),
+                HttpStatus.OK
+        );
+    }
+
+    // 워크스페이스별 프로젝트 개수 및 상태 조회
+
 
 }
