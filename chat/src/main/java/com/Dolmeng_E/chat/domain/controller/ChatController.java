@@ -70,7 +70,7 @@ public class ChatController {
     // 채팅방의 안읽은 메시지 목록 조회
     @GetMapping("/room/{roomId}/unread-messages")
     public ResponseEntity<?> getUnreadMessageListByRoom (@PathVariable("roomId") Long roomId, @RequestHeader("X-User-Id")String userId) {
-        String unreadMessages = chatService.getUnreadMessageListByRoom(roomId, userId);
+        String unreadMessages = chatService.getUnreadMessagesByRoom(roomId, userId);
         return new ResponseEntity<>(new CommonSuccessDto(unreadMessages, HttpStatus.OK.value(), "채팅방 안 읽은 메시지 목록 조회 성공"), HttpStatus.OK);
     }
 

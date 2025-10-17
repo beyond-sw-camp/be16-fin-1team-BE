@@ -270,16 +270,44 @@ public class ChatService {
     }
 
     // Agent 겸용 기능
-    public String getUnreadMessageListByRoom(Long roomId, String userId) {
-        ChatRoom room = chatRoomRepository.findById(roomId)
+    public String getUnreadMessagesByRoom(Long roomId, String userId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new EntityNotFoundException("없는 채팅방입니다."));
 
         // room이랑 user로 안 읽은 메시지 목록 먼저 가져오고, 그거에 매핑되는 메시지
-        List<ChatMessage> chatMessageList = readStatusRepository.findUnreadMessagesByChatRoomAndUserId(room, UUID.fromString(userId));
+        List<ChatMessage> chatMessageList = readStatusRepository.findUnreadMessagesByChatRoomAndUserId(chatRoom, UUID.fromString(userId));
 
         String unreadMessageList = "";
         for(ChatMessage chatMessage : chatMessageList) {
             unreadMessageList += chatMessage.getUserName() + " : " + chatMessage.getContent() + "\n";
+        }
+
+        return unreadMessageList;
+    }
+
+    // 워크스페이스 내에서 사용자가 읽지 않은 메시지 전부 조회
+    public String getUnreadMessages(ChatbotUnreadMessageListReqDto dto) {
+        // 사용자, 워크스페이스 필터링
+        List<ChatRoom> chatRoomList = chatRoomRepository.findAllByUserAndWorkspace(UUID.fromString(dto.getUserId()), dto.getWorkspaceId());
+
+        String unreadMessageList = "";
+
+        if(!chatRoomList.isEmpty()) {
+            for(ChatRoom chatRoom : chatRoomList) {
+                unreadMessageList += "채팅방 이름: " + chatRoom.getName() + "\n";
+
+                List<ChatMessage> chatMessageList = readStatusRepository.findUnreadMessagesByChatRoomAndUserId(chatRoom, UUID.fromString(dto.getUserId()));
+
+                if(!chatMessageList.isEmpty()) {
+                    for(ChatMessage chatMessage : chatMessageList) {
+                        unreadMessageList += chatMessage.getUserName() + " : " + chatMessage.getContent() + "\n";
+                    }
+                } else {
+                    unreadMessageList += "읽지 않은 채팅이 없습니다.\n";
+                }
+            }
+        } else {
+            unreadMessageList += "채팅방이 없습니다.";
         }
 
         return unreadMessageList;
