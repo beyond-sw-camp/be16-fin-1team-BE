@@ -1,5 +1,6 @@
 package com.Dolmeng_E.workspace.domain.task.repository;
 
+import com.Dolmeng_E.workspace.domain.stone.entity.Stone;
 import com.Dolmeng_E.workspace.domain.task.entity.Task;
 import com.Dolmeng_E.workspace.domain.workspace.entity.WorkspaceParticipant;
 import io.lettuce.core.dynamic.annotation.Param;
@@ -23,4 +24,5 @@ public interface TaskRepository extends JpaRepository<Task, String> {
             @Param("participant") WorkspaceParticipant participant,
             @Param("endTime") LocalDateTime endTime
     );
+    List<Task> findAllByStone(Stone stone);
 }

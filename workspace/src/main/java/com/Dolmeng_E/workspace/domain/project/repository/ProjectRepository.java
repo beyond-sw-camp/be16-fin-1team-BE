@@ -12,4 +12,5 @@ import java.util.Optional;
 public interface ProjectRepository extends JpaRepository<Project, String> {
     List<Project> findAllByWorkspaceIdAndIsDeleteFalseAndProjectStatusNot(String workspaceId, ProjectStatus projectStatus);
     Optional<Project> findByProjectName(String projectName);
+    List<Project> findAllByWorkspaceIdAndIsDeleteFalse(String workspaceId);
 }
