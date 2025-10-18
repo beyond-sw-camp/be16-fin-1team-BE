@@ -188,7 +188,24 @@ public class WorkspaceController {
         );
     }
 
-    // 워크스페이스별 프로젝트 개수 및 상태 조회
+    // 워크스페이스 전체 프로젝트별 프로젝트 마일스톤, 스톤 목록과 스톤의 마일스톤들 조회
+
+    @GetMapping("/admin/tree/{workspaceId}")
+    public ResponseEntity<?> getProjectMileStones(
+            @RequestHeader("X-User-Id") String userId,
+            @PathVariable String workspaceId
+    ) {
+        return new ResponseEntity<>(
+                CommonSuccessDto.builder()
+                        .statusMessage("전체 프로젝트 마일스톤 조회 완료")
+                        .result(workspaceService.milestoneListForAdmin(userId, workspaceId))
+                        .statusCode(HttpStatus.OK.value())
+                        .build(),
+                HttpStatus.OK
+        );
+    }
+
+    // 사용자 그룹별 프로젝트 현황 조회
 
 
 }

@@ -41,4 +41,6 @@ public interface ProjectParticipantRepository extends JpaRepository<ProjectParti
     List<ProjectParticipant> findAllWithOptionalStonesByWorkspaceParticipant(
             @Param("participant") WorkspaceParticipant participant
     );
+
+    List<ProjectParticipant> findAllByWorkspaceParticipantIn(List<WorkspaceParticipant> participants);
 }
