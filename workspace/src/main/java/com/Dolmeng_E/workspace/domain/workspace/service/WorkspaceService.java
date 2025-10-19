@@ -11,6 +11,7 @@ import com.Dolmeng_E.workspace.domain.project.entity.ProjectParticipant;
 import com.Dolmeng_E.workspace.domain.project.repository.ProjectParticipantRepository;
 import com.Dolmeng_E.workspace.domain.stone.dto.MilestoneResDto;
 import com.Dolmeng_E.workspace.domain.stone.dto.ProjectMilestoneResDto;
+import com.Dolmeng_E.workspace.domain.stone.entity.ChildStoneList;
 import com.Dolmeng_E.workspace.domain.stone.entity.Stone;
 import com.Dolmeng_E.workspace.domain.stone.entity.StoneStatus;
 import com.Dolmeng_E.workspace.domain.user_group.entity.UserGroup;
@@ -424,7 +425,7 @@ public List<WorkspaceListResDto> getWorkspaceList(String userId) {
             throw new IllegalArgumentException("관리자만 접근할 수 있습니다.");
         }
 
-        // 4. 프로젝트 + 스톤 목록 조회 (fetch join 적용)
+        // 4. 프로젝트 + 스톤 목록 조회 (fetch join)
         List<ProjectParticipant> projectParticipants =
                 projectParticipantRepository.findAllWithStonesByWorkspaceParticipant(participant);
 
@@ -433,34 +434,65 @@ public List<WorkspaceListResDto> getWorkspaceList(String userId) {
                 .map(ProjectParticipant::getProject)
                 .collect(Collectors.toSet());
 
-        // 6. 결과 DTO 리스트 생성
         List<ProjectMilestoneResDto> result = new ArrayList<>();
 
-        // 7. 각 프로젝트별로 스톤 리스트를 순회하며 DTO 변환
+        // 6. 각 프로젝트별로 스톤 트리 구성
         for (Project project : uniqueProjects) {
-            List<Stone> stones = project.getStones();
-
-            // 삭제되지 않은 스톤만 필터링
-            List<MilestoneResDto> milestoneDtos = stones.stream()
+            List<Stone> stones = project.getStones().stream()
                     .filter(s -> !s.getIsDelete())
-                    .map(MilestoneResDto::fromEntity)
                     .toList();
 
-            // 프로젝트별 마일스톤 응답 DTO 조립
+            // 모든 스톤 → DTO 변환 (중복 무시)
+            Map<String, MilestoneResDto> dtoMap = stones.stream()
+                    .collect(Collectors.toMap(
+                            Stone::getId,
+                            MilestoneResDto::fromEntity,
+                            (a, b) -> a // 중복 발생 시 첫 번째 유지
+                    ));
+
+            // ChildStoneList 기반으로 부모-자식 연결
+            for (Stone stone : stones) {
+                if (stone.getChildStoneLists() == null) continue;
+
+                for (ChildStoneList link : stone.getChildStoneLists()) {
+                    Stone child = link.getChildStone();
+                    if (child != null && !child.getIsDelete()) {
+                        MilestoneResDto parentDto = dtoMap.get(stone.getId());
+                        MilestoneResDto childDto = dtoMap.get(child.getId());
+                        if (parentDto != null && childDto != null) {
+                            parentDto.getChildren().add(childDto);
+                        }
+                    }
+                }
+            }
+
+            // 루트 스톤(= 자식으로 포함되지 않은 스톤)만 추출
+            Set<String> childIds = stones.stream()
+                    .flatMap(s -> s.getChildStoneLists().stream()
+                            .map(c -> c.getChildStone().getId()))
+                    .collect(Collectors.toSet());
+
+            List<MilestoneResDto> rootStones = stones.stream()
+                    .filter(s -> !childIds.contains(s.getId()))
+                    .map(s -> dtoMap.get(s.getId()))
+                    .toList();
+
+            // 프로젝트별 응답 조립
             result.add(ProjectMilestoneResDto.builder()
                     .projectId(project.getId())
                     .projectName(project.getProjectName())
-                    .milestoneResDtoList(milestoneDtos)
+                    .milestoneResDtoList(rootStones)
                     .build());
         }
 
-        // 8. 전체 프로젝트별 마일스톤 리스트 반환
         return result;
     }
 
 
 
-// 사용자 그룹별 프로젝트 현황 조회
+
+
+    // 사용자 그룹별 프로젝트 현황 조회
     @Transactional(readOnly = true)
     public List<UserGroupProjectProgressResDto> getUserGroupProjectProgress(String userId, String workspaceId) {
 

@@ -206,6 +206,20 @@ public class WorkspaceController {
     }
 
     // 사용자 그룹별 프로젝트 현황 조회
+    @GetMapping("/admin/group-progress/{workspaceId}")
+    public ResponseEntity<?> getUserGroupProjectProgress(
+            @RequestHeader("X-User-Id") String userId,
+            @PathVariable String workspaceId
+    ) {
+        return new ResponseEntity<>(
+                CommonSuccessDto.builder()
+                        .statusMessage("사용자 그룹별 프로젝트 현황 조회 완료")
+                        .result(workspaceService.getUserGroupProjectProgress(userId, workspaceId))
+                        .statusCode(HttpStatus.OK.value())
+                        .build(),
+                HttpStatus.OK
+        );
+    }
 
 
 }
