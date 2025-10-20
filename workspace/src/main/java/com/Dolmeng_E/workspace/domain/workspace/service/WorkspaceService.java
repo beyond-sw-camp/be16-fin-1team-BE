@@ -175,7 +175,6 @@ public List<WorkspaceListResDto> getWorkspaceList(String userId) {
         workspace.updateWorkspaceName(dto.getWorkspaceName());
     }
 
-    // todo 중복유저 추가 x, dto list에 관리자 들어있으면 허용됨
 //    워크스페이스 회원 초대
     public void addParticipants(String userId, String workspaceId, WorkspaceAddUserDto dto) {
 
