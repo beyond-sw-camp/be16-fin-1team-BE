@@ -60,29 +60,47 @@ public class ChatbotMessageService {
                 .build();
         chatbotMessageRepository.save(chatbotUserMessage);
 
-        // 사용자 메시지를 agent에게 보내기전에 필요한 데이터 담기
-        N8nAgentReqDto n8nAgentReqDto = N8nAgentReqDto.builder()
-                .workspaceId(reqDto.getWorkspaceId())
-                .content(reqDto.getContent())
-                .userId(userId)
-                .userName(participant.getUserName())
-                .today(String.valueOf(LocalDateTime.now()))
-                .build();
+        // SemanticMemory 유사도 검사
+        String semanticMessage = semanticMemoryService.findBotReplyByKeyFilter(reqDto.getWorkspaceId(), userId, reqDto.getContent());
+        N8nResDto result;
+        if(semanticMessage != null) {
+            result = N8nResDto.builder()
+                    .text(semanticMessage)
+                    .isSave(false)
+                    .build();
 
-        // agent에게 요청 및 응답 받아오기
-        ResponseEntity<N8nResDto> response =
-                restTemplateClient.post(AGENT_URL, n8nAgentReqDto, N8nResDto.class);
-        N8nResDto result = response.getBody();
+            // agent의 응답을 답장으로 저장
+            ChatbotMessage chatbotBotMessage = ChatbotMessage.builder()
+                    .content(result.getText())
+                    .type(ChatbotMessageType.BOT)
+                    .workspaceParticipant(participant)
+                    .build();
+            chatbotMessageRepository.save(chatbotBotMessage);
+        } else {
+            // 사용자 메시지를 agent에게 보내기전에 필요한 데이터 담기
+            N8nAgentReqDto n8nAgentReqDto = N8nAgentReqDto.builder()
+                    .workspaceId(reqDto.getWorkspaceId())
+                    .content(reqDto.getContent())
+                    .userId(userId)
+                    .userName(participant.getUserName())
+                    .today(String.valueOf(LocalDateTime.now()))
+                    .build();
 
-        // agent의 응답을 답장으로 저장
-        ChatbotMessage chatbotBotMessage = ChatbotMessage.builder()
-                .content(result.getText())
-                .type(ChatbotMessageType.BOT)
-                .workspaceParticipant(participant)
-                .build();
-        chatbotMessageRepository.save(chatbotBotMessage);
+            // agent에게 요청 및 응답 받아오기
+            ResponseEntity<N8nResDto> response =
+                    restTemplateClient.post(AGENT_URL, n8nAgentReqDto, N8nResDto.class);
+            result = response.getBody();
 
-        // isSave가 true일 때만 저장
+            // agent의 응답을 답장으로 저장
+            ChatbotMessage chatbotBotMessage = ChatbotMessage.builder()
+                    .content(result.getText())
+                    .type(ChatbotMessageType.BOT)
+                    .workspaceParticipant(participant)
+                    .build();
+            chatbotMessageRepository.save(chatbotBotMessage);
+        }
+
+        // isSave가 true일 때만 질문/답 Semantic에 저장
         if(result.getIsSave()) {
             // redis-stack에 임베딩 저장
             // User

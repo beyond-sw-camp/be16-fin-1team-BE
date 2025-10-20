@@ -117,10 +117,10 @@ public class SemanticMemoryService {
 
         // 5. BOT 텍스트 가져오기
         String botReply = jedis.hget(botKey, "text");
-        log.info("SemanticMemoryService - findBotReplyByKeyFilter() - Bot reply: %s%n", botReply);
+        log.info("SemanticMemoryService - findBotReplyByKeyFilter() - bestScore: " + bestScore + ", Bot reply: " + botReply);
 
-        // 6. 유사도가 0.2 이하일 때만 답장 반환
-        if(bestScore <= 0.2) {
+        // 6. 유사도가 0.25 이하일 때만 답장 반환
+        if(bestScore <= 0.25) {
             return botReply;
         } else {
             return null;
