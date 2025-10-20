@@ -29,6 +29,8 @@ import com.Dolmeng_E.workspace.domain.workspace.repository.WorkspaceRepository;
 import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -216,8 +218,13 @@ public List<WorkspaceListResDto> getWorkspaceList(String userId) {
                         .isDelete(false)
                         .build())
                 .toList();
-
+// Entity에 워크스페이스와 회원 id로 복합키를 설정하여 중복 제외했습니다.
+        try {
             workspaceParticipantRepository.saveAll(newParticipants);
+            workspaceParticipantRepository.flush(); // 즉시 insert 실행
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalArgumentException("이미 워크스페이스에 존재하는 사용자가 포함되어 있습니다.");
+        }
     }
 
 
