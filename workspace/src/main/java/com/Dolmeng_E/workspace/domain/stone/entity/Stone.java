@@ -92,6 +92,11 @@ public class Stone extends BaseTimeEntity {
     @Builder.Default
     private Boolean isDelete = false;
 
+    // 자식스톤 관계 매핑을 위한 oneToMany(트리구조 조회시 활용)
+    @OneToMany(mappedBy = "stone", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<ChildStoneList> childStoneLists = new ArrayList<>();
+
     @OneToMany(mappedBy = "stone", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     List<Task> tasks = new ArrayList<>();

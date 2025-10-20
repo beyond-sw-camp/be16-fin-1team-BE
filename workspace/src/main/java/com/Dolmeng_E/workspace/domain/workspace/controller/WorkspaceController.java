@@ -2,7 +2,10 @@ package com.Dolmeng_E.workspace.domain.workspace.controller;
 
 import com.Dolmeng_E.workspace.common.dto.WorkspaceInfoResDto;
 import com.Dolmeng_E.workspace.common.dto.WorkspaceNameDto;
+import com.Dolmeng_E.workspace.domain.project.dto.ProjectProgressResDto;
+import com.Dolmeng_E.workspace.domain.project.service.ProjectService;
 import com.Dolmeng_E.workspace.domain.workspace.dto.*;
+import com.Dolmeng_E.workspace.domain.workspace.repository.WorkspaceParticipantRepository;
 import com.Dolmeng_E.workspace.domain.workspace.service.WorkspaceService;
 import com.example.modulecommon.dto.CommonSuccessDto;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.nio.file.AccessDeniedException;
 import java.util.List;
+import java.util.UUID;
 
 
 @RestController
@@ -160,11 +164,81 @@ public class WorkspaceController {
                 HttpStatus.OK);
     }
 
-    //    workspace 정보 반환 api
+    // workspace 정보 반환
     @PostMapping("/return")
     public WorkspaceInfoResDto fetchWorkspaceInfo(@RequestHeader("X-User-Id")String userId, @RequestBody WorkspaceNameDto workspaceName) {
         WorkspaceInfoResDto workspaceInfoResDto =  workspaceService.fetchWorkspaceInfo(userId, workspaceName);
         return workspaceInfoResDto;
     }
+
+    // workspace 존재 여부 확인
+    @GetMapping("/{workspaceId}/exists")
+    public ResponseEntity<Boolean> checkWorkspaceExists(@PathVariable String workspaceId) {
+        boolean exists = workspaceService.existsById(workspaceId);
+        return ResponseEntity.ok(exists);
+    }
+
+    // 워크스페이스 멤버 여부 검증
+    @GetMapping("/{workspaceId}/participants/{userId}/exists")
+    public ResponseEntity<Boolean> checkWorkspaceMember(
+            @PathVariable String workspaceId,
+            @PathVariable UUID userId
+    ) {
+        boolean exists = workspaceService.checkWorkspaceMember(workspaceId, userId);
+        return ResponseEntity.ok(exists);
+    }
+
+
+    //    워크스페이스 전체 프로젝트별 마일스톤 조회
+    @GetMapping("/admin/{workspaceId}")
+    public ResponseEntity<?> getWorkspaceProjectProgress(
+            @RequestHeader("X-User-Id") String userId,
+            @PathVariable String workspaceId
+    ) {
+        List<ProjectProgressResDto> result = workspaceService.getWorkspaceProjectProgress(userId, workspaceId);
+
+        return new ResponseEntity<>(
+                CommonSuccessDto.builder()
+                        .statusMessage("프로젝트 진행률 조회 완료")
+                        .result(result)
+                        .statusCode(HttpStatus.OK.value())
+                        .build(),
+                HttpStatus.OK
+        );
+    }
+
+    // 워크스페이스 전체 프로젝트별 프로젝트 마일스톤, 스톤 목록과 스톤의 마일스톤들 조회
+
+    @GetMapping("/admin/tree/{workspaceId}")
+    public ResponseEntity<?> getProjectMileStones(
+            @RequestHeader("X-User-Id") String userId,
+            @PathVariable String workspaceId
+    ) {
+        return new ResponseEntity<>(
+                CommonSuccessDto.builder()
+                        .statusMessage("전체 프로젝트 마일스톤 조회 완료")
+                        .result(workspaceService.milestoneListForAdmin(userId, workspaceId))
+                        .statusCode(HttpStatus.OK.value())
+                        .build(),
+                HttpStatus.OK
+        );
+    }
+
+    // 사용자 그룹별 프로젝트 현황 조회
+    @GetMapping("/admin/group-progress/{workspaceId}")
+    public ResponseEntity<?> getUserGroupProjectProgress(
+            @RequestHeader("X-User-Id") String userId,
+            @PathVariable String workspaceId
+    ) {
+        return new ResponseEntity<>(
+                CommonSuccessDto.builder()
+                        .statusMessage("사용자 그룹별 프로젝트 현황 조회 완료")
+                        .result(workspaceService.getUserGroupProjectProgress(userId, workspaceId))
+                        .statusCode(HttpStatus.OK.value())
+                        .build(),
+                HttpStatus.OK
+        );
+    }
+
 
 }

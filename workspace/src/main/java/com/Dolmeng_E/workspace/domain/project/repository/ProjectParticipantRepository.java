@@ -48,4 +48,5 @@ public interface ProjectParticipantRepository extends JpaRepository<ProjectParti
             "ORDER BY p.project.startTime DESC")
     Optional<Project> findLatestProjectByParticipant(@Param("participant") WorkspaceParticipant participant);
 
+    List<ProjectParticipant> findAllByWorkspaceParticipantIn(List<WorkspaceParticipant> participants);
 }
