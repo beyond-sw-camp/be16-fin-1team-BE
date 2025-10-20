@@ -56,6 +56,13 @@ public class UserController {
         return userInfoListResDto;
     }
 
+    // 모든 유저 정보 list 반환 API
+    @GetMapping("/return/all-users")
+    UserInfoListResDto fetchAllUserListInfo(@RequestHeader("X-User-Id")String userId) {
+        UserInfoListResDto userInfoListResDto = userService.fetchAllUserListInfo(userId);
+        return userInfoListResDto;
+    }
+
     // 카카오 로그인 API (정보 없으면 회원가입까지)
     @PostMapping("/kakao/login")
     public ResponseEntity<?> kakaoLogin(@RequestBody RedirectDto dto) {

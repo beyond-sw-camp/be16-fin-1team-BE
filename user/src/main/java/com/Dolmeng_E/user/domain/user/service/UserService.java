@@ -109,6 +109,32 @@ public class UserService {
                 .build();
     }
 
+    // 모든 유저 정보 list 반환 API
+    public UserInfoListResDto fetchAllUserListInfo(String userId) {
+
+        // 1. 요청자 검증
+        User requester = userRepository.findById(UUID.fromString(userId))
+                .orElseThrow(() -> new EntityNotFoundException("없는 회원입니다."));
+
+        // 2. 전체 유저 조회
+        List<User> allUserList = userRepository.findAll();
+
+        // 3. DTO 변환
+        List<UserInfoResDto> userInfoList = allUserList.stream()
+                .map(user -> UserInfoResDto.builder()
+                        .userId(user.getId())
+                        .userName(user.getName())
+                        .userEmail(user.getEmail())
+                        .profileImageUrl(user.getProfileImageUrl())
+                        .build())
+                .toList();
+
+        // 4. 반환
+        return UserInfoListResDto.builder()
+                .userInfoList(userInfoList)
+                .build();
+    }
+
     // 카카오 로그인 API (정보 없으면 회원가입까지)
     public UserLoginResDto kakaoLogin(RedirectDto dto) {
         // accessToken 발급

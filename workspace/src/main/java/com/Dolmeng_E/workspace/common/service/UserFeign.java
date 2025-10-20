@@ -17,4 +17,7 @@ public interface UserFeign {
 
     @PostMapping("/user/return/users")
     UserInfoListResDto fetchUserListInfo(@RequestBody UserIdListDto userIdListDto);
+
+    @GetMapping("/user/return/all-users")
+    UserInfoListResDto fetchAllUserListInfo(@RequestHeader("X-User-Id")String userId);
 }
