@@ -67,11 +67,12 @@ public class ChatController {
         return new ResponseEntity<>(new CommonSuccessDto(fileListDto, HttpStatus.OK.value(), "채팅방 파일 목록 조회 성공"), HttpStatus.OK);
     }
 
-    // 채팅방의 안읽은 메시지 목록 조회
+    // 채팅방의 안읽은 메시지 목록 조회 (agent사용)
     @GetMapping("/room/{roomId}/unread-messages")
-    public ResponseEntity<?> getUnreadMessageListByRoom (@PathVariable("roomId") Long roomId, @RequestHeader("X-User-Id")String userId) {
+    public ResponseEntity<CommonSuccessDto> getUnreadMessageListByRoom (@PathVariable("roomId") Long roomId, @RequestHeader("X-User-Id")String userId) {
         String unreadMessages = chatService.getUnreadMessagesByRoom(roomId, userId);
         return new ResponseEntity<>(new CommonSuccessDto(unreadMessages, HttpStatus.OK.value(), "채팅방 안 읽은 메시지 목록 조회 성공"), HttpStatus.OK);
     }
+
 
 }

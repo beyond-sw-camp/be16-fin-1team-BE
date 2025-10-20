@@ -1,10 +1,8 @@
 package com.Dolmeng_E.workspace.domain.chatbot.service;
 
+import com.Dolmeng_E.workspace.common.service.ChatFeign;
 import com.Dolmeng_E.workspace.common.service.RestTemplateClient;
-import com.Dolmeng_E.workspace.domain.chatbot.dto.ChatbotMessageListResDto;
-import com.Dolmeng_E.workspace.domain.chatbot.dto.ChatbotMessageUserReqDto;
-import com.Dolmeng_E.workspace.domain.chatbot.dto.ChatbotTaskListReqDto;
-import com.Dolmeng_E.workspace.domain.chatbot.dto.N8nAgentReqDto;
+import com.Dolmeng_E.workspace.domain.chatbot.dto.*;
 import com.Dolmeng_E.workspace.domain.chatbot.entity.ChatbotMessage;
 import com.Dolmeng_E.workspace.domain.chatbot.entity.ChatbotMessageType;
 import com.Dolmeng_E.workspace.domain.chatbot.repository.ChatbotMessageRepository;
@@ -14,6 +12,8 @@ import com.Dolmeng_E.workspace.domain.task.entity.Task;
 import com.Dolmeng_E.workspace.domain.task.repository.TaskRepository;
 import com.Dolmeng_E.workspace.domain.workspace.entity.WorkspaceParticipant;
 import com.Dolmeng_E.workspace.domain.workspace.repository.WorkspaceParticipantRepository;
+import com.example.modulecommon.dto.CommonSuccessDto;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -28,16 +28,18 @@ import java.util.UUID;
 @Transactional
 @RequiredArgsConstructor
 public class ChatbotMessageService {
-    static final String AGENT_URL = "http://localhost:5678/webhook-test/chatbot-agent";
+    static final String AGENT_URL = "http://localhost:5678/webhook/chatbot-agent";
+    static final String AGENT_URL_CHAT = "http://localhost:5678/webhook-test/chatbot-agent/chat-summary";
 
     private final ChatbotMessageRepository chatbotMessageRepository;
     private final WorkspaceParticipantRepository workspaceParticipantRepository;
     private final RestTemplateClient restTemplateClient;
     private final ProjectRepository projectRepository;
     private final TaskRepository taskRepository;
+    private final ChatFeign chatFeign;
 
     // 사용자가 챗봇에게 메시지 전송
-    public String sendMessage(String userId, ChatbotMessageUserReqDto reqDto) {
+    public N8nResDto sendMessage(String userId, ChatbotMessageUserReqDto reqDto) {
         // 워크스페이스 참여자 검증
         WorkspaceParticipant participant = workspaceParticipantRepository
                 .findByWorkspaceIdAndUserId(reqDto.getWorkspaceId(), UUID.fromString(userId))
@@ -61,17 +63,38 @@ public class ChatbotMessageService {
                 .build();
 
         // agent에게 요청 및 응답 받아오기
-        ResponseEntity<String> response = restTemplateClient.post(AGENT_URL, n8nAgentReqDto, String.class);
+        ResponseEntity<N8nResDto> response =
+                restTemplateClient.post(AGENT_URL, n8nAgentReqDto, N8nResDto.class);
+        N8nResDto result = response.getBody();
 
         // agent의 응답을 답장으로 저장
         ChatbotMessage chatbotBotMessage = ChatbotMessage.builder()
-                .content(response.getBody())
+                .content(result.getText())
                 .type(ChatbotMessageType.BOT)
                 .workspaceParticipant(participant)
                 .build();
         chatbotMessageRepository.save(chatbotBotMessage);
 
-        return response.getBody();
+        return result;
+    }
+
+    public N8nResDto sendRequestForChat(String userId, Long roomId) {
+        ResponseEntity<CommonSuccessDto> response1 = chatFeign.getUnreadMessageListByRoom(roomId, userId);
+        CommonSuccessDto body = response1.getBody();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String unreadMessages = objectMapper.convertValue(body.getResult(), String.class);
+
+        N8nAgentReqDto n8nAgentReqDto = N8nAgentReqDto.builder()
+                .userId(userId)
+                .content(unreadMessages)
+                .build();
+
+        // agent에게 요청 및 응답 받아오기
+        ResponseEntity<N8nResDto> response2 =
+                restTemplateClient.post(AGENT_URL_CHAT, n8nAgentReqDto, N8nResDto.class);
+        N8nResDto result = response2.getBody();
+
+        return result;
     }
 
     // 사용자와 챗봇의 대화 조회
