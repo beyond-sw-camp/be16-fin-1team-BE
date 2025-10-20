@@ -13,7 +13,6 @@ import com.Dolmeng_E.workspace.domain.stone.dto.MilestoneResDto;
 import com.Dolmeng_E.workspace.domain.stone.dto.ProjectMilestoneResDto;
 import com.Dolmeng_E.workspace.domain.stone.entity.ChildStoneList;
 import com.Dolmeng_E.workspace.domain.stone.entity.Stone;
-import com.Dolmeng_E.workspace.domain.stone.entity.StoneStatus;
 import com.Dolmeng_E.workspace.domain.user_group.entity.UserGroup;
 import com.Dolmeng_E.workspace.domain.user_group.entity.UserGroupMapping;
 import com.Dolmeng_E.workspace.domain.user_group.repository.UserGroupMappingRepository;
@@ -29,17 +28,18 @@ import com.Dolmeng_E.workspace.domain.workspace.repository.WorkspaceRepository;
 import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
-
+import org.springframework.data.domain.Pageable;
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -275,9 +275,9 @@ public List<WorkspaceListResDto> getWorkspaceList(String userId) {
         }
 }
 
-//    워크스페이스 회원 목록 조회
+//    워크스페이스 참여자 목록 조회
     @Transactional(readOnly = true)
-    public List<WorkspaceParticipantResDto> getWorkspaceParticipants(String userId, String workspaceId) {
+    public Page<WorkspaceParticipantResDto> getWorkspaceParticipants(String userId, String workspaceId) {
         // 1. 요청자 유효성 검증
         UserInfoResDto requester = userFeign.fetchUserInfoById(userId);
 
@@ -285,21 +285,23 @@ public List<WorkspaceListResDto> getWorkspaceList(String userId) {
         Workspace workspace = workspaceRepository.findById(workspaceId)
                 .orElseThrow(() -> new EntityNotFoundException("해당 워크스페이스를 찾을 수 없습니다."));
 
-        // 4. 전체 참여자 조회
-        List<WorkspaceParticipant> participants = workspaceParticipantRepository.findAllByWorkspaceId(workspaceId);
+        // 3. 내부에서 페이지 및 정렬 설정 (createdAt ASC, 8개씩)
+        Pageable pageable = PageRequest.of(0, 8, Sort.by("createdAt").ascending());
 
-        // 5. DTO 변환 (삭제 상태 처리)
-        return participants.stream()
-                .map(p -> WorkspaceParticipantResDto.builder()
-                        .userId(p.getUserId())
-                        .userName(p.getUserName())
-                        .workspaceRole(p.getWorkspaceRole().name())
-                        .workspaceParticipantId(p.getId())
-                        .isDeleted(p.isDelete())
-                        .accessGroupId(p.getAccessGroup() != null ? p.getAccessGroup().getId() : null)
-                        .accessGroupName(p.getAccessGroup() != null ? p.getAccessGroup().getAccessGroupName() : null)
-                        .build())
-                .toList();
+        // 4. 참여자 조회 (삭제된 사람 포함)
+        Page<WorkspaceParticipant> participantPage =
+                workspaceParticipantRepository.findAllByWorkspaceId(workspaceId, pageable);
+
+        // 5. DTO 변환
+        return participantPage.map(p -> WorkspaceParticipantResDto.builder()
+                .userId(p.getUserId())
+                .userName(p.getUserName())
+                .workspaceRole(p.getWorkspaceRole().name())
+                .workspaceParticipantId(p.getId())
+                .isDeleted(p.isDelete())
+                .accessGroupId(p.getAccessGroup() != null ? p.getAccessGroup().getId() : null)
+                .accessGroupName(p.getAccessGroup() != null ? p.getAccessGroup().getAccessGroupName() : null)
+                .build());
     }
 
 
@@ -362,7 +364,7 @@ public List<WorkspaceListResDto> getWorkspaceList(String userId) {
         workspace.deleteWorkspace();
 
         // 6. 워크스페이스 참여자들도 함께 비활성화
-        List<WorkspaceParticipant> participants = workspaceParticipantRepository.findAllByWorkspaceId(workspaceId);
+        List<WorkspaceParticipant> participants = workspaceParticipantRepository.findAllByWorkspace(workspace);
         participants.forEach(p -> p.deleteParticipant());
     }
 

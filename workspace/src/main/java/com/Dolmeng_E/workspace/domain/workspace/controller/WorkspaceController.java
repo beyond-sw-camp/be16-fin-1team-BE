@@ -124,15 +124,15 @@ public class WorkspaceController {
             @RequestHeader("X-User-Id") String userId,
             @PathVariable String workspaceId
     ) {
-        List<WorkspaceParticipantResDto> participants = workspaceService.getWorkspaceParticipants(userId, workspaceId);
 
         return new ResponseEntity<>(CommonSuccessDto.builder()
                 .statusCode(HttpStatus.OK.value())
                 .statusMessage("워크스페이스 참여자 목록 조회 성공")
-                .result(participants)
+                .result(workspaceService.getWorkspaceParticipants(userId, workspaceId))
                 .build(),
                 HttpStatus.OK);
     }
+
 
 //    워크스페이스 회원 삭제
     @DeleteMapping("/{workspaceId}/participants")
