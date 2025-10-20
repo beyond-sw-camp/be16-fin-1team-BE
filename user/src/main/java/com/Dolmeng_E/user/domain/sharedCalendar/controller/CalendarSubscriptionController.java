@@ -24,9 +24,10 @@ public class CalendarSubscriptionController {
     }
 
     // 공유 캘린더 구독 리스트 조회
-    @GetMapping
-    public List<SubscriptionResDto> getSubscriptions(@RequestHeader("X-User-Id") String userId) {
-        return calendarSubscriptionService.getSubscriptions(UUID.fromString(userId));
+    @GetMapping("/{workspaceId}")
+    public List<SubscriptionResDto> getSubscriptions(@RequestHeader("X-User-Id") String userId,
+                                                     @PathVariable String workspaceId) {
+        return calendarSubscriptionService.getSubscriptions(UUID.fromString(userId), workspaceId);
     }
 
 //    // 구독 수정
