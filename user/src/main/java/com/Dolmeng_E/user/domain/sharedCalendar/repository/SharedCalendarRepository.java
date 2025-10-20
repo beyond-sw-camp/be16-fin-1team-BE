@@ -16,4 +16,8 @@ public interface SharedCalendarRepository extends JpaRepository<SharedCalendar, 
     // 구독한 유저들의 공유 일정
     @Query("SELECT c FROM SharedCalendar c WHERE c.userId.id IN :targetUserIds AND c.isShared = true")
     List<SharedCalendar> findSharedCalendarsOfSubscribedUsers(List<UUID> targetUserIds);
+
+    // 특정 유저가 공유한 일정만 조회하는 쿼리 메서드 추가
+    @Query("SELECT c FROM SharedCalendar c WHERE c.userId.id = :userId AND c.isShared = true")
+    List<SharedCalendar> findSharedCalendarsByUserId(UUID userId);
 }
