@@ -5,6 +5,19 @@ import com.Dolmeng_E.workspace.common.service.UserFeign;
 import com.Dolmeng_E.workspace.domain.access_group.entity.AccessGroup;
 import com.Dolmeng_E.workspace.domain.access_group.repository.AccessGroupRepository;
 import com.Dolmeng_E.workspace.domain.access_group.service.AccessGroupService;
+import com.Dolmeng_E.workspace.domain.project.dto.ProjectProgressResDto;
+import com.Dolmeng_E.workspace.domain.project.entity.Project;
+import com.Dolmeng_E.workspace.domain.project.entity.ProjectParticipant;
+import com.Dolmeng_E.workspace.domain.project.repository.ProjectParticipantRepository;
+import com.Dolmeng_E.workspace.domain.stone.dto.MilestoneResDto;
+import com.Dolmeng_E.workspace.domain.stone.dto.ProjectMilestoneResDto;
+import com.Dolmeng_E.workspace.domain.stone.entity.ChildStoneList;
+import com.Dolmeng_E.workspace.domain.stone.entity.Stone;
+import com.Dolmeng_E.workspace.domain.stone.entity.StoneStatus;
+import com.Dolmeng_E.workspace.domain.user_group.entity.UserGroup;
+import com.Dolmeng_E.workspace.domain.user_group.entity.UserGroupMapping;
+import com.Dolmeng_E.workspace.domain.user_group.repository.UserGroupMappingRepository;
+import com.Dolmeng_E.workspace.domain.user_group.repository.UserGroupRepository;
 import com.Dolmeng_E.workspace.domain.workspace.dto.*;
 import com.Dolmeng_E.workspace.domain.workspace.entity.Workspace;
 import com.Dolmeng_E.workspace.domain.workspace.entity.WorkspaceInvite;
@@ -18,10 +31,12 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -34,6 +49,9 @@ public class WorkspaceService {
     private final AccessGroupRepository accessGroupRepository;
     private final EmailService emailService;
     private final WorkspaceInviteRepository workspaceInviteRepository;
+    private final ProjectParticipantRepository projectParticipantRepository;
+    private final UserGroupRepository userGroupRepository;
+    private final UserGroupMappingRepository userGroupMappingRepository;
 
 //    워크스페이스 생성
     public String createWorkspace(WorkspaceCreateDto workspaceCreateDto, String userId) {
@@ -361,6 +379,203 @@ public List<WorkspaceListResDto> getWorkspaceList(String userId) {
     @Transactional(readOnly = true)
     public boolean checkWorkspaceMember(String workspaceId, UUID userId) {
         return workspaceParticipantRepository.existsByWorkspaceIdAndUserId(workspaceId, userId);
+    }
+
+//    워크스페이스 전체 프로젝트별 마일스톤 조회
+    @Transactional(readOnly = true)
+    public List<ProjectProgressResDto> getWorkspaceProjectProgress(String userId, String workspaceId) {
+
+        // 1. 워크스페이스 검증
+        Workspace workspace = workspaceRepository.findById(workspaceId)
+                .orElseThrow(() -> new EntityNotFoundException("워크스페이스를 찾을 수 없습니다."));
+
+        // 2. 요청자 검증
+        WorkspaceParticipant requester = workspaceParticipantRepository
+                .findByWorkspaceIdAndUserId(workspaceId, UUID.fromString(userId))
+                .orElseThrow(() -> new EntityNotFoundException("워크스페이스 참여자가 아닙니다."));
+
+        // 3. 관리자 권한 검증
+        if (!requester.getWorkspaceRole().equals(WorkspaceRole.ADMIN)) {
+            throw new IllegalArgumentException("관리자만 접근할 수 있습니다.");
+        }
+
+        // 4. 관리자 권한이므로 workspace 전체 프로젝트 조회 (스톤 없어도 다 가져오기)
+        List<ProjectParticipant> projectParticipants =
+                projectParticipantRepository.findAllWithOptionalStonesByWorkspaceParticipant(requester);
+
+        // 5. DTO 변환용 중복 제거 (동일 프로젝트 중복 방지)
+        Set<Project> uniqueProjects = projectParticipants.stream()
+                .map(ProjectParticipant::getProject)
+                .collect(Collectors.toSet());
+
+        // 6. 마일스톤 최신화 및 DTO 변환
+        List<ProjectProgressResDto> result = uniqueProjects.stream()
+                .map(project -> {
+                    project.updateMilestone(); // 완료/전체 비율 재계산
+                    return ProjectProgressResDto.fromEntity(project);
+                })
+                .toList();
+
+        return result;
+    }
+
+    // 워크스페이스 전체 프로젝트별 프로젝트 마일스톤, 스톤 목록과 스톤의 마일스톤들 조회
+    @Transactional(readOnly = true)
+    public List<ProjectMilestoneResDto> milestoneListForAdmin(String userId, String workspaceId) {
+
+        // 1. 워크스페이스 검증
+        Workspace workspace = workspaceRepository.findById(workspaceId)
+                .orElseThrow(() -> new EntityNotFoundException("워크스페이스가 존재하지 않습니다."));
+
+        // 2. 사용자 검증
+        WorkspaceParticipant participant = workspaceParticipantRepository
+                .findByWorkspaceIdAndUserId(workspaceId, UUID.fromString(userId))
+                .orElseThrow(() -> new EntityNotFoundException("워크스페이스 참여자가 존재하지 않습니다."));
+
+        // 3. 관리자 권한 검증
+        if (participant.getWorkspaceRole() != WorkspaceRole.ADMIN) {
+            throw new IllegalArgumentException("관리자만 접근할 수 있습니다.");
+        }
+
+        // 4. 프로젝트 + 스톤 목록 조회 (fetch join)
+        List<ProjectParticipant> projectParticipants =
+                projectParticipantRepository.findAllWithStonesByWorkspaceParticipant(participant);
+
+        // 5. 중복 프로젝트 제거
+        Set<Project> uniqueProjects = projectParticipants.stream()
+                .map(ProjectParticipant::getProject)
+                .collect(Collectors.toSet());
+
+        List<ProjectMilestoneResDto> result = new ArrayList<>();
+
+        // 6. 각 프로젝트별로 스톤 트리 구성
+        for (Project project : uniqueProjects) {
+            List<Stone> stones = project.getStones().stream()
+                    .filter(s -> !s.getIsDelete())
+                    .toList();
+
+            // 모든 스톤 → DTO 변환 (중복 무시)
+            Map<String, MilestoneResDto> dtoMap = stones.stream()
+                    .collect(Collectors.toMap(
+                            Stone::getId,
+                            MilestoneResDto::fromEntity,
+                            (a, b) -> a // 중복 발생 시 첫 번째 유지
+                    ));
+
+            // ChildStoneList 기반으로 부모-자식 연결
+            for (Stone stone : stones) {
+                if (stone.getChildStoneLists() == null) continue;
+
+                for (ChildStoneList link : stone.getChildStoneLists()) {
+                    Stone child = link.getChildStone();
+                    if (child != null && !child.getIsDelete()) {
+                        MilestoneResDto parentDto = dtoMap.get(stone.getId());
+                        MilestoneResDto childDto = dtoMap.get(child.getId());
+                        if (parentDto != null && childDto != null) {
+                            parentDto.getChildren().add(childDto);
+                        }
+                    }
+                }
+            }
+
+            // 루트 스톤(= 자식으로 포함되지 않은 스톤)만 추출
+            Set<String> childIds = stones.stream()
+                    .flatMap(s -> s.getChildStoneLists().stream()
+                            .map(c -> c.getChildStone().getId()))
+                    .collect(Collectors.toSet());
+
+            List<MilestoneResDto> rootStones = stones.stream()
+                    .filter(s -> !childIds.contains(s.getId()))
+                    .map(s -> dtoMap.get(s.getId()))
+                    .toList();
+
+            // 프로젝트별 응답 조립
+            result.add(ProjectMilestoneResDto.builder()
+                    .projectId(project.getId())
+                    .projectName(project.getProjectName())
+                    .milestoneResDtoList(rootStones)
+                    .build());
+        }
+
+        return result;
+    }
+
+
+
+
+
+    // 사용자 그룹별 프로젝트 현황 조회
+    @Transactional(readOnly = true)
+    public List<UserGroupProjectProgressResDto> getUserGroupProjectProgress(String userId, String workspaceId) {
+
+        // 1. 워크스페이스 검증
+        Workspace workspace = workspaceRepository.findById(workspaceId)
+                .orElseThrow(() -> new EntityNotFoundException("워크스페이스가 존재하지 않습니다."));
+
+        // 2. 요청자 검증
+        WorkspaceParticipant requester = workspaceParticipantRepository
+                .findByWorkspaceIdAndUserId(workspaceId, UUID.fromString(userId))
+                .orElseThrow(() -> new EntityNotFoundException("워크스페이스 참여자가 아닙니다."));
+
+        // 3. 관리자 권한 확인
+        if (!requester.getWorkspaceRole().equals(WorkspaceRole.ADMIN)) {
+            throw new IllegalArgumentException("관리자만 접근할 수 있습니다.");
+        }
+
+        // 4. 해당 워크스페이스의 사용자 그룹 전체 조회
+        List<UserGroup> userGroups = userGroupRepository.findByWorkspace(workspace);
+        List<UserGroupProjectProgressResDto> result = new ArrayList<>();
+
+        // 5. 각 사용자 그룹별로 프로젝트 진행률 계산
+        for (UserGroup group : userGroups) {
+
+            // 5-1. 그룹에 속한 사용자 매핑 조회
+            List<UserGroupMapping> mappings = userGroupMappingRepository.findByUserGroup(group);
+            if (mappings.isEmpty()) continue;
+
+            // 5-2. 매핑된 워크스페이스 참여자 목록
+            List<WorkspaceParticipant> participants = mappings.stream()
+                    .map(UserGroupMapping::getWorkspaceParticipant)
+                    .toList();
+
+            // 5-3. 해당 참여자들이 속한 프로젝트 참가 정보 조회
+            List<ProjectParticipant> projectParticipants =
+                    projectParticipantRepository.findAllByWorkspaceParticipantIn(participants);
+
+            // 5-4. 실제 프로젝트 추출 (중복 제거 + 삭제 제외)
+            Set<Project> projects = projectParticipants.stream()
+                    .map(ProjectParticipant::getProject)
+                    .filter(p -> !Boolean.TRUE.equals(p.getIsDelete()))
+                    .collect(Collectors.toSet());
+
+            // 5-5. 그룹 내 프로젝트가 없을 경우 0% 처리
+            if (projects.isEmpty()) {
+                result.add(UserGroupProjectProgressResDto.builder()
+                        .groupName(group.getUserGroupName())
+                        .projectCount(0)
+                        .averageProgress(0)
+                        .build());
+                continue;
+            }
+
+            // 5-6. DB에 저장된 milestone 그대로 사용 (재계산 X)
+            double avgProgress = projects.stream()
+                    .map(Project::getMilestone)
+                    .filter(Objects::nonNull)
+                    .mapToDouble(BigDecimal::doubleValue)
+                    .average()
+                    .orElse(0.0);
+
+            // 5-7. DTO 변환 및 결과 누적
+            result.add(UserGroupProjectProgressResDto.builder()
+                    .groupName(group.getUserGroupName())
+                    .projectCount(projects.size())
+                    .averageProgress(Math.round(avgProgress * 10) / 10.0)
+                    .build());
+        }
+
+        // 6. 최종 결과 반환
+        return result;
     }
 
 }
