@@ -90,35 +90,34 @@ public class WorkspaceService {
         return workspace.getId();
     }
 
-//    회원가입 시 워크스페이스 생성
 
 //    워크스페이스 목록 조회
-@Transactional(readOnly = true)
-public List<WorkspaceListResDto> getWorkspaceList(String userId) {
-    // 1. 유저 정보 조회 (Feign)
-    UserInfoResDto userInfo = userFeign.fetchUserInfoById(userId);
+    @Transactional(readOnly = true)
+    public List<WorkspaceListResDto> getWorkspaceList(String userId) {
+        // 1. 유저 정보 조회 (Feign)
+        UserInfoResDto userInfo = userFeign.fetchUserInfoById(userId);
 
-    // 2. 사용자가 속한 워크스페이스 조회
-    List<WorkspaceParticipant> participants =
-            workspaceParticipantRepository.findByUserIdAndIsDeleteFalse(userInfo.getUserId());
+        // 2. 사용자가 속한 워크스페이스 조회
+        List<WorkspaceParticipant> participants =
+                workspaceParticipantRepository.findByUserIdAndIsDeleteFalse(userInfo.getUserId());
 
-    // 3. DTO 변환 + 필터링
-    return participants.stream()
-            .filter(p -> p.getWorkspace() != null && !Boolean.TRUE.equals(p.getWorkspace().getIsDelete())) // 워크스페이스 삭제 제외
-            .map(p -> {
-                Workspace workspace = p.getWorkspace();
-                return WorkspaceListResDto.builder()
-                        .workspaceId(workspace.getId())
-                        .workspaceName(workspace.getWorkspaceName())
-                        .workspaceTemplates(workspace.getWorkspaceTemplates())
-                        .subscribe(workspace.getSubscribe())
-                        .currentStorage(workspace.getCurrentStorage())
-                        .maxStorage(workspace.getMaxStorage())
-                        .role(p.getWorkspaceRole().name())
-                        .build();
-            })
-            .toList();
-}
+        // 3. DTO 변환 + 필터링
+        return participants.stream()
+                .filter(p -> p.getWorkspace() != null && !Boolean.TRUE.equals(p.getWorkspace().getIsDelete())) // 워크스페이스 삭제 제외
+                .map(p -> {
+                    Workspace workspace = p.getWorkspace();
+                    return WorkspaceListResDto.builder()
+                            .workspaceId(workspace.getId())
+                            .workspaceName(workspace.getWorkspaceName())
+                            .workspaceTemplates(workspace.getWorkspaceTemplates())
+                            .subscribe(workspace.getSubscribe())
+                            .currentStorage(workspace.getCurrentStorage())
+                            .maxStorage(workspace.getMaxStorage())
+                            .role(p.getWorkspaceRole().name())
+                            .build();
+                })
+                .toList();
+    }
 
 //    워크스페이스 상세조회
     @Transactional(readOnly = true)
@@ -178,7 +177,7 @@ public List<WorkspaceListResDto> getWorkspaceList(String userId) {
         workspace.updateWorkspaceName(dto.getWorkspaceName());
     }
 
-    //    워크스페이스 회원 초대
+    // 워크스페이스 회원 초대
     public void addParticipants(String userId, String workspaceId, WorkspaceAddUserDto dto) {
 
         // 1. 워크스페이스 확인
@@ -195,11 +194,10 @@ public List<WorkspaceListResDto> getWorkspaceList(String userId) {
             throw new IllegalArgumentException("관리자만 사용자 추가 가능");
         }
 
-        // 3. 유저 리스트
+        // 3. 초대할 사용자 목록
         UserIdListDto userIdListDto = new UserIdListDto(dto.getUserIdList());
         UserInfoListResDto userInfoListResDto = userFeign.fetchUserListInfo(userIdListDto);
 
-        // 관리자는 워크스페이스 초대 안되게끔 제외 리스트 생성
         List<UserInfoResDto> filteredUserList = userInfoListResDto.getUserInfoList().stream()
                 .filter(userInfo -> !userInfo.getUserId().equals(requester.getUserId()))
                 .toList();
@@ -208,50 +206,53 @@ public List<WorkspaceListResDto> getWorkspaceList(String userId) {
             throw new IllegalArgumentException("초대 가능한 사용자가 없습니다. (관리자 본인은 제외됩니다)");
         }
 
-        // 4. 신규 사용자 추가 (이름 매핑)
+        // 4. 일반 그룹 조회
         AccessGroup commonAccessGroup = accessGroupRepository.findByWorkspaceIdAndAccessGroupName(workspaceId, "일반 유저 그룹")
                 .orElseThrow(() -> new EntityNotFoundException("워크스페이스 ID 혹은 권한 그룹명에 맞는 정보가 없습니다."));
 
         List<WorkspaceParticipant> newParticipants = new ArrayList<>();
 
-        // 로직추가: 이미 삭제(isDelete=true)된 사용자는 복귀 처리
         for (UserInfoResDto userInfo : filteredUserList) {
-            Optional<WorkspaceParticipant> existing = workspaceParticipantRepository
-                    .findByWorkspaceIdAndUserId(workspaceId, userInfo.getUserId());
+            Optional<WorkspaceParticipant> existingOpt =
+                    workspaceParticipantRepository.findByWorkspaceIdAndUserId(workspaceId, userInfo.getUserId());
 
-            if (existing.isPresent()) {
-                WorkspaceParticipant participant = existing.get();
-                if (participant.isDelete()) {
-                    participant.restoreParticipant();
-                } else {
-                    // 이미 활성화된 유저라면 건너뜀
-                    continue;
+            if (existingOpt.isPresent()) {
+                WorkspaceParticipant existing = existingOpt.get();
+
+                // 1️. 이미 존재하고 삭제되지 않은 경우 → 예외 던지기
+                if (!existing.isDelete()) {
+                    throw new IllegalArgumentException("이미 워크스페이스에 존재하는 사용자입니다: " + userInfo.getUserName());
                 }
-            } else {
-                newParticipants.add(
-                        WorkspaceParticipant.builder()
-                                .workspace(workspace)
-                                .workspaceRole(WorkspaceRole.COMMON)
-                                .userId(userInfo.getUserId())
-                                .accessGroup(commonAccessGroup)
-                                .userName(userInfo.getUserName())
-                                .isDelete(false)
-                                .build()
-                );
+
+                // 2️. 존재하지만 삭제된 경우 → 복귀 처리
+                existing.restoreParticipant();
+                continue;
             }
+
+            // 3️. 신규 사용자 → 추가
+            newParticipants.add(
+                    WorkspaceParticipant.builder()
+                            .workspace(workspace)
+                            .workspaceRole(WorkspaceRole.COMMON)
+                            .userId(userInfo.getUserId())
+                            .accessGroup(commonAccessGroup)
+                            .userName(userInfo.getUserName())
+                            .isDelete(false)
+                            .build()
+            );
         }
 
-        try {
+        // 5. 신규 사용자 저장
+        if (!newParticipants.isEmpty()) {
             workspaceParticipantRepository.saveAll(newParticipants);
-            workspaceParticipantRepository.flush(); // 즉시 insert 실행
-        } catch (DataIntegrityViolationException e) {
-            throw new IllegalArgumentException("이미 워크스페이스에 존재하는 사용자가 포함되어 있습니다.");
+            workspaceParticipantRepository.flush();
         }
     }
 
 
 
-//    워크스페이스 이메일 회원 초대 (ToDo : 로직 반드시 수정 할 것, X-User-Id 로 바뀌어서 그에 맞게!)
+
+    //    워크스페이스 이메일 회원 초대 (ToDo : 로직 반드시 수정 할 것, X-User-Id 로 바뀌어서 그에 맞게!)
     public void inviteUsers(String userId, String workspaceId, WorkspaceInviteDto dto) throws AccessDeniedException {
         // 1. 워크스페이스 확인
         Workspace workspace = workspaceRepository.findById(workspaceId)
