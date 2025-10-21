@@ -51,7 +51,7 @@ public class SharedCalendarService {
         validationService.validateUserAndWorkspace(userId, workspaceId);
 
         // 2. 일정 조회
-        List<SharedCalendar> calendars = sharedCalendarRepository.findByUserIdAndWorkspaceId(userId, workspaceId);
+        List<SharedCalendar> calendars = sharedCalendarRepository.findByUserIdAndWorkspaceIdAndCalendarType(userId, workspaceId, CalendarType.SCHEDULE);
         return calendars.stream()
                 .map(SharedCalendarResDto::fromEntity)
                 .toList();
