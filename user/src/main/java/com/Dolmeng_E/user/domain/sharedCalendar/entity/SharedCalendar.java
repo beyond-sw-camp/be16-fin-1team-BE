@@ -7,6 +7,7 @@ import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static com.Dolmeng_E.user.domain.sharedCalendar.entity.CalendarType.SCHEDULE;
@@ -59,16 +60,33 @@ public class SharedCalendar extends BaseTimeEntity {
     @Builder.Default
     private Boolean bookmark = false;
 
+    // todo 완료 여부
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean isCompleted = false;
+
     // 일정 공유 여부
     @Column(name = "is_shared", nullable = false)
     @Builder.Default
     private Boolean isShared = false;
 
 
-    public void update(String name, LocalDateTime start, LocalDateTime end, Boolean isShared) {
+    public void updateSchedule(String name, LocalDateTime start, LocalDateTime end, Boolean isShared) {
         this.calendarName = name;
         this.startedAt = start;
         this.endedAt = end;
         this.isShared = isShared;
+    }
+
+    public void updateTodo(String name, LocalDate date, Boolean bookmark) {
+        this.calendarName = name;
+
+        // date → 하루 전체로 환산
+        this.startedAt = date.atStartOfDay();             // 2025-10-21T00:00:00
+        this.endedAt = date.atTime(23, 59, 59);           // 2025-10-21T23:59:59
+
+        if (bookmark != null) {
+            this.bookmark = bookmark;
+        }
     }
 }
