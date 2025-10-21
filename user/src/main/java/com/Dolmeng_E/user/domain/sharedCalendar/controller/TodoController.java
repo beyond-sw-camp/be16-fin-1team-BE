@@ -1,8 +1,6 @@
 package com.Dolmeng_E.user.domain.sharedCalendar.controller;
 
-import com.Dolmeng_E.user.domain.sharedCalendar.dto.TodoCreateReqDto;
-import com.Dolmeng_E.user.domain.sharedCalendar.dto.TodoCreateResDto;
-import com.Dolmeng_E.user.domain.sharedCalendar.dto.UpdateTodoReqDto;
+import com.Dolmeng_E.user.domain.sharedCalendar.dto.*;
 import com.Dolmeng_E.user.domain.sharedCalendar.service.TodoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -45,6 +43,19 @@ public class TodoController {
         todoService.deleteTodo(todoId, UUID.fromString(userId));
     }
 
-
     // todo 완료 처리
+    @PutMapping("/completion/{todoId}")
+    public TodoCreateResDto completedTodo(@RequestHeader("X-User-Id") String userId,
+                                          @PathVariable String todoId,
+                                          @RequestBody completedTodoReqDto dto) {
+        return todoService.completedTodo(todoId, UUID.fromString(userId), dto);
+    }
+
+    // todo 미완료 처리
+    @PutMapping("/incompletion/{todoId}")
+    public TodoCreateResDto incompletedTodo(@RequestHeader("X-User-Id") String userId,
+                                             @PathVariable String todoId,
+                                             @RequestBody incompletedTodoReqDto dto) {
+        return todoService.incompletedTodo(todoId, UUID.fromString(userId), dto);
+    }
 }
