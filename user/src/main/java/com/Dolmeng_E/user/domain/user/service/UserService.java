@@ -69,8 +69,8 @@ public class UserService {
     }
 
     // 유저 ID, 이름, email, 유저 프로필 url 반환 API
-    public UserInfoResDto fetchUserInfo(String userEmail) {
-        User user = userRepository.findByEmail(userEmail).orElseThrow(()->new EntityNotFoundException("없는 회원입니다."));
+    public UserInfoResDto fetchUserInfo(String userId) {
+        User user = userRepository.findById(UUID.fromString(userId)).orElseThrow(()->new EntityNotFoundException("없는 회원입니다."));
         return UserInfoResDto.builder()
                 .userId(user.getId())
                 .userName(user.getName())
@@ -79,8 +79,8 @@ public class UserService {
                 .build();
 
     }
-    public UserInfoResDto fetchUserInfoById(UUID userId) {
-        User user = userRepository.findById(userId).orElseThrow(()->new EntityNotFoundException("없는 회원입니다."));
+    public UserInfoResDto fetchUserInfoById(String userId) {
+        User user = userRepository.findById(UUID.fromString(userId)).orElseThrow(()->new EntityNotFoundException("없는 회원입니다."));
         return UserInfoResDto.builder()
                 .userId(user.getId())
                 .userName(user.getName())
