@@ -621,9 +621,9 @@ public List<WorkspaceListResDto> getWorkspaceList(String userId) {
         // 2️. 현재 워크스페이스 참가자 목록 추출
         List<UUID> participantUserIds = workspaceParticipantRepository.findByWorkspaceId(workspace.getId())
                 .stream()
+                .filter(p -> !p.isDelete()) // 삭제된 사람은 제외 (검색 결과에 포함되도록)
                 .map(WorkspaceParticipant::getUserId)
                 .toList();
-
         // 3️. user-service에 userIdList 제외한 유저목록 요청
         UserIdListDto excludedIdsDto = UserIdListDto.builder()
                 .userIdList(participantUserIds)
