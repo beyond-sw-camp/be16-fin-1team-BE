@@ -59,6 +59,11 @@ public class SharedCalendar extends BaseTimeEntity {
     @Builder.Default
     private Boolean bookmark = false;
 
+    // todo 완료 여부
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean isCompleted = false;
+
     // 일정 공유 여부
     @Column(name = "is_shared", nullable = false)
     @Builder.Default
