@@ -154,7 +154,7 @@ public class WorkspaceService {
                 .build();
     }
 
-    //    워크스페이스 변경(To-do: 관리자 그룹, 일반사용자 그룹은 이름 바꾸지 못하게)
+    //    워크스페이스 변경
     @Transactional
     public void updateWorkspaceName(String userId, String workspaceId, WorkspaceNameUpdateDto dto) {
         // 1. 요청자 정보 조회
