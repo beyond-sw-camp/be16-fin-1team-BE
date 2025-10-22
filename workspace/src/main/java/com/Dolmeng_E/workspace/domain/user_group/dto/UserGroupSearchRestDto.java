@@ -11,5 +11,5 @@ public class UserGroupSearchRestDto {
     private String userGroupName;
     private String groupName;
     private LocalDateTime createdAt;
-    private Long userGroupParticipantsCount;
+    private long userGroupParticipantsCount;
 }

@@ -735,7 +735,7 @@ public class WorkspaceService {
         return userInfoListResDto;
     }
 
-    // 워크스페이스 내 참여자 검색
+    // 워크스페이스 내 참여자 검색 (user-service 정보 포함)
     @Transactional(readOnly = true)
     public UserInfoListResDto searchWorkspaceParticipants(String userId, SearchDto dto) {
 
@@ -743,40 +743,75 @@ public class WorkspaceService {
         Workspace workspace = workspaceRepository.findById(dto.getWorkspaceId())
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 워크스페이스입니다."));
 
-        // 개인워크스페이스에는 안되게 방어코드
+        // 개인 워크스페이스 방어
         validateNotPersonalWorkspace(workspace);
 
-        // 2. 요청자 유효성 검증
-        WorkspaceParticipant requester = workspaceParticipantRepository.findByWorkspaceIdAndUserId(dto.getWorkspaceId(), UUID.fromString(userId))
+        // 2. 요청자 권한 검증
+        WorkspaceParticipant requester = workspaceParticipantRepository
+                .findByWorkspaceIdAndUserId(dto.getWorkspaceId(), UUID.fromString(userId))
                 .orElseThrow(() -> new EntityNotFoundException("해당 워크스페이스 접근 권한이 없습니다."));
 
         if (!requester.getWorkspaceRole().equals(WorkspaceRole.ADMIN)) {
-            throw new IllegalArgumentException("관리자만 사용자 추가 가능");
+            throw new IllegalArgumentException("관리자만 사용자 조회가 가능합니다.");
         }
 
-        // 3. 워크스페이스 참여자 목록 조회 (삭제 안된 사용자만)
+        // 3. 워크스페이스 참여자 목록 조회 (삭제된 사용자 제외)
         List<WorkspaceParticipant> participants =
                 workspaceParticipantRepository.findByWorkspaceIdAndIsDeleteFalse(dto.getWorkspaceId());
 
-        // 4. 키워드 필터링 (없으면 전체)
-        String keyword = dto.getSearchKeyword();
-        List<WorkspaceParticipant> filteredParticipants = (keyword == null || keyword.isBlank())
-                ? participants
-                : participants.stream()
-                .filter(p -> p.getUserName().contains(keyword))
+        if (participants.isEmpty()) {
+            return UserInfoListResDto.builder()
+                    .userInfoList(Collections.emptyList())
+                    .build();
+        }
+
+        // 4. 참가자 userId 리스트 생성
+        List<UUID> participantUserIds = participants.stream()
+                .map(WorkspaceParticipant::getUserId)
                 .toList();
 
-        // 5. DTO 변환
-        List<UserInfoResDto> userInfoList = filteredParticipants.stream()
-                .map(p -> UserInfoResDto.builder()
-                        .userId(p.getUserId())
-                        .userName(p.getUserName())
-                        .build())
-                .toList();
+        // 5. user-service에서 상세 정보 가져오기 (Feign)
+        UserIdListDto userIdListDto = new UserIdListDto(participantUserIds);
+        UserInfoListResDto userInfoListResDto = userFeign.fetchUserListInfo(userIdListDto);
 
-        // 6. 반환
-        return UserInfoListResDto.builder().userInfoList(userInfoList).build();
+        // 6. 워크스페이스 참가자와 user-service의 정보 병합
+        Map<UUID, UserInfoResDto> userInfoMap = new HashMap<>();
+        for (UserInfoResDto userInfo : userInfoListResDto.getUserInfoList()) {
+            userInfoMap.put(userInfo.getUserId(), userInfo);
+        }
+
+        // 7. 키워드 필터링 및 병합
+                String keyword = dto.getSearchKeyword();
+                List<UserInfoResDto> filteredList = new ArrayList<>();
+
+                for (WorkspaceParticipant participant : participants) {
+
+                    // 키워드가 없거나, 이름이 검색어를 포함하면 통과
+                    boolean matches = (keyword == null || keyword.isBlank())
+                            || participant.getUserName().contains(keyword);
+
+                    if (!matches) continue;
+
+                    // user-service에서 받은 추가 정보 매칭
+                    UserInfoResDto info = userInfoMap.get(participant.getUserId());
+
+                    // 결과 DTO 조립
+                    UserInfoResDto mergedDto = UserInfoResDto.builder()
+                            .userId(participant.getUserId())
+                            .userName(participant.getUserName())
+                            .userEmail(info != null ? info.getUserEmail() : null)
+                            .profileImageUrl(info != null ? info.getProfileImageUrl() : null)
+                            .build();
+
+                    filteredList.add(mergedDto);
+                }
+
+        // 8. 결과 반환
+        return UserInfoListResDto.builder()
+                .userInfoList(filteredList)
+                .build();
     }
+
 
     public void validateNotPersonalWorkspace(Workspace workspace) {
         if (workspace.getWorkspaceTemplates() == WorkspaceTemplates.PERSONAL) {
