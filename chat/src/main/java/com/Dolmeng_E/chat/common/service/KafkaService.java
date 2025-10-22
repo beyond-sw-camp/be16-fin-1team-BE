@@ -55,7 +55,6 @@ public class KafkaService {
         chatMessageDto.setSenderName(senderInfo.getUserName());
         chatMessageDto.setUserProfileImageUrl(senderInfo.getProfileImageUrl());
 
-//        chatService.saveMessage(Long.parseLong(key), dto);
         messageTemplate.convertAndSend("/topic/"+key, chatMessageDto);
 
         // 채팅방 목록

@@ -26,8 +26,8 @@ public class StompController {
     public void sendMessage(@DestinationVariable Long roomId, ChatMessageDto dto) {
         log.info("sendMessage() - roomId: " + roomId + ", dto : " + dto);
 
-        ChatMessageDto chatMessageDto = chatService.saveMessage(roomId, dto);
-
-        kafkaService.kafkaMessageKeyCreate(chatMessageDto);
+        // roomId 붙여서 카프카 메시지 발행
+        dto.setRoomId(roomId);
+        kafkaService.kafkaMessageKeyCreate(dto);
     }
 }
