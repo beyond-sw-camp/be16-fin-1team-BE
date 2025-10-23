@@ -54,8 +54,13 @@ public class UserGroupService {
 
         if (!requester.getWorkspaceRole().equals(WorkspaceRole.ADMIN)) {
             // 관리자 아니면 권한 검증 (내부에서 예외 발생 시 catch 없이 자동 전파)
-            accessCheckService.validateAccess(requester, "ws_acc_list_4");
+            throw new IllegalArgumentException("관리자 권한이 필요합니다.");
         }
+
+        if (dto.getUserGroupName() == null || dto.getUserGroupName().isBlank()) {
+            throw new IllegalArgumentException("사용자 그룹명이 없습니다.");
+        }
+
 
         // 3️. 동일 워크스페이스 내 중복 그룹명 검증
         boolean exists = userGroupRepository.existsByWorkspaceAndUserGroupName(
@@ -74,6 +79,35 @@ public class UserGroupService {
                 .build();
 
         userGroupRepository.save(userGroup);
+
+        // 5. 중복 방지 - 이미 그룹에 속한 유저 제외(프론트에서 사용자그룹이 없는 유저 목록을 제공하기 때문에 에러없이 db저장만 막음)
+        Set<UUID> existingUserIds = userGroupMappingRepository
+                .findByUserGroup(userGroup)
+                .stream()
+                .map(mapping -> mapping.getWorkspaceParticipant().getUserId())
+                .collect(Collectors.toSet());
+
+        // 사용자 목록이 비었을 때 예외 처리
+        if (dto.getUserIdList() == null || dto.getUserIdList().isEmpty()) {
+            throw new IllegalArgumentException("추가할 유저 목록이 없습니다.");
+        }
+
+        // 6. 유저 매핑 저장
+        for (UUID id : dto.getUserIdList()) {
+            if (existingUserIds.contains(id)) continue; // 중복 제외
+
+            WorkspaceParticipant participant = workspaceParticipantRepository
+                    .findByWorkspaceIdAndUserId(workspace.getId(), id)
+                    .orElseThrow(() -> new EntityNotFoundException("워크스페이스에 속하지 않은 사용자입니다."));
+
+            userGroupMappingRepository.save(
+                    UserGroupMapping.builder()
+                            .userGroup(userGroup)
+                            .workspaceParticipant(participant)
+                            .build()
+            );
+        }
+
         return userGroup.getId();
     }
 
@@ -119,7 +153,7 @@ public class UserGroupService {
 
         if (!requester.getWorkspaceRole().equals(WorkspaceRole.ADMIN)) {
             // 관리자 아니면 권한 검증 (내부에서 예외 발생 시 catch 없이 자동 전파)
-            accessCheckService.validateAccess(requester, "ws_acc_list_4");
+            throw new IllegalArgumentException("관리자 권한이 필요합니다.");
         }
 
         // 3. 유저 존재 검증 (Feign)
@@ -169,7 +203,7 @@ public class UserGroupService {
 
         if (!requester.getWorkspaceRole().equals(WorkspaceRole.ADMIN)) {
             // 관리자 아니면 권한 검증 (내부에서 예외 발생 시 catch 없이 자동 전파)
-            accessCheckService.validateAccess(requester, "ws_acc_list_4");
+            throw new IllegalArgumentException("관리자 권한이 필요합니다.");
         }
 
         // 3. 그룹 내 매핑된 사용자 목록 (페이징)
@@ -239,7 +273,7 @@ public class UserGroupService {
 
         if (!requester.getWorkspaceRole().equals(WorkspaceRole.ADMIN)) {
             // 관리자 아니면 권한 검증 (내부에서 예외 발생 시 catch 없이 자동 전파)
-            accessCheckService.validateAccess(requester, "ws_acc_list_4");
+            throw new IllegalArgumentException("관리자 권한이 필요합니다.");
         }
 
         // 3. 요청 값 유효성 검사
@@ -302,7 +336,7 @@ public class UserGroupService {
 
         if (!requester.getWorkspaceRole().equals(WorkspaceRole.ADMIN)) {
             // 관리자 아니면 권한 검증 (내부에서 예외 발생 시 catch 없이 자동 전파)
-            accessCheckService.validateAccess(requester, "ws_acc_list_4");
+            throw new IllegalArgumentException("관리자 권한이 필요합니다.");
         }
 
         // 3. 그룹 내 매핑된 유저 삭제 (Cascade 대신 명시적으로)
@@ -350,4 +384,61 @@ public class UserGroupService {
                 .userGroupParticipantsCount(userGroupMappingRepository.countByUserGroup(group))
                 .build());
     }
+
+    @Transactional
+    public String modifyUserGroup(String userId, UserGroupModifyDto dto) {
+
+        // 1️. 사용자 그룹 조회
+        UserGroup userGroup = userGroupRepository.findById(dto.getUserGroupId())
+                .orElseThrow(() -> new EntityNotFoundException("사용자 그룹 ID가 유효하지 않습니다."));
+        Workspace workspace = userGroup.getWorkspace();
+
+        // 2️. 관리자 권한 검증
+        UserInfoResDto adminInfo = userFeign.fetchUserInfoById(userId);
+        WorkspaceParticipant requester = workspaceParticipantRepository
+                .findByWorkspaceIdAndUserId(workspace.getId(), adminInfo.getUserId())
+                .orElseThrow(() -> new EntityNotFoundException("요청자는 워크스페이스 참가자가 아닙니다."));
+
+        if (!requester.getWorkspaceRole().equals(WorkspaceRole.ADMIN)) {
+            throw new IllegalArgumentException("관리자 권한이 필요합니다.");
+        }
+
+        // 1. 그룹명 수정 처리
+        if (dto.getUserGroupName() != null && !dto.getUserGroupName().isBlank()) {
+
+            // 중복 그룹명 검증 (자기 자신은 예외)
+            boolean exists = userGroupRepository.existsByWorkspaceAndUserGroupName(workspace, dto.getUserGroupName());
+            if (exists && !userGroup.getUserGroupName().equals(dto.getUserGroupName())) {
+                throw new DuplicateKeyException("해당 워크스페이스 내 동일한 사용자 그룹명이 이미 존재합니다.");
+            }
+
+            // 이름 변경
+            userGroup.updateName(dto.getUserGroupName());
+        }
+
+        // 2. 참여자 수정 처리
+        if (dto.getUserIdList() != null && !dto.getUserIdList().isEmpty()) {
+            // 기존 매핑 전체 삭제
+            userGroupMappingRepository.deleteAllByUserGroup(userGroup);
+
+            // 새 사용자 추가
+            for (UUID id : dto.getUserIdList()) {
+                WorkspaceParticipant participant = workspaceParticipantRepository
+                        .findByWorkspaceIdAndUserId(workspace.getId(), id)
+                        .orElseThrow(() -> new EntityNotFoundException("워크스페이스에 속하지 않은 사용자입니다."));
+
+                userGroupMappingRepository.save(
+                        UserGroupMapping.builder()
+                                .userGroup(userGroup)
+                                .workspaceParticipant(participant)
+                                .build()
+                );
+            }
+        }
+
+        userGroupRepository.save(userGroup);
+        return userGroup.getId();
+    }
+
+
 }
