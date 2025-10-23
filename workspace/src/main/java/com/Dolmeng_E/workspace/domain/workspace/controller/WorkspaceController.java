@@ -272,7 +272,7 @@ public class WorkspaceController {
     }
 
     // 워크스페이스 내 사용자 그룹이 없는 참여자 검색(사용자 그룹 추가시 활용)
-    @PostMapping("/participants/search")
+    @PostMapping("/participants/not-in-groups/search")
     public ResponseEntity<?> searchWorkspaceParticipantsNotInUserGroup(
             @RequestHeader("X-User-Id") String userId,
             @RequestBody SearchDto dto
