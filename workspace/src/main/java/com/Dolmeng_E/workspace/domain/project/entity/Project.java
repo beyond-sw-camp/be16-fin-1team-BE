@@ -93,6 +93,8 @@ public class Project extends BaseTimeEntity {
         if (dto.getProjectObjective() != null) this.projectObjective = dto.getProjectObjective();
         if (dto.getProjectDescription() != null) this.projectDescription = dto.getProjectDescription();
         if (dto.getProjectStatus() != null) this.projectDescription = dto.getProjectDescription();
+        if (dto.getProjectName() != null) this.projectName = dto.getProjectName();
+        if (dto.getProjectStatus() != null) this.projectStatus = dto.getProjectStatus();
     }
 
     public void changeManager(WorkspaceParticipant newManager) {
