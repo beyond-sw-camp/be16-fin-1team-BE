@@ -74,6 +74,30 @@ public class UserGroupService {
                 .build();
 
         userGroupRepository.save(userGroup);
+
+        // 5. 중복 방지 - 이미 그룹에 속한 유저 제외(프론트에서 사용자그룹이 없는 유저 목록을 제공하기 때문에 에러없이 db저장만 막음)
+        Set<UUID> existingUserIds = userGroupMappingRepository
+                .findByUserGroup(userGroup)
+                .stream()
+                .map(mapping -> mapping.getWorkspaceParticipant().getUserId())
+                .collect(Collectors.toSet());
+
+        // 6. 유저 매핑 저장
+        for (UUID id : dto.getUserIdList()) {
+            if (existingUserIds.contains(id)) continue; // 중복 제외
+
+            WorkspaceParticipant participant = workspaceParticipantRepository
+                    .findByWorkspaceIdAndUserId(workspace.getId(), id)
+                    .orElseThrow(() -> new EntityNotFoundException("워크스페이스에 속하지 않은 사용자입니다."));
+
+            userGroupMappingRepository.save(
+                    UserGroupMapping.builder()
+                            .userGroup(userGroup)
+                            .workspaceParticipant(participant)
+                            .build()
+            );
+        }
+
         return userGroup.getId();
     }
 
@@ -350,4 +374,5 @@ public class UserGroupService {
                 .userGroupParticipantsCount(userGroupMappingRepository.countByUserGroup(group))
                 .build());
     }
+
 }
