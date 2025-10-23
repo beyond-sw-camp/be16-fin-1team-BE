@@ -78,13 +78,13 @@ public class ProjectController {
     }
 
 
-    // 프로젝트가 프로젝트 캘린더에 노출 여부 설정(프로젝트 캘린더 조회용 API)
+    // 프로젝트 캘린더에 스톤 노출 여부 설정(프로젝트 캘린더 조회용 API)
     @PatchMapping("/setting")
     public ResponseEntity<?> settingProject(@RequestHeader("X-User-Id") String userId,
                                           @RequestBody ProjectSettingDto dto) {
         projectService.settingProject(userId, dto);
         return new ResponseEntity<>(CommonSuccessDto.builder()
-                .statusMessage("프로젝트 노출여부 설정 완료")
+                .statusMessage("프로젝트 캘린더에 스톤 노출여부 설정 완료")
                 .result(HttpStatus.OK)
                 .statusCode(HttpStatus.OK.value())
                 .build()
