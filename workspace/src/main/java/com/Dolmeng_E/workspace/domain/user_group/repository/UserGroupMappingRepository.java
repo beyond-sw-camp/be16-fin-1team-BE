@@ -2,6 +2,7 @@ package com.Dolmeng_E.workspace.domain.user_group.repository;
 
 import com.Dolmeng_E.workspace.domain.user_group.entity.UserGroup;
 import com.Dolmeng_E.workspace.domain.user_group.entity.UserGroupMapping;
+import com.Dolmeng_E.workspace.domain.workspace.entity.WorkspaceParticipant;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,4 +21,6 @@ public interface UserGroupMappingRepository extends JpaRepository<UserGroupMappi
     List<UserGroupMapping> findAllByUserGroup(UserGroup userGroup);
 
     void deleteAllByUserGroup(UserGroup userGroup);
+
+    boolean existsByWorkspaceParticipant(WorkspaceParticipant workspaceParticipant);
 }
