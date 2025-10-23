@@ -18,7 +18,6 @@ public class UserGroupController {
     private final UserGroupService userGroupService;
 
     // 사용자 그룹 생성
-
     @PostMapping("")
     public ResponseEntity<?> createUserGroup(
             @RequestHeader("X-User-Id") String userId,

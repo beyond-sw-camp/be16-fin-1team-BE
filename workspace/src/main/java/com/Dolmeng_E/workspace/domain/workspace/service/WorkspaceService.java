@@ -859,7 +859,9 @@ public class WorkspaceService {
                 .toList();
 
         // 6. user-service에서 상세 정보 가져오기 (Feign)
-        UserIdListDto userIdListDto = new UserIdListDto(participantUserIds);
+        UserIdListDto userIdListDto = UserIdListDto.builder()
+                .userIdList(participantUserIds)
+                .build();
         UserInfoListResDto userInfoListResDto = userFeign.fetchUserListInfo(userIdListDto);
 
         // 7. 워크스페이스 참가자와 user-service의 정보 병합
