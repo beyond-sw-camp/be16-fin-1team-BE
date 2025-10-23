@@ -57,6 +57,11 @@ public class UserGroupService {
             accessCheckService.validateAccess(requester, "ws_acc_list_4");
         }
 
+        if (dto.getUserGroupName() == null || dto.getUserGroupName().isBlank()) {
+            throw new IllegalArgumentException("사용자 그룹명이 없습니다.");
+        }
+
+
         // 3️. 동일 워크스페이스 내 중복 그룹명 검증
         boolean exists = userGroupRepository.existsByWorkspaceAndUserGroupName(
                 workspace,
@@ -81,6 +86,11 @@ public class UserGroupService {
                 .stream()
                 .map(mapping -> mapping.getWorkspaceParticipant().getUserId())
                 .collect(Collectors.toSet());
+
+        // 사용자 목록이 비었을 때 예외 처리
+        if (dto.getUserIdList() == null || dto.getUserIdList().isEmpty()) {
+            throw new IllegalArgumentException("추가할 유저 목록이 없습니다.");
+        }
 
         // 6. 유저 매핑 저장
         for (UUID id : dto.getUserIdList()) {
