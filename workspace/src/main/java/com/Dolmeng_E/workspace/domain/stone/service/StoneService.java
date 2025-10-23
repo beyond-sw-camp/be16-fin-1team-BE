@@ -209,7 +209,26 @@ public class StoneService {
             }
         }
 
-        // 5. 프로젝트 참여자에 추가
+        // 5. 중복참여자 검증
+        List<String> duplicateNames = new ArrayList<>();
+
+        if (dto.getStoneParticipantList() != null && !dto.getStoneParticipantList().isEmpty()) {
+            for (String wpId : dto.getStoneParticipantList()) {
+                WorkspaceParticipant wp = workspaceParticipantRepository.findById(wpId)
+                        .orElseThrow(() -> new EntityNotFoundException("워크스페이스 참여자를 찾을 수 없습니다."));
+
+                if (stoneParticipantRepository.existsByStoneAndWorkspaceParticipant(stone, wp)) {
+                    duplicateNames.add(wp.getUserName());
+                }
+            }
+
+            if (!duplicateNames.isEmpty()) {
+                throw new IllegalArgumentException(String.join(", ", duplicateNames) + "은/는 이미 존재하는 참여자입니다.");
+            }
+        }
+
+
+        // 6. 프로젝트 참여자에 추가
         if (dto.getStoneParticipantList() != null && !dto.getStoneParticipantList().isEmpty()) {
             for (String wpId : dto.getStoneParticipantList()) {
 
