@@ -132,4 +132,19 @@ public class UserGroupController {
                 , HttpStatus.OK);
     }
 
+    // 사용자 그룹 정보 수정
+    @PatchMapping("")
+    public ResponseEntity<?> modifyUserGroup(
+            @RequestHeader("X-User-Id") String userId,
+            @RequestBody UserGroupModifyDto dto
+    ) {
+        String groupId = userGroupService.modifyUserGroup(userId, dto);
+        return new ResponseEntity<>(CommonSuccessDto.builder()
+                .statusMessage("사용자 그룹 수정 완료")
+                .result(groupId)
+                .statusCode(HttpStatus.OK.value())
+                .build()
+                , HttpStatus.OK);
+    }
+
 }

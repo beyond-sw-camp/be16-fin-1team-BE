@@ -47,4 +47,9 @@ public class UserGroup extends BaseTimeEntity {
     @NotNull
     @Column(name = "user_group_name", length = 30)
     private String userGroupName;
+
+    public void updateName(String newName) {
+        this.userGroupName = newName;
+    }
+
 }
