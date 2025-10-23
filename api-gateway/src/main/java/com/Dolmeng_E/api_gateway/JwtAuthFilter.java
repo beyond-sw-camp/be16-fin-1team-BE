@@ -20,7 +20,7 @@ public class JwtAuthFilter implements GlobalFilter {
     private String secretKeyAt;
 
     private static final List<String> ALLOWED_PATH = List.of(
-
+            "/user/new-user",
             "/user/auth/login",
             "/user/kakao/login",
             "/user/google/login",
@@ -32,6 +32,11 @@ public class JwtAuthFilter implements GlobalFilter {
             "/user/password/authcode",
             "/user/password",
             "/health",
+            "/connect/**",
+            "/chatbot/project-info",
+            "/chatbot/task-list",
+            "/chatbot/unread-messages",
+            "/chatbot/history",
             "/connect/**",
             "/drive/**",
             "/documentLine/**",
@@ -65,7 +70,7 @@ public class JwtAuthFilter implements GlobalFilter {
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
-            String email = claims.getSubject();
+            String userIdString = claims.getSubject();
             String role = claims.get("role", String.class);
             
 //            admin권한 있어야 하는 url 검증
@@ -78,7 +83,7 @@ public class JwtAuthFilter implements GlobalFilter {
 //            X를 붙이는 것은 custom header라는 것을 의미하는 관례적 키워드
 //            주로 서비스 모듈에서 RequestHeader어노테이션을 사용하여 아래 헤더를 꺼내 쓸 수 있음
             ServerWebExchange serverWebExchange = exchange.mutate()
-                    .request(r -> r.header("X-User-Email", email)
+                    .request(r -> r.header("X-User-Id", userIdString)
                             .header("X-User-Role", role))
                     .build();
 

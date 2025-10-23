@@ -4,17 +4,17 @@ import com.Dolmeng_E.user.common.auth.JwtTokenProvider;
 import com.Dolmeng_E.user.common.dto.UserIdListDto;
 import com.Dolmeng_E.user.common.dto.UserInfoListResDto;
 import com.Dolmeng_E.user.common.dto.UserInfoResDto;
+import com.Dolmeng_E.user.common.service.S3Uploader;
+import com.Dolmeng_E.user.common.service.UserSignupOrchestrationService;
 import com.Dolmeng_E.user.domain.user.dto.*;
 import com.Dolmeng_E.user.domain.user.entity.User;
 import com.Dolmeng_E.user.domain.user.repository.UserRepository;
-import com.example.modulecommon.service.S3Uploader;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -35,9 +36,16 @@ public class UserService {
     private final GoogleService googleService;
     private final MailService mailService;
     private final RedisTemplate<String, String> redisTemplate;
+    private final UserSignupOrchestrationService userSignupOrchestrationService;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, S3Uploader s3Uploader, JwtTokenProvider jwtTokenProvider, KakaoService kakaoService, GoogleService googleService, MailService mailService, @Qualifier("rtInventory") RedisTemplate<String, String> redisTemplate) {
+    public UserService(UserRepository userRepository,
+                       PasswordEncoder passwordEncoder, S3Uploader s3Uploader,
+                       JwtTokenProvider jwtTokenProvider,
+                       KakaoService kakaoService, GoogleService googleService,
+                       MailService mailService, @Qualifier("rtInventory") RedisTemplate<String, String> redisTemplate,
+                       UserSignupOrchestrationService userSignupOrchestrationService
+                       ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.s3Uploader = s3Uploader;
@@ -46,6 +54,7 @@ public class UserService {
         this.googleService = googleService;
         this.mailService = mailService;
         this.redisTemplate = redisTemplate;
+        this.userSignupOrchestrationService = userSignupOrchestrationService;
     }
 
     // 회원가입 API 구현3 - 계정 생성
@@ -53,10 +62,18 @@ public class UserService {
         if(userRepository.findByEmail(dto.getEmail()).isPresent()) throw new EntityExistsException("중복되는 이메일입니다.");
 
         String encodedPassword = passwordEncoder.encode(dto.getPassword());
-        String profileImgaeUrl = s3Uploader.upload(dto.getProfileImageUrl(), "user");
+        String profileImgaeUrl = null;
+        if(dto.getProfileImageUrl() != null && !dto.getProfileImageUrl().isEmpty()) {
+            profileImgaeUrl = s3Uploader.upload(dto.getProfileImageUrl(), "user");
+        }
 
         User user = dto.toEntity(encodedPassword, profileImgaeUrl);
         userRepository.save(user);
+
+        // 회원가입 시 워크스페이스 생성 메세지 발송
+        userSignupOrchestrationService.publishSignupEvent(user);
+
+
     }
 
     // 로그인 API
@@ -67,8 +84,8 @@ public class UserService {
     }
 
     // 유저 ID, 이름, email, 유저 프로필 url 반환 API
-    public UserInfoResDto fetchUserInfo(String userEmail) {
-        User user = userRepository.findByEmail(userEmail).orElseThrow(()->new EntityNotFoundException("없는 회원입니다."));
+    public UserInfoResDto fetchUserInfo(String userId) {
+        User user = userRepository.findById(UUID.fromString(userId)).orElseThrow(()->new EntityNotFoundException("없는 회원입니다."));
         return UserInfoResDto.builder()
                 .userId(user.getId())
                 .userName(user.getName())
@@ -77,12 +94,13 @@ public class UserService {
                 .build();
 
     }
-    public UserInfoResDto fetchUserInfoById(UUID userId) {
-        User user = userRepository.findById(userId).orElseThrow(()->new EntityNotFoundException("없는 회원입니다."));
+    public UserInfoResDto fetchUserInfoById(String userId) {
+        User user = userRepository.findById(UUID.fromString(userId)).orElseThrow(()->new EntityNotFoundException("없는 회원입니다."));
         return UserInfoResDto.builder()
                 .userId(user.getId())
                 .userName(user.getName())
                 .userEmail(user.getEmail())
+                .profileImageUrl(user.getProfileImageUrl())
                 .build();
     }
 
@@ -102,6 +120,32 @@ public class UserService {
                     .build();
             userInfoList.add(userInfo);
         }
+        return UserInfoListResDto.builder()
+                .userInfoList(userInfoList)
+                .build();
+    }
+
+    // 모든 유저 정보 list 반환 API
+    public UserInfoListResDto fetchAllUserListInfo(String userId) {
+
+        // 1. 요청자 검증
+        User requester = userRepository.findById(UUID.fromString(userId))
+                .orElseThrow(() -> new EntityNotFoundException("없는 회원입니다."));
+
+        // 2. 전체 유저 조회
+        List<User> allUserList = userRepository.findAll();
+
+        // 3. DTO 변환
+        List<UserInfoResDto> userInfoList = allUserList.stream()
+                .map(user -> UserInfoResDto.builder()
+                        .userId(user.getId())
+                        .userName(user.getName())
+                        .userEmail(user.getEmail())
+                        .profileImageUrl(user.getProfileImageUrl())
+                        .build())
+                .toList();
+
+        // 4. 반환
         return UserInfoListResDto.builder()
                 .userInfoList(userInfoList)
                 .build();
@@ -181,14 +225,14 @@ public class UserService {
     }
 
     // 로그아웃 API
-    public void logout(String userEmail) {
-        userRepository.findByEmail(userEmail).orElseThrow(() -> new EntityNotFoundException("없는 회원입니다."));
-        jwtTokenProvider.removeRt(userEmail);
+    public void logout(String userId) {
+        userRepository.findById(UUID.fromString(userId)).orElseThrow(() -> new EntityNotFoundException("없는 회원입니다."));
+        jwtTokenProvider.removeRt(userId);
     }
 
     // 회원 탈퇴 API
-    public void delete(String userEmail) {
-        User user = userRepository.findByEmail(userEmail).orElseThrow(() -> new EntityNotFoundException("없는 회원입니다."));
+    public void delete(String userId) {
+        User user = userRepository.findById(UUID.fromString(userId)).orElseThrow(() -> new EntityNotFoundException("없는 회원입니다."));
         user.updateDeleted(true);
     }
 
@@ -199,8 +243,8 @@ public class UserService {
     }
 
     // 회원 정보 수정
-    public void update(UserUpdateReqDto dto, String userEmail) {
-        User user = userRepository.findByEmail(userEmail).orElseThrow(() -> new EntityNotFoundException("없는 회원입니다."));
+    public void update(UserUpdateReqDto dto, String userId) {
+        User user = userRepository.findById(UUID.fromString(userId)).orElseThrow(() -> new EntityNotFoundException("없는 회원입니다."));
         if(dto.getName() != null && !dto.getName().isEmpty()) { user.updateName(dto.getName()); }
         if(dto.getPhoneNumber() != null) { user.updatePhoneNumber(dto.getPhoneNumber()); }
         if(dto.getProfileImage() != null) {
@@ -235,5 +279,52 @@ public class UserService {
         User user = userRepository.findByEmail(dto.getEmail()).orElseThrow(()->new EntityNotFoundException("없는 회원입니다."));
         String encodedPassword = passwordEncoder.encode(dto.getNewPassword());
         user.updatePassword(encodedPassword);
+    }
+
+    // 회원 검색
+    public UserInfoListResDto searchUser(String userId, SearchDto dto) {
+
+        // 1. 요청자 검증
+        userRepository.findById(UUID.fromString(userId))
+                .orElseThrow(() -> new EntityNotFoundException("없는 회원입니다."));
+
+        // 2. 검색 키워드
+        String keyword = dto.getSearchKeyword();
+        if (keyword == null || keyword.trim().isEmpty()) {
+            throw new IllegalArgumentException("검색어를 입력해주세요.");
+        }
+
+        // 3. 이메일 또는 이름에 키워드가 포함된 유저 검색
+        List<User> matchedUsers = userRepository.findByEmailContainingIgnoreCaseOrNameContainingIgnoreCase(keyword, keyword);
+
+        // 4. DTO 변환
+        List<UserInfoResDto> userInfoList = matchedUsers.stream()
+                .map(user -> UserInfoResDto.builder()
+                        .userId(user.getId())
+                        .userName(user.getName())
+                        .userEmail(user.getEmail())
+                        .profileImageUrl(user.getProfileImageUrl())
+                        .build())
+                .toList();
+
+        // 5. 결과 반환
+        return UserInfoListResDto.builder()
+                .userInfoList(userInfoList)
+                .build();
+    }
+
+    // 아직 초대되지 않은 사용자 목록 반환 API
+    public UserInfoListResDto getUsersNotInIds(List<UUID> excludedIds) {
+        List<User> users = excludedIds == null || excludedIds.isEmpty()
+                ? userRepository.findAll()
+                : userRepository.findAllNotInIds(excludedIds);
+
+        List<UserInfoResDto> userInfoList = users.stream()
+                .map(UserInfoResDto::fromEntity)
+                .collect(Collectors.toList());
+
+        return UserInfoListResDto.builder()
+                .userInfoList(userInfoList)
+                .build();
     }
 }

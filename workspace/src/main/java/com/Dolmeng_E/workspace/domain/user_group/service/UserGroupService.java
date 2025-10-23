@@ -3,6 +3,7 @@ package com.Dolmeng_E.workspace.domain.user_group.service;
 import com.Dolmeng_E.workspace.common.dto.UserIdListDto;
 import com.Dolmeng_E.workspace.common.dto.UserInfoListResDto;
 import com.Dolmeng_E.workspace.common.dto.UserInfoResDto;
+import com.Dolmeng_E.workspace.common.service.AccessCheckService;
 import com.Dolmeng_E.workspace.common.service.UserFeign;
 import com.Dolmeng_E.workspace.domain.user_group.dto.*;
 import com.Dolmeng_E.workspace.domain.user_group.entity.UserGroup;
@@ -37,21 +38,23 @@ public class UserGroupService {
     private final WorkspaceParticipantRepository workspaceParticipantRepository;
     private final UserGroupMappingRepository userGroupMappingRepository;
     private final UserFeign userFeign;
+    private final AccessCheckService accessCheckService;
 
     // 사용자 그룹 생성
-    public String createUserGroup(String userEmail, UserGroupCreateDto dto) {
+    public String createUserGroup(String userId, UserGroupCreateDto dto) {
         // 1️. 워크스페이스 조회
         Workspace workspace = workspaceRepository.findById(dto.getWorkspaceId())
                 .orElseThrow(() -> new EntityNotFoundException("해당 워크스페이스가 존재하지 않습니다."));
 
-        // 2️. 관리자 검증
-        UserInfoResDto adminInfo = userFeign.fetchUserInfo(userEmail);
-        WorkspaceParticipant admin = workspaceParticipantRepository
+        // 2️. 관리자 혹은 사용자 그룹 권한 있는지 확인
+        UserInfoResDto adminInfo = userFeign.fetchUserInfoById(userId);
+        WorkspaceParticipant requester = workspaceParticipantRepository
                 .findByWorkspaceIdAndUserId(workspace.getId(), adminInfo.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("요청자는 워크스페이스 참가자가 아닙니다."));
 
-        if (!admin.getWorkspaceRole().equals(WorkspaceRole.ADMIN)) {
-            throw new IllegalArgumentException("관리자만 사용자 그룹을 생성할 수 있습니다.");
+        if (!requester.getWorkspaceRole().equals(WorkspaceRole.ADMIN)) {
+            // 관리자 아니면 권한 검증 (내부에서 예외 발생 시 catch 없이 자동 전파)
+            accessCheckService.validateAccess(requester, "ws_acc_list_4");
         }
 
         // 3️. 동일 워크스페이스 내 중복 그룹명 검증
@@ -75,21 +78,17 @@ public class UserGroupService {
     }
 
     // 사용자 그룹 목록 조회
-    public Page<UserGroupListResDto> getUserGroupList(String userEmail, String workspaceId, Pageable pageable) {
+    public Page<UserGroupListResDto> getUserGroupList(String userId, String workspaceId, Pageable pageable) {
 
         // 1️. 워크스페이스 조회
         Workspace workspace = workspaceRepository.findById(workspaceId)
                 .orElseThrow(() -> new EntityNotFoundException("해당 워크스페이스가 존재하지 않습니다."));
 
-        // 2️. 관리자 검증
-        UserInfoResDto adminInfo = userFeign.fetchUserInfo(userEmail);
-        WorkspaceParticipant admin = workspaceParticipantRepository
+        // 2️. 요청자 검증(사용자 그룹 목록 조회는 여러 서비스에서 필요하기 때문에 권한 x)
+        UserInfoResDto adminInfo = userFeign.fetchUserInfoById(userId);
+        WorkspaceParticipant requester = workspaceParticipantRepository
                 .findByWorkspaceIdAndUserId(workspace.getId(), adminInfo.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("요청자는 워크스페이스 참가자가 아닙니다."));
-
-        if (!admin.getWorkspaceRole().equals(WorkspaceRole.ADMIN)) {
-            throw new IllegalArgumentException("관리자만 사용자 그룹을 생성할 수 있습니다.");
-        }
 
         // 3. 그룹 목록 조회 (페이지네이션)
         Page<UserGroup> groups = userGroupRepository.findByWorkspace(workspace, pageable);
@@ -105,21 +104,22 @@ public class UserGroupService {
     }
 
     // 사용자 그룹에 추가
-    public void addUsersToGroup(String userEmail, String groupId, UserGroupAddUserDto dto) {
+    public void addUsersToGroup(String userId, String groupId, UserGroupAddUserDto dto) {
         // 1. 그룹 조회
         UserGroup userGroup = userGroupRepository.findById(groupId)
                 .orElseThrow(() -> new EntityNotFoundException("해당 사용자 그룹이 존재하지 않습니다."));
 
         Workspace workspace = userGroup.getWorkspace();
 
-        // 2. 관리자 검증
-        UserInfoResDto adminInfo = userFeign.fetchUserInfo(userEmail);
-        WorkspaceParticipant admin = workspaceParticipantRepository
+        // 2️. 관리자 혹은 사용자 그룹 권한 있는지 확인
+        UserInfoResDto adminInfo = userFeign.fetchUserInfoById(userId);
+        WorkspaceParticipant requester = workspaceParticipantRepository
                 .findByWorkspaceIdAndUserId(workspace.getId(), adminInfo.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("요청자는 워크스페이스 참가자가 아닙니다."));
 
-        if (!admin.getWorkspaceRole().equals(WorkspaceRole.ADMIN)) {
-            throw new IllegalArgumentException("관리자만 사용자 그룹에 추가할 수 있습니다.");
+        if (!requester.getWorkspaceRole().equals(WorkspaceRole.ADMIN)) {
+            // 관리자 아니면 권한 검증 (내부에서 예외 발생 시 catch 없이 자동 전파)
+            accessCheckService.validateAccess(requester, "ws_acc_list_4");
         }
 
         // 3. 유저 존재 검증 (Feign)
@@ -153,7 +153,7 @@ public class UserGroupService {
 
 
     // 사용자 그룹 상세 조회
-    public UserGroupDetailResDto getUserGroupDetail(String userEmail, String groupId, Pageable pageable) {
+    public UserGroupDetailResDto getUserGroupDetail(String userId, String groupId, Pageable pageable) {
 
         // 1. 사용자 그룹 조회
         UserGroup userGroup = userGroupRepository.findById(groupId)
@@ -161,14 +161,15 @@ public class UserGroupService {
 
         Workspace workspace = userGroup.getWorkspace();
 
-        // 2. 관리자 검증
-        UserInfoResDto requester = userFeign.fetchUserInfo(userEmail);
-        WorkspaceParticipant participant = workspaceParticipantRepository
-                .findByWorkspaceIdAndUserId(workspace.getId(), requester.getUserId())
+        // 2️. 관리자 혹은 사용자 그룹 권한 있는지 확인
+        UserInfoResDto adminInfo = userFeign.fetchUserInfoById(userId);
+        WorkspaceParticipant requester = workspaceParticipantRepository
+                .findByWorkspaceIdAndUserId(workspace.getId(), adminInfo.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("요청자는 워크스페이스 참가자가 아닙니다."));
 
-        if (!participant.getWorkspaceRole().equals(WorkspaceRole.ADMIN)) {
-            throw new IllegalArgumentException("관리자만 사용자 그룹 상세를 조회할 수 있습니다.");
+        if (!requester.getWorkspaceRole().equals(WorkspaceRole.ADMIN)) {
+            // 관리자 아니면 권한 검증 (내부에서 예외 발생 시 catch 없이 자동 전파)
+            accessCheckService.validateAccess(requester, "ws_acc_list_4");
         }
 
         // 3. 그룹 내 매핑된 사용자 목록 (페이징)
@@ -193,14 +194,14 @@ public class UserGroupService {
         // 6. 사용자 정보 + 매핑 결합
         List<UserGroupMemberDto> memberDtos = mappings.stream()
                 .map(mapping -> {
-                    UUID userId = mapping.getWorkspaceParticipant().getUserId();
+                    UUID id = mapping.getWorkspaceParticipant().getUserId();
                     UserInfoResDto userInfo = userInfoListResDto.getUserInfoList().stream()
-                            .filter(u -> u.getUserId().equals(userId))
+                            .filter(u -> u.getUserId().equals(id))
                             .findFirst()
                             .orElse(null);
 
                     return UserGroupMemberDto.builder()
-                            .userId(userId)
+                            .userId(id)
                             .userName(userInfo != null ? userInfo.getUserName() : "유저 이름 없음")
                             .userEmail(userInfo != null ? userInfo.getUserEmail() : "유저 이메일 없음")
                             .profileImageUrl(userInfo != null ? userInfo.getProfileImageUrl() : null)
@@ -221,8 +222,8 @@ public class UserGroupService {
     }
 
 
-    // 사용자 그룹에서 삭제
-    public void removeUsersFromGroup(String userEmail, String groupId, UserGroupRemoveUserDto dto) {
+    // 사용자를 그룹에서 삭제
+    public void removeUsersFromGroup(String userId, String groupId, UserGroupRemoveUserDto dto) {
 
         // 1. 사용자 그룹 조회
         UserGroup userGroup = userGroupRepository.findById(groupId)
@@ -230,14 +231,15 @@ public class UserGroupService {
 
         Workspace workspace = userGroup.getWorkspace();
 
-        // 2. 관리자 검증
-        UserInfoResDto requester = userFeign.fetchUserInfo(userEmail);
-        WorkspaceParticipant admin = workspaceParticipantRepository
-                .findByWorkspaceIdAndUserId(workspace.getId(), requester.getUserId())
+        // 2️. 관리자 혹은 사용자 그룹 권한 있는지 확인
+        UserInfoResDto adminInfo = userFeign.fetchUserInfoById(userId);
+        WorkspaceParticipant requester = workspaceParticipantRepository
+                .findByWorkspaceIdAndUserId(workspace.getId(), adminInfo.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("요청자는 워크스페이스 참가자가 아닙니다."));
 
-        if (!admin.getWorkspaceRole().equals(WorkspaceRole.ADMIN)) {
-            throw new IllegalArgumentException("관리자만 사용자 그룹을 수정할 수 있습니다.");
+        if (!requester.getWorkspaceRole().equals(WorkspaceRole.ADMIN)) {
+            // 관리자 아니면 권한 검증 (내부에서 예외 발생 시 catch 없이 자동 전파)
+            accessCheckService.validateAccess(requester, "ws_acc_list_4");
         }
 
         // 3. 요청 값 유효성 검사
@@ -284,7 +286,7 @@ public class UserGroupService {
     }
 
     // 사용자 그룹 삭제
-    public void deleteUserGroup(String userEmail, String groupId) {
+    public void deleteUserGroup(String userId, String groupId) {
 
         // 1. 그룹 조회
         UserGroup userGroup = userGroupRepository.findById(groupId)
@@ -292,14 +294,15 @@ public class UserGroupService {
 
         Workspace workspace = userGroup.getWorkspace();
 
-        // 2. 관리자 검증
-        UserInfoResDto requester = userFeign.fetchUserInfo(userEmail);
-        WorkspaceParticipant admin = workspaceParticipantRepository
-                .findByWorkspaceIdAndUserId(workspace.getId(), requester.getUserId())
+        // 2️. 관리자 혹은 사용자 그룹 권한 있는지 확인
+        UserInfoResDto adminInfo = userFeign.fetchUserInfoById(userId);
+        WorkspaceParticipant requester = workspaceParticipantRepository
+                .findByWorkspaceIdAndUserId(workspace.getId(), adminInfo.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("요청자는 워크스페이스 참가자가 아닙니다."));
 
-        if (!admin.getWorkspaceRole().equals(WorkspaceRole.ADMIN)) {
-            throw new IllegalArgumentException("관리자만 사용자 그룹을 삭제할 수 있습니다.");
+        if (!requester.getWorkspaceRole().equals(WorkspaceRole.ADMIN)) {
+            // 관리자 아니면 권한 검증 (내부에서 예외 발생 시 catch 없이 자동 전파)
+            accessCheckService.validateAccess(requester, "ws_acc_list_4");
         }
 
         // 3. 그룹 내 매핑된 유저 삭제 (Cascade 대신 명시적으로)
@@ -307,5 +310,44 @@ public class UserGroupService {
 
         // 4. 그룹 삭제
         userGroupRepository.delete(userGroup);
+    }
+
+
+    // 사용자 그룹 그룹명으로 검색
+    @Transactional(readOnly = true)
+    public Page<UserGroupSearchRestDto> SearchByGroupName(String userId, UserGroupSearchDto dto, Pageable pageable) {
+
+        // 1. 워크스페이스 조회
+        Workspace workspace = workspaceRepository.findById(dto.getWorkspaceId())
+                .orElseThrow(() -> new EntityNotFoundException("해당 워크스페이스가 존재하지 않습니다."));
+
+        // 2. 요청자 검증
+        UserInfoResDto userInfo = userFeign.fetchUserInfoById(userId);
+        WorkspaceParticipant requester = workspaceParticipantRepository
+                .findByWorkspaceIdAndUserId(workspace.getId(), userInfo.getUserId())
+                .orElseThrow(() -> new EntityNotFoundException("요청자는 워크스페이스 참가자가 아닙니다."));
+
+        // 3. 권한 검증
+        if (!requester.getWorkspaceRole().equals(WorkspaceRole.ADMIN)) {
+            throw new IllegalArgumentException("관리자 권한이 필요합니다.");
+        }
+
+        // 4. 검색어 검증
+        String keyword = dto.getGroupName();
+        if (keyword == null || keyword.isBlank()) {
+            throw new IllegalArgumentException("검색어가 비어있습니다.");
+        }
+
+        // 5. 그룹명 부분 일치 검색 (대소문자 구분 없음)
+        Page<UserGroup> groups = userGroupRepository
+                .findByWorkspaceAndUserGroupNameContainingIgnoreCase(workspace, keyword, pageable);
+
+        // 6. DTO 변환
+        return groups.map(group -> UserGroupSearchRestDto.builder()
+                .userGroupName(group.getUserGroupName())
+                .groupName(group.getUserGroupName()) // dto 구조 맞추기용
+                .createdAt(group.getCreatedAt())
+                .userGroupParticipantsCount(userGroupMappingRepository.countByUserGroup(group))
+                .build());
     }
 }
