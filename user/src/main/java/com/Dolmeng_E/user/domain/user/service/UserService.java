@@ -248,9 +248,13 @@ public class UserService {
         if(dto.getName() != null && !dto.getName().isEmpty()) { user.updateName(dto.getName()); }
         if(dto.getPhoneNumber() != null) { user.updatePhoneNumber(dto.getPhoneNumber()); }
         if(dto.getProfileImage() != null) {
-            s3Uploader.delete(user.getProfileImageUrl());
+            if(user.getProfileImageUrl() != null) {
+                s3Uploader.delete(user.getProfileImageUrl());
+            }
             String profileImgaeUrl = s3Uploader.upload(dto.getProfileImage(), "user");
             user.updateProfileImageUrl(profileImgaeUrl);
+        } else {
+            user.updateProfileImageUrl(null);
         }
     }
 
