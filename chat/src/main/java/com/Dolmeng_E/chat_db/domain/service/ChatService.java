@@ -136,8 +136,10 @@ public class ChatService {
 
             List<String> userProfileImageUrlList = new ArrayList<>();
             for (ChatParticipant p : room.getChatParticipantList()) {
-                String userProfileImageUrl = userFeignClient.fetchUserInfoById(String.valueOf(p.getUserId())).getProfileImageUrl();
-                userProfileImageUrlList.add(userProfileImageUrl);
+                if(!p.getUserId().equals(senderInfo.getUserId())) {
+                    String userProfileImageUrl = userFeignClient.fetchUserInfoById(String.valueOf(p.getUserId())).getProfileImageUrl();
+                    userProfileImageUrlList.add(userProfileImageUrl);
+                }
             }
 
             ChatRoomListResDto chatRoomDto = ChatRoomListResDto.builder()
