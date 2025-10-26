@@ -623,7 +623,7 @@ public class StoneService {
         stoneRepository.save(stone);
     }
 
-// 프로젝트 별 내 마일스톤 조회(isDelete = true 제외, stoneStatus Completed 제외)
+    // 프로젝트 별 나의 마일스톤 조회(isDelete = true 제외, stoneStatus Completed 제외)
     public List<ProjectMilestoneResDto> milestoneList(String userId, String workspaceId) {
 
         // 1. 워크스페이스, 사용자 검증
@@ -634,40 +634,37 @@ public class StoneService {
                 .findByWorkspaceIdAndUserId(workspaceId, UUID.fromString(userId))
                 .orElseThrow(() -> new EntityNotFoundException("워크스페이스 참여자가 존재하지 않습니다."));
 
-        // 2. fetch join으로 프로젝트 + 스톤을 한 번에 로드
-        // 이전 구조는 for문을 통해 객체를 구해서 N + 1 이슈가 있었습니다.
+        // 2. 내가 속한 프로젝트 + 스톤 fetch join으로 조회
         List<ProjectParticipant> projectParticipants =
-                // 내가 속한 프로젝트와 그 안의 스톤들을 조회하는 쿼리문
                 projectParticipantRepository.findAllWithStonesByWorkspaceParticipant(participant);
 
-        // 3. DTO 변환
+        // 프로젝트 중복 제거
+        List<Project> uniqueProjects = projectParticipants.stream()
+                .map(ProjectParticipant::getProject)
+                .distinct()
+                .toList();
 
+        // 3. 내가 참여 중인 스톤들을 미리 캐싱 (성능 최적화용)
+        List<StoneParticipant> activeStoneParticipants =
+                stoneParticipantRepository.findAllActiveWithStoneByWorkspaceParticipant(participant);
+
+
+        // 3. DTO 변환
         // 리턴용 리스트 생성
         List<ProjectMilestoneResDto> result = new ArrayList<>();
 
-        for (ProjectParticipant pp : projectParticipants) {
-            Project project = pp.getProject();
-
-            // 프로젝트의 스톤 리스트 가져오기 (fetch join으로 이미 로드됨)
-            List<Stone> stones = project.getStones();
-
-            List<StoneParticipant> activeStoneParticipants =
-                    //내가 참여 중인 스톤들만 미리 캐싱하는 쿼리문
-                    stoneParticipantRepository.findAllActiveWithStoneByWorkspaceParticipant(participant);
-
+        for (Project project : uniqueProjects) {
             List<MilestoneResDto> milestoneDtos = activeStoneParticipants.stream()
+                    .filter(sp -> sp.getStone().getProject().equals(project))
                     .filter(sp -> !sp.getIsMilestoneHidden())
                     .map(sp -> MilestoneResDto.fromEntity(sp.getStone()))
                     .toList();
 
-            // 프로젝트별 마일스톤 응답 DTO 조립
-            ProjectMilestoneResDto dto = ProjectMilestoneResDto.builder()
+            result.add(ProjectMilestoneResDto.builder()
                     .projectId(project.getId())
                     .projectName(project.getProjectName())
                     .milestoneResDtoList(milestoneDtos)
-                    .build();
-
-            result.add(dto);
+                    .build());
         }
 
         return result;
