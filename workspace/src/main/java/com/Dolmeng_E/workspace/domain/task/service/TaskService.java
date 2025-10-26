@@ -74,6 +74,12 @@ public class TaskService {
             throw new IllegalArgumentException("스톤이 이미 완료상태입니다.");
         }
 
+        // 5. 태스크 기간 검증 (스톤 기간 내에만 생성 가능)
+        if (dto.getStartTime().isBefore(stone.getStartTime()) ||
+                dto.getEndTime().isAfter(stone.getEndTime())) {
+            throw new IllegalArgumentException("스톤 기간 내에만 스톤 생성이 가능합니다.");
+        }
+
         // 4. 태스크 생성 및 저장
                 Task task = Task.builder()
                         .taskName(dto.getTaskName())
