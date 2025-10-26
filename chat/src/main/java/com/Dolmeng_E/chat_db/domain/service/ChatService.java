@@ -219,6 +219,7 @@ public class ChatService {
                     .lastSendTime(dto.getLastSendTime())
                     .lastSenderId(dto.getSenderId())
                     .unreadCount(unreadCount)
+                    .messageType(dto.getMessageType())
                     .build();
 
             // 각 사용자별 summary 토픽 전송
