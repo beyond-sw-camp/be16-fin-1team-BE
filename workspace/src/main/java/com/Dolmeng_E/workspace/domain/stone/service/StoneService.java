@@ -430,7 +430,13 @@ public class StoneService {
             }
         }
 
-        // 5. 기본 필드 수정 (null 체크해서 들어온 값만 반영)
+        // 5. 스톤 기간 검증 (프로젝트 기간 내에만 수정 가능)
+        if (dto.getStartTime().isBefore(project.getStartTime()) ||
+                dto.getEndTime().isAfter(project.getEndTime())) {
+            throw new IllegalArgumentException("프로젝트 기간 내에만 스톤 수정이 가능합니다.");
+        }
+
+        // 6. 기본 필드 수정 (null 체크해서 들어온 값만 반영)
         if (dto.getStoneName() != null) {
             stone.setStoneName(dto.getStoneName());
         }
@@ -441,7 +447,7 @@ public class StoneService {
             stone.setEndTime(dto.getEndTime());
         }
 
-        // 6. 수정된 스톤 저장
+        // 7. 수정된 스톤 저장
         stoneRepository.save(stone);
     }
 
