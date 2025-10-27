@@ -1,6 +1,10 @@
 package com.Dolmeng_E.workspace.domain.stone.service;
 
+import com.Dolmeng_E.workspace.common.dto.UserIdListDto;
+import com.Dolmeng_E.workspace.common.dto.UserInfoListResDto;
+import com.Dolmeng_E.workspace.common.dto.UserInfoResDto;
 import com.Dolmeng_E.workspace.common.service.AccessCheckService;
+import com.Dolmeng_E.workspace.common.service.UserFeign;
 import com.Dolmeng_E.workspace.domain.project.entity.Project;
 import com.Dolmeng_E.workspace.domain.project.entity.ProjectParticipant;
 import com.Dolmeng_E.workspace.domain.project.repository.ProjectParticipantRepository;
@@ -42,6 +46,7 @@ public class StoneService {
     private final ProjectParticipantRepository projectParticipantRepository;
     private final WorkspaceRepository workspaceRepository;
     private final TaskRepository taskRepository;
+    private final UserFeign userFeign;
 
 // 최상위 스톤 생성(프로젝트 생성 시 자동 생성)
     public String createTopStone(TopStoneCreateDto dto) {
@@ -758,29 +763,89 @@ public class StoneService {
     }
 
 
-
-
-
     // 스톤 참여자 목록 조회
+    @Transactional(readOnly = true)
+    public List<StoneParticipantDto> getStoneParticipantList(String userId, String stoneId) {
 
-    //ToDo: 다 하면 프로젝트 쪽 로직 완성
+        // 1. 스톤 조회
+        Stone stone = stoneRepository.findById(stoneId)
+                .orElseThrow(() -> new EntityNotFoundException("스톤을 찾을 수 없습니다."));
 
-// 공통 메서드 : 부모가 최상위 스톤인지 파악하는 메서드
-public Boolean findTopStone(Stone stone) {
+        // 2. 스톤이 속한 프로젝트 및 워크스페이스 조회
+        Project project = stone.getProject();
+        Workspace workspace = project.getWorkspace();
 
-    if (stone.getParentStoneId() == null) {
-        return false;
+        // 3. 요청 사용자 검증
+        WorkspaceParticipant requester = workspaceParticipantRepository
+                .findByWorkspaceIdAndUserId(workspace.getId(), UUID.fromString(userId))
+                .orElseThrow(() -> new EntityNotFoundException("워크스페이스 참여자가 아닙니다."));
+
+        // 4. 접근 권한 검증
+        boolean isAuthorized =
+                requester.getWorkspaceRole().equals(WorkspaceRole.ADMIN) ||
+                        project.getWorkspaceParticipant().getId().equals(requester.getId()) ||
+                        stone.getStoneManager().getId().equals(requester.getId()) ||
+                        stoneParticipantRepository.existsByStoneAndWorkspaceParticipant(stone, requester);
+
+        if (!isAuthorized) {
+            throw new IllegalArgumentException("해당 스톤에 접근할 권한이 없습니다.");
+        }
+
+        // 5. 스톤 참여자 목록 조회 (워크스페이스에서 삭제되지 않은 인원만)
+        List<StoneParticipant> participants =
+                stoneParticipantRepository.findAllByStoneAndWorkspaceParticipant_IsDeleteFalse(stone);
+
+        if (participants.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // 6. userId(UUID) 리스트 수집
+        List<UUID> userIdList = participants.stream()
+                .map(sp -> sp.getWorkspaceParticipant().getUserId())
+                .distinct() // 중복 제거용
+                .toList();
+
+        // 7. user-service에서 이메일 등 상세 정보 조회 (Feign)
+        UserIdListDto userIdListDto = new UserIdListDto(userIdList);
+        UserInfoListResDto userInfoListResDto = userFeign.fetchUserListInfo(userIdListDto);
+
+        // 8. 결과 매핑 (UUID → UserInfoResDto)
+        Map<UUID, UserInfoResDto> userInfoMap = userInfoListResDto.getUserInfoList().stream()
+                .collect(Collectors.toMap(UserInfoResDto::getUserId, u -> u));
+
+        // 9. DTO 조립
+        return participants.stream()
+                .map(sp -> {
+                    WorkspaceParticipant wp = sp.getWorkspaceParticipant();
+                    UserInfoResDto info = userInfoMap.get(wp.getUserId());
+
+                    return StoneParticipantDto.builder()
+                            .participantId(wp.getId())
+                            .participantName(wp.getUserName())
+                            .userId(wp.getUserId())
+                            .userEmail(info != null ? info.getUserEmail() : null)
+                            .build();
+                })
+                .toList();
     }
 
-    Optional<Stone> parentOpt = stoneRepository.findById(stone.getParentStoneId());
 
-    if (parentOpt.isEmpty()) {
-        return false;
+    // 공통 메서드 : 부모가 최상위 스톤인지 파악하는 메서드
+    public Boolean findTopStone(Stone stone) {
+
+        if (stone.getParentStoneId() == null) {
+            return false;
+        }
+
+        Optional<Stone> parentOpt = stoneRepository.findById(stone.getParentStoneId());
+
+        if (parentOpt.isEmpty()) {
+            return false;
+        }
+
+        Stone parent = parentOpt.get();
+
+        return parent.getParentStoneId() == null;
     }
-
-    Stone parent = parentOpt.get();
-
-    return parent.getParentStoneId() == null;
-}
 
 }

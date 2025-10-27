@@ -11,4 +11,5 @@ public class StoneParticipantDto {
     private String participantId;
     private String participantName;
     private UUID userId;
+    private String userEmail;
 }

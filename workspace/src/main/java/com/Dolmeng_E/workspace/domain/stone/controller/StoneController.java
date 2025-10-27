@@ -186,9 +186,21 @@ public class StoneController {
                 ,HttpStatus.OK);
     }
 
-    // 스톤 참여자 목록 조회 - 스톤참여자 테이블 조회(Todo 간단해서 필요시 구현 예정)
+    // 스톤 참여자 목록 조회
+    @GetMapping("/participant/{stoneId}")
+    public ResponseEntity<?> getStoneParticipantList(
+            @RequestHeader("X-User-Id") String userId,
+            @PathVariable String stoneId
+    ) {
+        return new ResponseEntity<>(CommonSuccessDto.builder()
+                .statusMessage("스톤 참여자 목록 조회 성공")
+                .result(stoneService.getStoneParticipantList(userId, stoneId))
+                .statusCode(HttpStatus.OK.value())
+                .build(),
+                HttpStatus.OK);
+    }
 
 
-    //ToDo: 다 하면 프로젝트 쪽 로직 완성
+
 
 }

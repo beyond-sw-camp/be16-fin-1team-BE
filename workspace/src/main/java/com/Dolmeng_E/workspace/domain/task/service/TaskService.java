@@ -65,7 +65,7 @@ public class TaskService {
         }
 
         // 3. 태스크 담당자 검증(스톤 참여자 혹은 스톤 담당자만 가능)
-        WorkspaceParticipant taskManager = workspaceParticipantRepository.findById(dto.getManagerId())
+        WorkspaceParticipant taskManager = workspaceParticipantRepository.findByWorkspaceIdAndUserId(workspace.getId(), dto.getManagerId())
                 .orElseThrow(()->new EntityNotFoundException("워크스페이스 참여자 정보가 없습니다."));
         // 스톤 참여자 목록에 dto의 담당자 id가 있는지 조회
         if(!stoneParticipantRepository.existsByStoneAndWorkspaceParticipant(stone,taskManager)) {
