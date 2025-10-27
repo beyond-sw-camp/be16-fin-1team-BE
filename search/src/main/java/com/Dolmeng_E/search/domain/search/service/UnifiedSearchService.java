@@ -1,7 +1,7 @@
 package com.Dolmeng_E.search.domain.search.service;
 
 import com.Dolmeng_E.search.domain.search.dto.DocumentResDto;
-import com.Dolmeng_E.search.domain.search.entity.UnifiedSearchDocument;
+import com.Dolmeng_E.search.domain.search.entity.TaskDocument;
 import com.Dolmeng_E.search.domain.search.repository.UnifiedSearchRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,11 +18,11 @@ public class UnifiedSearchService {
 
     // 이름을 통한 검색
     public List<DocumentResDto> searchDocumentByTitle(String title) {
-        List<UnifiedSearchDocument> unifiedSearchDocuments = unifiedSearchRepository.findBySearchTitle(title);
+        List<TaskDocument> taskDocuments = unifiedSearchRepository.findBySearchTitle(title);
         List<DocumentResDto> documentResDtos = new ArrayList<>();
-        for (UnifiedSearchDocument unifiedSearchDocument : unifiedSearchDocuments) {
+        for (TaskDocument taskDocument : taskDocuments) {
             DocumentResDto documentResDto = DocumentResDto.builder()
-                    .searchTitle(unifiedSearchDocument.getSearchTitle())
+                    .searchTitle(taskDocument.getSearchTitle())
                     .build();
             documentResDtos.add(documentResDto);
         }
