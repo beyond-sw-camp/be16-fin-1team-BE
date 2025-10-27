@@ -18,7 +18,7 @@ public class ProjectController {
 
     private final ProjectService projectService;
 
-// 프로젝트 생성(To-Do: 스톤 생성도 구현해야함)
+// 프로젝트 생성
     @PostMapping("")
     public ResponseEntity<?> createProject(
             @RequestHeader("X-User-Id") String userId,

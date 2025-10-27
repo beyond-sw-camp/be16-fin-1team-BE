@@ -86,7 +86,7 @@ public class StoneService {
 
     }
 
-    // 일반 스톤 생성
+// 일반 스톤 생성
     public String createStone(String userId, StoneCreateDto dto) {
 
         // 1. 상위 스톤 조회
@@ -102,7 +102,7 @@ public class StoneService {
                 .findByWorkspaceIdAndUserId(workspace.getId(), UUID.fromString(userId))
                 .orElseThrow(() -> new EntityNotFoundException("워크스페이스 참여자가 아닙니다."));
 
-        // 4. 권한 검증 (프로젝트 담당자이거나, 스톤 생성 권한이 있어야 함, 혹은 관리자)
+        // 4. 권한 검증
         if (!participant.getWorkspaceRole().equals(WorkspaceRole.ADMIN)) {
             if (!project.getWorkspaceParticipant().getId().equals(participant.getId())) {
                 accessCheckService.validateAccess(participant, "ws_acc_list_2");
@@ -111,25 +111,26 @@ public class StoneService {
 
         // 5. 스톤 참여자들 중 프로젝트 참여자에 아직 등록되지 않은 경우 자동 등록
         if (dto.getParticipantIds() != null && !dto.getParticipantIds().isEmpty()) {
-            for (String participantId : dto.getParticipantIds()) {
-                WorkspaceParticipant wp = workspaceParticipantRepository.findById(participantId)
+            for (UUID userUuid : dto.getParticipantIds()) { // UUID로 변경 // 추가
+                WorkspaceParticipant wp = workspaceParticipantRepository
+                        .findByWorkspaceIdAndUserId(workspace.getId(), userUuid) // 추가
                         .orElseThrow(() -> new EntityNotFoundException("참여자 정보를 찾을 수 없습니다."));
 
-                // 요청자 자신은 중복 추가하지 않음
                 if (wp.getId().equals(participant.getId())) continue;
 
                 boolean exists = projectParticipantRepository.existsByProjectAndWorkspaceParticipant(project, wp);
                 if (!exists) {
-                    ProjectParticipant newProjectParticipant = ProjectParticipant.builder()
-                            .project(project)
-                            .workspaceParticipant(wp)
-                            .build();
-                    projectParticipantRepository.save(newProjectParticipant);
+                    projectParticipantRepository.save(
+                            ProjectParticipant.builder()
+                                    .project(project)
+                                    .workspaceParticipant(wp)
+                                    .build()
+                    );
                 }
             }
         }
 
-        // 6. 스톤 담당자 프로젝트 참여자 등록 (중복 방지 로직 수정)
+        // 6. 스톤 담당자 프로젝트 참여자 등록
         boolean alreadyProjectParticipant = projectParticipantRepository.existsByProjectAndWorkspaceParticipant(project, participant);
         if (!alreadyProjectParticipant) {
             projectParticipantRepository.save(
@@ -147,10 +148,10 @@ public class StoneService {
                         .startTime(dto.getStartTime())
                         .endTime(dto.getEndTime())
                         .project(project)
-                        .stoneManager(participant) // 스톤 담당자
+                        .stoneManager(participant)
                         .chatCreation(dto.getChatCreation() != null ? dto.getChatCreation() : false)
-                        .parentStoneId(parentStone.getId()) // 상위 스톤 참조
-                        .taskCreation(true) // 기본값 true
+                        .parentStoneId(parentStone.getId())
+                        .taskCreation(true)
                         .milestone(dto.getMilestone() != null ? dto.getMilestone() : BigDecimal.ZERO)
                         .status(StoneStatus.PROGRESS)
                         .build()
@@ -168,8 +169,9 @@ public class StoneService {
         if (dto.getParticipantIds() != null && !dto.getParticipantIds().isEmpty()) {
             List<StoneParticipant> participantEntities = new ArrayList<>();
 
-            for (String participantId : dto.getParticipantIds()) {
-                WorkspaceParticipant stoneParticipant = workspaceParticipantRepository.findById(participantId)
+            for (UUID userUuid : dto.getParticipantIds()) { // UUID로 변경 // 추가
+                WorkspaceParticipant stoneParticipant = workspaceParticipantRepository
+                        .findByWorkspaceIdAndUserId(workspace.getId(), userUuid) // 추가
                         .orElseThrow(() -> new EntityNotFoundException("참여자 정보를 찾을 수 없습니다."));
 
                 StoneParticipant entity = StoneParticipant.builder()
@@ -196,7 +198,7 @@ public class StoneService {
 
         // 1. 스톤 조회
         Stone stone = stoneRepository.findById(dto.getStoneId())
-                .orElseThrow(()->new EntityNotFoundException("스톤을 찾을 수 없습니다."));
+                .orElseThrow(() -> new EntityNotFoundException("스톤을 찾을 수 없습니다."));
 
         // 2. 스톤이 포함된 프로젝트 객체 생성
         Project project = stone.getProject();
@@ -214,12 +216,13 @@ public class StoneService {
             }
         }
 
-        // 5. 중복참여자 검증
+        // 5. 중복참여자 검증 // 추가
         List<String> duplicateNames = new ArrayList<>();
 
         if (dto.getStoneParticipantList() != null && !dto.getStoneParticipantList().isEmpty()) {
-            for (String wsPtId : dto.getStoneParticipantList()) {
-                WorkspaceParticipant wsPt = workspaceParticipantRepository.findById(wsPtId)
+            for (UUID userUuid : dto.getStoneParticipantList()) { // String → UUID 변경 // 추가
+                WorkspaceParticipant wsPt = workspaceParticipantRepository
+                        .findByWorkspaceIdAndUserId(project.getWorkspace().getId(), userUuid) // 추가
                         .orElseThrow(() -> new EntityNotFoundException("워크스페이스 참여자를 찾을 수 없습니다."));
 
                 if (stoneParticipantRepository.existsByStoneAndWorkspaceParticipant(stone, wsPt)) {
@@ -232,18 +235,15 @@ public class StoneService {
             }
         }
 
-        // 6. 프로젝트 참여자에 추가
+        // 6. 프로젝트 참여자에 추가 // 추가
         if (dto.getStoneParticipantList() != null && !dto.getStoneParticipantList().isEmpty()) {
-            for (String wpId : dto.getStoneParticipantList()) {
-
-                // 워크스페이스 참여자 조회
-                WorkspaceParticipant wp = workspaceParticipantRepository.findById(wpId)
+            for (UUID userUuid : dto.getStoneParticipantList()) { // String → UUID 변경 // 추가
+                WorkspaceParticipant wp = workspaceParticipantRepository
+                        .findByWorkspaceIdAndUserId(project.getWorkspace().getId(), userUuid) // 추가
                         .orElseThrow(() -> new EntityNotFoundException("워크스페이스 참여자를 찾을 수 없습니다."));
 
-                // 이미 프로젝트에 포함되어 있는지 확인
                 boolean exists = projectParticipantRepository.existsByProjectAndWorkspaceParticipant(project, wp);
 
-                // 포함되어 있지 않으면 새로 추가
                 if (!exists) {
                     ProjectParticipant newProjectParticipant = ProjectParticipant.builder()
                             .project(project)
@@ -256,24 +256,19 @@ public class StoneService {
 
         // 7. 기존 참여자 조회
         List<StoneParticipant> existingParticipants = stoneParticipantRepository.findAllByStone(stone);
-        // true일 경우 기존값 존재, false의 경우 기존값 없다는 뜻
         boolean hasExisting = !existingParticipants.isEmpty();
 
         // 8. 스톤에 참여자가 없거나, 중복되지 않은 경우 새로 저장
         if (dto.getStoneParticipantList() != null && !dto.getStoneParticipantList().isEmpty()) {
-            // dto에 넣어놓은 id 리스트
-            Set<String> participantIds = dto.getStoneParticipantList();
-            // 엔티티에 추가할 리스트 생성
+            Set<UUID> participantIds = dto.getStoneParticipantList(); // String → UUID 변경 // 추가
             List<StoneParticipant> newParticipants = new ArrayList<>();
 
-            // dto의 각 id별로 워크스페이스 참여자 조회
-            for (String id : participantIds) {
-                WorkspaceParticipant wp = workspaceParticipantRepository.findById(id)
+            for (UUID userUuid : participantIds) { // String → UUID 변경 // 추가
+                WorkspaceParticipant wp = workspaceParticipantRepository
+                        .findByWorkspaceIdAndUserId(project.getWorkspace().getId(), userUuid) // 추가
                         .orElseThrow(() -> new EntityNotFoundException("참여자 정보를 찾을 수 없습니다."));
 
-                // 기존 참여자가 없거나, 해당 참여자가 DB에 없는 경우에만 추가(중복 추가 검증)
                 if (!hasExisting || !stoneParticipantRepository.existsByStoneAndWorkspaceParticipant(stone, wp)) {
-                    // 새로운 스톤 참여자 엔티티 생성 및 리스트에 추가
                     newParticipants.add(
                             StoneParticipant.builder()
                                     .stone(stone)
@@ -283,16 +278,16 @@ public class StoneService {
                 }
             }
 
-            // 모두 저장(새로 구성한 리스트가 비어있지 않다면)
             if (!newParticipants.isEmpty()) {
-                // DB에 일괄 저장 (saveAll()로 bulk insert)
                 stoneParticipantRepository.saveAll(newParticipants);
             }
         }
     }
 
+
 // 스톤 참여자 리스트 삭제
     public void deleteStoneParticipantList(String userId, StoneParticipantListDto dto) {
+
         // 1. 스톤 조회
         Stone stone = stoneRepository.findById(dto.getStoneId())
                 .orElseThrow(() -> new EntityNotFoundException("스톤을 찾을 수 없습니다."));
@@ -312,13 +307,14 @@ public class StoneService {
                 throw new IllegalArgumentException("프로젝트 담당자 혹은 스톤 담당자가 아닙니다.");
             }
         }
-        // 5. 스톤 참여자 삭제 (일괄 처리)
-        if (dto.getStoneParticipantList() != null && !dto.getStoneParticipantList().isEmpty()) {
 
+        // 5. 스톤 참여자 삭제 (UUID 기반으로 변경) // 추가
+        if (dto.getStoneParticipantList() != null && !dto.getStoneParticipantList().isEmpty()) {
             List<StoneParticipant> toDeleteStoneParticipants = new ArrayList<>();
 
-            for (String participantId : dto.getStoneParticipantList()) {
-                WorkspaceParticipant wp = workspaceParticipantRepository.findById(participantId)
+            for (UUID userUuid : dto.getStoneParticipantList()) { // String → UUID 변경 // 추가
+                WorkspaceParticipant wp = workspaceParticipantRepository
+                        .findByWorkspaceIdAndUserId(project.getWorkspace().getId(), userUuid) // 추가
                         .orElseThrow(() -> new EntityNotFoundException("참여자 정보를 찾을 수 없습니다."));
 
                 StoneParticipant stoneParticipant = stoneParticipantRepository
@@ -327,10 +323,9 @@ public class StoneService {
 
                 toDeleteStoneParticipants.add(stoneParticipant);
 
-                // 프로젝트 참여자 삭제
                 ProjectParticipant projectParticipant = projectParticipantRepository
                         .findByProjectAndWorkspaceParticipant(project, wp)
-                        .orElse(null); // 아래에서 검증 후 삭제하기 위해 orElse 사용..
+                        .orElse(null);
 
                 if (projectParticipant != null) {
                     projectParticipantRepository.delete(projectParticipant);
@@ -340,6 +335,7 @@ public class StoneService {
             stoneParticipantRepository.deleteAll(toDeleteStoneParticipants);
         }
     }
+
 
 // 스톤 참여자 전체 삭제
     public void deleteAllStoneParticipants(String userId, String stoneId) {
@@ -668,8 +664,6 @@ public class StoneService {
 
 
 // 스톤 상세 정보 조회
-
-    // 스톤 상세 정보 조회
     public StoneDetailResDto getStoneDetail(String userId, String stoneId) {
         // 1. 스톤 조회
         Stone stone = stoneRepository.findById(stoneId)
