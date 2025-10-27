@@ -31,4 +31,6 @@ public interface StoneParticipantRepository extends JpaRepository<StoneParticipa
     """)
     List<StoneParticipant> findAllActiveWithStoneByWorkspaceParticipant(@Param("participant") WorkspaceParticipant participant);
 
+
+    List<StoneParticipant> findAllByStoneAndWorkspaceParticipant_IsDeleteFalse(Stone stone);
 }

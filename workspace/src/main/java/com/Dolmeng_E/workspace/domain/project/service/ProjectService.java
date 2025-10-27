@@ -298,6 +298,44 @@ public class ProjectService {
         return roots;
     }
 
+    // 프로젝트 상세조회
+    @Transactional(readOnly = true)
+    public ProjectDetailResDto getProjectDetail(String userId, String projectId) {
+
+        // 1. 프로젝트 조회
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new EntityNotFoundException("프로젝트를 찾을 수 없습니다."));
+
+        // 2. 워크스페이스 및 사용자 검증
+        Workspace workspace = project.getWorkspace();
+        WorkspaceParticipant participant = workspaceParticipantRepository
+                .findByWorkspaceIdAndUserId(workspace.getId(), UUID.fromString(userId))
+                .orElseThrow(() -> new EntityNotFoundException("워크스페이스 참여자가 아닙니다."));
+
+        // 3. 권한 검증
+        // 관리자이거나 프로젝트 담당자인 경우는 바로 통과
+        if (!participant.getWorkspaceRole().equals(ADMIN) &&
+                !project.getWorkspaceParticipant().getId().equals(participant.getId())) {
+            accessCheckService.validateAccess(participant, "ws_acc_list_1"); // 프로젝트 관련 접근 권한
+        }
+
+        // 4. DTO 변환 및 반환
+        return ProjectDetailResDto.builder()
+                .projectId(project.getId())
+                .projectName(project.getProjectName())
+                .projectObjective(project.getProjectObjective())
+                .projectDescription(project.getProjectDescription())
+                .milestone(project.getMilestone())
+                .startTime(project.getStartTime())
+                .endTime(project.getEndTime())
+                .projectStatus(project.getProjectStatus())
+                .isDelete(project.getIsDelete())
+                .stoneCount(project.getStoneCount())
+                .completedCount(project.getCompletedCount())
+                .projectManagerName(project.getWorkspaceParticipant().getUserName())
+                .build();
+    }
+
 
 
 
