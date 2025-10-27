@@ -1,7 +1,7 @@
 package com.Dolmeng_E.search.domain.search.service;
 
 import com.Dolmeng_E.search.domain.search.dto.EventDto;
-import com.Dolmeng_E.search.domain.search.entity.UnifiedSearchDocument;
+import com.Dolmeng_E.search.domain.search.entity.TaskDocument;
 import com.Dolmeng_E.search.domain.search.repository.UnifiedSearchRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ public class EventConsumer {
                 case "DOCUMENT_CREATED":
                 case "DOCUMENT_UPDATED":
                     // 생성과 수정은 ES에서 동일하게 save()를 사용 (Upsert: 없으면 생성, 있으면 덮어쓰기)
-                    UnifiedSearchDocument document = UnifiedSearchDocument.builder()
+                    TaskDocument document = TaskDocument.builder()
                             .id(eventPayload.getOriginalId())
                             .docType("DOCUMENT")
                             .searchTitle(eventPayload.getSearchTitle())
