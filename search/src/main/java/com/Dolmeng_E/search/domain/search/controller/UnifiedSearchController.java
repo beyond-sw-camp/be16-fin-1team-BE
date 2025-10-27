@@ -16,7 +16,7 @@ public class UnifiedSearchController {
     @GetMapping("/search")
     public ResponseEntity<?> searchDocument(@RequestParam String keyword) {
         return new ResponseEntity<>(CommonSuccessDto.builder()
-                .result(unifiedSearchService.search(keyword, "회원ID"))
+                .result(unifiedSearchService.search(keyword, "ed682ca4-1be0-4409-949a-3cd70e524e4c"))
                 .statusCode(HttpStatus.OK.value())
                 .statusMessage("검색 성공")
                 .build(), HttpStatus.OK);
@@ -25,7 +25,7 @@ public class UnifiedSearchController {
     @GetMapping("/suggest")
     public ResponseEntity<?> suggestDocument(@RequestParam String keyword) {
         return new ResponseEntity<>(CommonSuccessDto.builder()
-                .result(unifiedSearchService.suggest(keyword, "회원ID"))
+                .result(unifiedSearchService.suggest(keyword, "ed682ca4-1be0-4409-949a-3cd70e524e4c"))
                 .statusCode(HttpStatus.OK.value())
                 .statusMessage("검색어 제안")
                 .build(), HttpStatus.OK);

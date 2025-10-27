@@ -5,6 +5,7 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -57,8 +58,8 @@ public class TaskDocument {
     private Boolean isDone;
 
     // 생성일
-    @Field(type = FieldType.Date, format = DateFormat.date_time)
-    private LocalDateTime dateTime;
+    @Field(type = FieldType.Date)
+    private LocalDate dateTime;
 
     // 생성자 프로필 이미지
     @Field(type = FieldType.Keyword, index = false)

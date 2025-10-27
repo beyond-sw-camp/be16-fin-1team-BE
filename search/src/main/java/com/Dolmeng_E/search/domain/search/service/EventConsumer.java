@@ -10,6 +10,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
 
 @Component
@@ -27,6 +29,7 @@ public class EventConsumer {
     @KafkaListener(topics = "document-topic", groupId = "search-consumer-group")
     public void handleDocument(String eventMessage, Acknowledgment ack) {
         try {
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             // 1. Kafka 메시지(JSON)를 DTO로 파싱
             EventDto eventDto = objectMapper.readValue(eventMessage, EventDto.class);
             String eventType = eventDto.getEventType();
@@ -43,7 +46,7 @@ public class EventConsumer {
                             .docType("DOCUMENT")
                             .searchTitle(eventPayload.getSearchTitle())
                             .searchContent(eventPayload.getSearchContent())
-                            .dateTime(eventPayload.getCreatedAt())
+                            .dateTime(eventPayload.getCreatedAt().toLocalDate())
                             .viewableUserIds(eventPayload.getViewableUserIds())
                             .createdBy(eventPayload.getCreatedBy())
                             .creatorName(userInfo.get("name"))
