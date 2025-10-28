@@ -622,7 +622,7 @@ public class StoneService {
         stoneRepository.save(stone);
     }
 
-// 스톤 완료 처리
+    // 스톤 완료 처리
     public void completeStone(String userId, String stoneId) {
         // 1. 스톤 조회
         Stone stone = stoneRepository.findById(stoneId)
@@ -649,26 +649,36 @@ public class StoneService {
             throw new IllegalArgumentException("관리자, 프로젝트 담당자, 혹은 스톤 담당자만 완료처리 가능합니다.");
         }
 
-        // 6. 완료처리
+        // 6. 이미 완료된 스톤인지 확인
         if (stone.getStatus() == StoneStatus.COMPLETED) {
             throw new IllegalStateException("이미 완료된 스톤입니다.");
         }
-        // 7. 스톤 완료 처리 및 마일스톤 100%
+
+        // 7. 스톤에 속한 태스크 모두 완료되었는지 검사
+        List<Task> tasks = taskRepository.findAllByStone(stone);
+        boolean allTasksCompleted = tasks.stream()
+                .allMatch(Task::getIsDone);
+
+        if (!allTasksCompleted) {
+            throw new IllegalStateException("모든 태스크가 완료되어야 스톤을 완료 처리할 수 있습니다.");
+        }
+
+        // 8. 스톤 완료 처리 및 마일스톤 100%
         stone.setStatus(StoneStatus.COMPLETED);
         stone.setMilestone(BigDecimal.valueOf(100.0));
 
-        // 8. 부모가 최상위 스톤인지 확인
+        // 9. 부모가 최상위 스톤인지 확인
         Boolean isParentTop = findTopStone(stone);
-
         if (isParentTop) {
             // 부모가 최상위 스톤이면 프로젝트 진행률 갱신
             project.incrementCompletedCount();
             projectRepository.save(project);
         }
 
-        // 9. 스톤 저장
+        // 10. 스톤 저장
         stoneRepository.save(stone);
     }
+
 
     // 프로젝트 별 나의 마일스톤 조회(isDelete = true 제외, stoneStatus Completed 제외)
     public List<ProjectMilestoneResDto> milestoneList(String userId, String workspaceId) {
