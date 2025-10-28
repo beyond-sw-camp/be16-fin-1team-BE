@@ -35,8 +35,8 @@ import java.util.UUID;
 @Transactional
 @RequiredArgsConstructor
 public class ChatbotMessageService {
-    static final String AGENT_URL = "http://localhost:5678/webhook-test/chatbot-agent";
-    static final String AGENT_URL_CHAT = "http://localhost:5678/webhook-test/chatbot-agent/chat-summary";
+    static final String AGENT_URL = "http://localhost:5678/webhook/chatbot-agent";
+    static final String AGENT_URL_CHAT = "http://localhost:5678/webhook/chatbot-agent/chat-summary";
 
     private final ChatbotMessageRepository chatbotMessageRepository;
     private final WorkspaceParticipantRepository workspaceParticipantRepository;
@@ -208,6 +208,7 @@ public class ChatbotMessageService {
         }
 
         int todoIndex = 1;
+        taskList += "todo목록: \n";
         List<SharedCalendarResDto> todos = userFeign.getTodosForAgent(reqDto.getUserId(), getSchedulesForChatBotReqDto);
         for(SharedCalendarResDto sharedCalendarResDto : todos) {
             taskList += todoIndex++ + ". " + sharedCalendarResDto.getCalendarName()
