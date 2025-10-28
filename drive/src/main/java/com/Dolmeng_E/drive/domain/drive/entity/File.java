@@ -30,6 +30,9 @@ public class File extends BaseTimeEntity {
     private String id;
 
     @Column(nullable = false)
+    private String workspaceId;
+
+    @Column(nullable = false)
     private String name;
 
     @Column(nullable = false)
