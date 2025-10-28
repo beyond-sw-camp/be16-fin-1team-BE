@@ -1,6 +1,7 @@
 package com.Dolmeng_E.user.domain.sharedCalendar.service;
 
 import com.Dolmeng_E.user.domain.sharedCalendar.dto.CreateScheduleReqDto;
+import com.Dolmeng_E.user.domain.sharedCalendar.dto.GetSchedulesForChatBotReqDto;
 import com.Dolmeng_E.user.domain.sharedCalendar.dto.SharedCalendarResDto;
 import com.Dolmeng_E.user.domain.sharedCalendar.dto.UpdateScheduleReqDto;
 import com.Dolmeng_E.user.domain.sharedCalendar.entity.CalendarType;
@@ -244,4 +245,23 @@ public class SharedCalendarService {
         sharedCalendarRepository.delete(target);
     }
 
+    // 챗봇 agent 전용 - 특정시점 전까지의 모든 일정 조회
+    public List<SharedCalendarResDto> getSchedulesForAgent(UUID userId, GetSchedulesForChatBotReqDto reqDto) {
+        // 1. 검증
+        validationService.validateUserAndWorkspace(userId, reqDto.getWorkspaceId());
+
+        // 2. 일정 조회
+        List<SharedCalendar> calendars
+                = sharedCalendarRepository.findByUserIdAndWorkspaceIdAndCalendarTypeAndEndedAtBeforeAndNotCompleted(userId, reqDto.getWorkspaceId(), CalendarType.SCHEDULE, reqDto.getEndedAt());
+
+
+        return calendars.stream()
+                .map(SharedCalendarResDto::fromEntity)
+                .collect(Collectors.toMap(
+                        SharedCalendarResDto::getId,
+                        dto -> dto,
+                        (existing, duplicate) -> existing
+                ))
+                .values().stream().toList();
+    }
 }

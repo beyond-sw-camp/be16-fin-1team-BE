@@ -1,6 +1,7 @@
 package com.Dolmeng_E.user.domain.sharedCalendar.controller;
 
 import com.Dolmeng_E.user.domain.sharedCalendar.dto.CreateScheduleReqDto;
+import com.Dolmeng_E.user.domain.sharedCalendar.dto.GetSchedulesForChatBotReqDto;
 import com.Dolmeng_E.user.domain.sharedCalendar.dto.SharedCalendarResDto;
 import com.Dolmeng_E.user.domain.sharedCalendar.dto.UpdateScheduleReqDto;
 import com.Dolmeng_E.user.domain.sharedCalendar.service.SharedCalendarService;
@@ -61,4 +62,13 @@ public class SharedCalendarController {
                                 @PathVariable String calendarId) {
         sharedCalendarService.cancelOneRepeat(UUID.fromString(userId), calendarId);
     }
+
+    // 챗봇 agent 전용 - 특정시점 전까지의 모든 일정 조회
+    @GetMapping("/chatbot/schedules")
+    public List<SharedCalendarResDto> getSchedulesForAgent(@RequestHeader("X-User-Id") String userId,
+                                                           @ModelAttribute GetSchedulesForChatBotReqDto dto) {
+        return sharedCalendarService.getSchedulesForAgent(UUID.fromString(userId), dto);
+    }
+
+    // 챗봇 agent 전용 - 특정시점 전까지의 모든 to-do 조회
 }

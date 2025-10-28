@@ -1,7 +1,10 @@
 package com.Dolmeng_E.workspace.domain.chatbot.service;
 
+import com.Dolmeng_E.workspace.common.dto.GetSchedulesForChatBotReqDto;
+import com.Dolmeng_E.workspace.common.dto.SharedCalendarResDto;
 import com.Dolmeng_E.workspace.common.service.ChatFeign;
 import com.Dolmeng_E.workspace.common.service.RestTemplateClient;
+import com.Dolmeng_E.workspace.common.service.UserFeign;
 import com.Dolmeng_E.workspace.domain.chatbot.dto.*;
 import com.Dolmeng_E.workspace.domain.chatbot.entity.ChatbotMessage;
 import com.Dolmeng_E.workspace.domain.chatbot.entity.ChatbotMessageType;
@@ -33,7 +36,7 @@ import java.util.UUID;
 @Transactional
 @RequiredArgsConstructor
 public class ChatbotMessageService {
-    static final String AGENT_URL = "http://localhost:5678/webhook/chatbot-agent";
+    static final String AGENT_URL = "http://localhost:5678/webhook-test/chatbot-agent";
     static final String AGENT_URL_CHAT = "http://localhost:5678/webhook-test/chatbot-agent/chat-summary";
 
     private final ChatbotMessageRepository chatbotMessageRepository;
@@ -42,6 +45,7 @@ public class ChatbotMessageService {
     private final ProjectRepository projectRepository;
     private final TaskRepository taskRepository;
     private final ChatFeign chatFeign;
+    private final UserFeign userFeign;
     private final ProjectParticipantRepository projectParticipantRepository;
     private final SemanticMemoryService semanticMemoryService;
 
@@ -187,8 +191,21 @@ public class ChatbotMessageService {
         List<Task> tasks = taskRepository.findUnfinishedTasksBeforeDate(participant, dtoEndTime);
 
         int taskIndex = 1;
+        taskList += "Task목록: \n";
         for(Task task : tasks) {
             taskList += taskIndex++ + ". " + task.getTaskName() + ", 만료기한: " + task.getEndTime() + "\n";
+        }
+
+        int scheduleIndex = 1;
+        taskList += "개인일정목록: \n";
+        GetSchedulesForChatBotReqDto getSchedulesForChatBotReqDto = GetSchedulesForChatBotReqDto.builder()
+                .workspaceId(reqDto.getWorkspaceId())
+                .endedAt(LocalDateTime.parse(reqDto.getEndTime()))
+                .build();
+        List<SharedCalendarResDto> sharedCalendarResDtoList = userFeign.getSchedulesForAgent(reqDto.getUserId(), getSchedulesForChatBotReqDto);
+        for(SharedCalendarResDto sharedCalendarResDto : sharedCalendarResDtoList) {
+            taskList += scheduleIndex++ + ". " + sharedCalendarResDto.getCalendarName() + ", 시작시간: " + sharedCalendarResDto.getStartedAt()
+                    + ", 종료시간: " + sharedCalendarResDto.getEndedAt() + "\n";
         }
 
         return taskList;
