@@ -11,7 +11,9 @@ import com.Dolmeng_E.drive.domain.drive.repository.FolderRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +24,6 @@ import java.util.List;
 
 @Service
 @Transactional
-@RequiredArgsConstructor
 public class DriverService {
 
     private final FolderRepository folderRepository;
@@ -31,12 +32,24 @@ public class DriverService {
     private final DocumentRepository documentRepository;
     private final KafkaTemplate<String, String> kafkaTemplate; // Kafka 전송용
     private final ObjectMapper objectMapper;
+    private final HashOperations<String, String, String> hashOperations;
+
+    public DriverService(FolderRepository folderRepository, S3Uploader s3Uploader, FileRepository fileRepository, DocumentRepository documentRepository, KafkaTemplate<String, String> kafkaTemplate, ObjectMapper objectMapper, @Qualifier("userInventory") RedisTemplate<String, String> redisTemplate) {
+        this.folderRepository = folderRepository;
+        this.s3Uploader = s3Uploader;
+        this.fileRepository = fileRepository;
+        this.documentRepository = documentRepository;
+        this.kafkaTemplate = kafkaTemplate;
+        this.objectMapper = objectMapper;
+        this.hashOperations = redisTemplate.opsForHash();
+    }
 
     // 폴더 생성
     public String createFolder(FolderSaveDto folderSaveDto, String userId){
         if(folderRepository.findByParentIdAndNameAndIsDeleteIsFalse(folderSaveDto.getParentId(), folderSaveDto.getName()).isPresent()){
             throw new IllegalArgumentException("중복된 폴더명입니다.");
         }
+        System.out.println(hashOperations.entries("user:"+userId));
         return folderRepository.save(folderSaveDto.toEntity()).getId();
     }
 
