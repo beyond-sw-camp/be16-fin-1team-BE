@@ -59,7 +59,7 @@ public class FileDocument {
 
     // 생성자 프로필 이미지
     @Field(type = FieldType.Keyword, index = false)
-    private String profileImage;
+    private String profileImageUrl;
 
     // 생성자 이름
     @Field(type = FieldType.Keyword, index = false)

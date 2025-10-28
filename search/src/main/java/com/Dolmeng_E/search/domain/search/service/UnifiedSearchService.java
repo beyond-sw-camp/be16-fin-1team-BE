@@ -1,5 +1,6 @@
 package com.Dolmeng_E.search.domain.search.service;
 
+import co.elastic.clients.elasticsearch._types.query_dsl.Operator; // ✅ import 문 추가
 import com.Dolmeng_E.search.domain.search.dto.DocumentResDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -65,6 +66,7 @@ public class UnifiedSearchService {
                                         .multiMatch(mm -> mm
                                                 .query(keyword)
                                                 .fields(List.of(searchFields))
+                                                .operator(Operator.And) // [수정] Operator.And Enum 값 사용
                                         )
                                 )
                                 .filter(f -> f
@@ -99,7 +101,7 @@ public class UnifiedSearchService {
                         dto.setSearchContent(String.join("", highlights.get("searchContent")));
                     }
 
-                    // [수정] NPE(NullPointerException) 방어 코드 추가
+                    // NPE(NullPointerException) 방어 코드
                     if (dto.getSearchContent() != null && !highlights.containsKey("searchContent")) {
                         dto.setSearchContent(
                                 dto.getSearchContent().length() > 200
@@ -124,9 +126,10 @@ public class UnifiedSearchService {
                 .withQuery(q -> q
                         .bool(b -> b
                                 .must(m -> m
-                                        .match(mq -> mq
+                                        // [수정] match 쿼리 대신 term 쿼리 사용
+                                        .term(t -> t
                                                 .field(suggestField)
-                                                .query(keyword)
+                                                .value(keyword)
                                         )
                                 )
                                 .filter(f -> f
@@ -154,4 +157,3 @@ public class UnifiedSearchService {
                 .collect(Collectors.toList());
     }
 }
-

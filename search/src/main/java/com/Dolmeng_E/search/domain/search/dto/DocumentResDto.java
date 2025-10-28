@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class DocumentResDto {
-    private String Id;
+    private String id;
     private String searchTitle;
     private String searchContent;
     private List<participantInfo> participants;
