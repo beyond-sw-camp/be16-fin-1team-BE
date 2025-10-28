@@ -25,4 +25,7 @@ public interface UserFeign {
 
     @GetMapping("/shared-calendars/chatbot/schedules")
     List<SharedCalendarResDto> getSchedulesForAgent(@RequestHeader("X-User-Id") String userId, @SpringQueryMap GetSchedulesForChatBotReqDto dto);
+
+    @GetMapping("/shared-calendars/chatbot/todos")
+    List<SharedCalendarResDto> getTodosForAgent(@RequestHeader("X-User-Id") String userId, @SpringQueryMap GetSchedulesForChatBotReqDto dto);
 }

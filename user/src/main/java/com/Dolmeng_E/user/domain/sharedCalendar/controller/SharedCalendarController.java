@@ -71,4 +71,9 @@ public class SharedCalendarController {
     }
 
     // 챗봇 agent 전용 - 특정시점 전까지의 모든 to-do 조회
+    @GetMapping("/chatbot/todos")
+    public List<SharedCalendarResDto> getTodosForAgent(@RequestHeader("X-User-Id") String userId,
+                                                           @ModelAttribute GetSchedulesForChatBotReqDto dto) {
+        return sharedCalendarService.getTodosForAgent(UUID.fromString(userId), dto);
+    }
 }

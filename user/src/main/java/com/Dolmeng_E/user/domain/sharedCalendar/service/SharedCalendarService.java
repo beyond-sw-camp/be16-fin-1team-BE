@@ -264,4 +264,25 @@ public class SharedCalendarService {
                 ))
                 .values().stream().toList();
     }
+
+    public List<SharedCalendarResDto> getTodosForAgent(UUID userId, GetSchedulesForChatBotReqDto reqDto) {
+        // 1. 검증
+        validationService.validateUserAndWorkspace(userId, reqDto.getWorkspaceId());
+
+        // 2. to-do 조회
+        List<SharedCalendar> calendars
+                = sharedCalendarRepository.findByUserIdAndWorkspaceIdAndCalendarTypeAndEndedAtBeforeAndNotCompleted(userId, reqDto.getWorkspaceId(), CalendarType.TODO, reqDto.getEndedAt());
+
+
+        return calendars.stream()
+                .map(SharedCalendarResDto::fromEntity)
+                .collect(Collectors.toMap(
+                        SharedCalendarResDto::getId,
+                        dto -> dto,
+                        (existing, duplicate) -> existing
+                ))
+                .values().stream().toList();
+    }
+
+
 }

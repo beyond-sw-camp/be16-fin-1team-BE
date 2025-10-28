@@ -10,7 +10,6 @@ import com.Dolmeng_E.workspace.domain.chatbot.entity.ChatbotMessage;
 import com.Dolmeng_E.workspace.domain.chatbot.entity.ChatbotMessageType;
 import com.Dolmeng_E.workspace.domain.chatbot.repository.ChatbotMessageRepository;
 import com.Dolmeng_E.workspace.domain.project.entity.Project;
-import com.Dolmeng_E.workspace.domain.project.entity.ProjectParticipant;
 import com.Dolmeng_E.workspace.domain.project.repository.ProjectParticipantRepository;
 import com.Dolmeng_E.workspace.domain.project.repository.ProjectRepository;
 import com.Dolmeng_E.workspace.domain.task.entity.Task;
@@ -202,10 +201,17 @@ public class ChatbotMessageService {
                 .workspaceId(reqDto.getWorkspaceId())
                 .endedAt(LocalDateTime.parse(reqDto.getEndTime()))
                 .build();
-        List<SharedCalendarResDto> sharedCalendarResDtoList = userFeign.getSchedulesForAgent(reqDto.getUserId(), getSchedulesForChatBotReqDto);
-        for(SharedCalendarResDto sharedCalendarResDto : sharedCalendarResDtoList) {
+        List<SharedCalendarResDto> schedules = userFeign.getSchedulesForAgent(reqDto.getUserId(), getSchedulesForChatBotReqDto);
+        for(SharedCalendarResDto sharedCalendarResDto : schedules) {
             taskList += scheduleIndex++ + ". " + sharedCalendarResDto.getCalendarName() + ", 시작시간: " + sharedCalendarResDto.getStartedAt()
                     + ", 종료시간: " + sharedCalendarResDto.getEndedAt() + "\n";
+        }
+
+        int todoIndex = 1;
+        List<SharedCalendarResDto> todos = userFeign.getTodosForAgent(reqDto.getUserId(), getSchedulesForChatBotReqDto);
+        for(SharedCalendarResDto sharedCalendarResDto : todos) {
+            taskList += todoIndex++ + ". " + sharedCalendarResDto.getCalendarName()
+                    + ", 만료기한: " + sharedCalendarResDto.getEndedAt() + "\n";
         }
 
         return taskList;
