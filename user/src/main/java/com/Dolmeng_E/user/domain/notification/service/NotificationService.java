@@ -1,7 +1,9 @@
 package com.Dolmeng_E.user.domain.notification.service;
 
 import com.Dolmeng_E.user.domain.notification.dto.NotificationCreateReqDto;
+import com.Dolmeng_E.user.domain.notification.dto.NotificationListResDto;
 import com.Dolmeng_E.user.domain.notification.entity.Notification;
+import com.Dolmeng_E.user.domain.notification.entity.NotificationReadStatus;
 import com.Dolmeng_E.user.domain.notification.entity.NotificationType;
 import com.Dolmeng_E.user.domain.notification.repository.NotificationRepository;
 import com.Dolmeng_E.user.domain.user.entity.User;
@@ -17,6 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -79,4 +83,12 @@ public class NotificationService {
         }
     }
 
+    // 알림 목록 조회
+    public List<NotificationListResDto> getNotifications(String userId) {
+        List<Notification> notificationList = notificationRepository.findByUser_IdAndReadStatusNotAndTypeNotOrderByCreatedAtDesc(UUID.fromString(userId)
+        , NotificationReadStatus.REMOVE, NotificationType.NEW_CHAT_MESSAGE);
+
+        List<NotificationListResDto> notificationListResDtoList = notificationList.stream().map(n -> NotificationListResDto.fromEntiry(n)).toList();
+        return notificationListResDtoList;
+    }
 }

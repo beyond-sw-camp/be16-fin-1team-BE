@@ -1,6 +1,7 @@
 package com.Dolmeng_E.user.domain.notification.controller;
 
 import com.Dolmeng_E.user.domain.notification.dto.NotificationCreateReqDto;
+import com.Dolmeng_E.user.domain.notification.dto.NotificationListResDto;
 import com.Dolmeng_E.user.domain.notification.entity.NotificationType;
 import com.Dolmeng_E.user.domain.notification.service.NotificationKafkaService;
 import com.Dolmeng_E.user.domain.notification.service.NotificationService;
@@ -30,6 +31,12 @@ public class NotificationController {
         return new ResponseEntity<>(new CommonSuccessDto("CREATED", HttpStatus.CREATED.value(), "알림 생성 성공"), HttpStatus.CREATED);
     }
 
+    // 알림 목록 조회
+    @GetMapping("/list")
+    public ResponseEntity<?> getNotifications(@RequestHeader("X-User-Id") String userId) {
+        List<NotificationListResDto> notificationListResDto = notificationService.getNotifications(userId);
+        return new ResponseEntity<>(new CommonSuccessDto(notificationListResDto, HttpStatus.OK.value(), "알림 목록 조회 성공"),  HttpStatus.OK);
+    }
     @GetMapping("/test")
     public ResponseEntity<?> test() {
         List<UUID> userIdList = new ArrayList<>();
