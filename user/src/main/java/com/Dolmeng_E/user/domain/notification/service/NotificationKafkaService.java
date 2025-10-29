@@ -39,7 +39,7 @@ public class NotificationKafkaService {
     public void NotificationConsumer(String message, Acknowledgment ack) throws JsonProcessingException {
         log.info("kafkaListener2 - NotificationConsumer() - message: " + message);
 
-        
+
 
         // 위 작업들 문제없으면 커밋 (offset)
         ack.acknowledge();
