@@ -16,4 +16,6 @@ public class RootContentsDto {
     private Long size;
     private String type;
     private String id;
+    private String creatorName;
+    private String profileImage;
 }

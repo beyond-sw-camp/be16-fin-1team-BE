@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.cache.CacheProperties;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -26,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -57,7 +59,6 @@ public class DriverService {
         if(folderRepository.findByParentIdAndNameAndIsDeleteIsFalse(folderSaveDto.getParentId(), folderSaveDto.getName()).isPresent()){
             throw new IllegalArgumentException("중복된 폴더명입니다.");
         }
-        System.out.println(hashOperations.entries("user:"+userId));
         return folderRepository.save(folderSaveDto.toEntity()).getId();
     }
 
@@ -181,39 +182,42 @@ public class DriverService {
 //            }catch (Exception e){
 //                throw new IllegalArgumentException("예상치못한오류 발생");
 //            }
-            // 폴더 불러오기
-            List<Folder> folders = folderRepository.findAllByParentIdIsNullAndRootTypeAndRootIdAndIsDeleteIsFalse(RootType.valueOf(rootType),rootId);
-            for(Folder folder : folders){
-                rootContentsDtos.add(RootContentsDto.builder()
-                        .createBy(folder.getCreatedBy())
-                        .name(folder.getName())
-                        .updateAt(folder.getUpdatedAt().toString())
-                        .id(folder.getId())
-                        .type("folder")
-                        .build());
-            }
-            // 파일 불러오기
-            List<File> files = fileRepository.findAllByFolderIsNullAndRootTypeAndRootIdAndIsDeleteIsFalse(RootType.valueOf(rootType),rootId);
-            for(File file : files){
-                rootContentsDtos.add(RootContentsDto.builder()
-                        .size(file.getSize())
-                        .createBy(file.getCreatedBy())
-                        .name(file.getName())
-                        .type(file.getType())
-                        .id(file.getId())
-                        .build());
-            }
-            // 문서 불러오기
-            List<Document> documents = documentRepository.findAllByFolderIsNullAndRootTypeAndRootIdAndIsDeleteIsFalse(RootType.valueOf(rootType),rootId);
-            for(Document document : documents){
-                rootContentsDtos.add(RootContentsDto.builder()
-                        .createBy(document.getCreatedBy())
-                        .updateAt(document.getUpdatedBy())
-                        .name(document.getTitle())
-                        .type("document")
-                        .id(document.getId())
-                        .build());
-            }
+        }
+        Map<String, String> userInfo = hashOperations.entries("user:"+userId);
+        // 폴더 불러오기
+        List<Folder> folders = folderRepository.findAllByParentIdIsNullAndRootTypeAndRootIdAndIsDeleteIsFalse(RootType.valueOf(rootType),rootId);
+        for(Folder folder : folders){
+            rootContentsDtos.add(RootContentsDto.builder()
+                    .createBy(folder.getCreatedBy())
+                    .name(folder.getName())
+                    .updateAt(folder.getUpdatedAt().toString())
+                    .id(folder.getId())
+                    .type("folder")
+                    .creatorName(userInfo.get("name"))
+                    .profileImage(userInfo.get("profileImageUrl"))
+                    .build());
+        }
+        // 파일 불러오기
+        List<File> files = fileRepository.findAllByFolderIsNullAndRootTypeAndRootIdAndIsDeleteIsFalse(RootType.valueOf(rootType),rootId);
+        for(File file : files){
+            rootContentsDtos.add(RootContentsDto.builder()
+                    .size(file.getSize())
+                    .createBy(file.getCreatedBy())
+                    .name(file.getName())
+                    .type(file.getType())
+                    .id(file.getId())
+                    .build());
+        }
+        // 문서 불러오기
+        List<Document> documents = documentRepository.findAllByFolderIsNullAndRootTypeAndRootIdAndIsDeleteIsFalse(RootType.valueOf(rootType),rootId);
+        for(Document document : documents){
+            rootContentsDtos.add(RootContentsDto.builder()
+                    .createBy(document.getCreatedBy())
+                    .updateAt(document.getUpdatedBy())
+                    .name(document.getTitle())
+                    .type("document")
+                    .id(document.getId())
+                    .build());
         }
         return rootContentsDtos;
     }
