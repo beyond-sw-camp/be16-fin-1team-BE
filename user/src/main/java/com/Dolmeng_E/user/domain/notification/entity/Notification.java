@@ -34,4 +34,8 @@ public class Notification extends BaseTimeEntity {
     @JoinColumn(name = "user_id")
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
+
+    public void updateReadStatus(NotificationReadStatus readStatus) {
+        this.readStatus = readStatus;
+    }
 }

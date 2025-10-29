@@ -91,4 +91,16 @@ public class NotificationService {
         List<NotificationListResDto> notificationListResDtoList = notificationList.stream().map(n -> NotificationListResDto.fromEntiry(n)).toList();
         return notificationListResDtoList;
     }
+
+    // 알림 읽음 처리
+    public void readNotification(Long notificationId) {
+        Notification notification = notificationRepository.findById(notificationId).orElseThrow(() -> new EntityNotFoundException("없는 알림입니다."));
+        notification.updateReadStatus(NotificationReadStatus.READ);
+    }
+
+    // 알림 삭제 처리
+    public void removeNotification(Long notificationId) {
+        Notification notification = notificationRepository.findById(notificationId).orElseThrow(() -> new EntityNotFoundException("없는 알림입니다."));
+        notification.updateReadStatus(NotificationReadStatus.REMOVE);
+    }
 }

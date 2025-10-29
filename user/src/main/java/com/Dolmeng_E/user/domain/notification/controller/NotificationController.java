@@ -37,6 +37,21 @@ public class NotificationController {
         List<NotificationListResDto> notificationListResDto = notificationService.getNotifications(userId);
         return new ResponseEntity<>(new CommonSuccessDto(notificationListResDto, HttpStatus.OK.value(), "알림 목록 조회 성공"),  HttpStatus.OK);
     }
+
+    // 알림 읽음 처리
+    @PostMapping("/{notificationId}/read")
+    public ResponseEntity<?> readNotification(@PathVariable Long notificationId) {
+        notificationService.readNotification(notificationId);
+        return new ResponseEntity<>(new CommonSuccessDto(notificationId, HttpStatus.OK.value(), "알림 읽음 처리 성공"),  HttpStatus.OK);
+    }
+
+    // 알림 삭제 처리
+    @DeleteMapping("/{notificationId}")
+    public ResponseEntity<?> removeNotification(@PathVariable Long notificationId) {
+        notificationService.removeNotification(notificationId);
+        return new ResponseEntity<>(new CommonSuccessDto(notificationId, HttpStatus.OK.value(), "알림 삭제 처리 성공"),  HttpStatus.OK);
+    }
+
     @GetMapping("/test")
     public ResponseEntity<?> test() {
         List<UUID> userIdList = new ArrayList<>();
