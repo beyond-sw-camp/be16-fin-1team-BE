@@ -7,6 +7,7 @@ import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -48,5 +49,20 @@ public interface SharedCalendarRepository extends JpaRepository<SharedCalendar, 
             @Param("userId") UUID userId,
             @Param("workspaceId") String workspaceId,
             @Param("calendarType") CalendarType calendarType
+    );
+
+    // todo 특정 날짜 조회
+    @Query("SELECT s FROM SharedCalendar s " +
+            "WHERE s.userId.id = :userId " +
+            "AND s.workspaceId = :workspaceId " +
+            "AND s.calendarType = :calendarType " +
+            "AND s.startedAt <= :endOfDay " +
+            "AND s.endedAt >= :startOfDay")
+    List<SharedCalendar> findTodosByUserIdAndWorkspaceIdAndCalendarTypeAndDateRange(
+            @Param("userId") UUID userId,
+            @Param("workspaceId") String workspaceId,
+            @Param("calendarType") CalendarType calendarType,
+            @Param("startOfDay") LocalDateTime startOfDay,
+            @Param("endOfDay") LocalDateTime endOfDay
     );
 }
