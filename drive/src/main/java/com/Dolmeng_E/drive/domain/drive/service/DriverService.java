@@ -33,7 +33,7 @@ public class DriverService {
     private final ObjectMapper objectMapper;
 
     // 폴더 생성
-    public String createFolder(FolderSaveDto folderSaveDto){
+    public String createFolder(FolderSaveDto folderSaveDto, String userId){
         if(folderRepository.findByParentIdAndNameAndIsDeleteIsFalse(folderSaveDto.getParentId(), folderSaveDto.getName()).isPresent()){
             throw new IllegalArgumentException("중복된 폴더명입니다.");
         }
@@ -112,7 +112,7 @@ public class DriverService {
     }
 
     // 파일 업로드
-    public String uploadFile(MultipartFile file, String folderId){
+    public String uploadFile(MultipartFile file, String folderId, String workspaceId){
         String file_url = s3Uploader.upload(file, "drive");
         Folder folder = folderRepository.findById(folderId).orElseThrow(()->new EntityNotFoundException("해당 폴더가 존재하지 않습니다."));
         if(fileRepository.findByFolderAndNameAndIsDeleteFalse(folder, file.getOriginalFilename()).isPresent()){
@@ -125,6 +125,7 @@ public class DriverService {
                 .name(file.getOriginalFilename())
                 .type(file.getContentType())
                 .size(file.getSize())
+                .workspaceId(workspaceId)
                 .build();
         return fileRepository.save(fileEntity).getId();
     }
@@ -191,5 +192,10 @@ public class DriverService {
         return DocumentResDto.builder()
                 .title(document.getTitle())
                 .build();
+    }
+
+    public Long getFilesSize(String workspaceId){
+        Long totalSize = fileRepository.findTotalSizeByWorkspaceId(workspaceId);
+        return (totalSize != null) ? totalSize : 0L;
     }
 }

@@ -1,5 +1,7 @@
 package com.Dolmeng_E.workspace.domain.workspace.controller;
 
+import com.Dolmeng_E.workspace.common.dto.StoneTaskResDto;
+import com.Dolmeng_E.workspace.common.dto.SubProjectResDto;
 import com.Dolmeng_E.workspace.common.dto.WorkspaceInfoResDto;
 import com.Dolmeng_E.workspace.common.dto.WorkspaceNameDto;
 import com.Dolmeng_E.workspace.domain.project.dto.ProjectProgressResDto;
@@ -304,6 +306,24 @@ public class WorkspaceController {
     }
 
 
+    // 워크스페이스 담당자 확인
+    @GetMapping("/{workspaceId}/manager/check")
+    ResponseEntity<CommonSuccessDto> checkWorkspaceManager(
+            @PathVariable("workspaceId") String workspaceId,
+            @RequestHeader("X-User-Id") String userId
+    ) {
+        boolean isWorkspaceParticipant = workspaceService.checkWorkspaceManager(workspaceId,userId);
+        return new ResponseEntity<>(
+                CommonSuccessDto.builder()
+                        .result(isWorkspaceParticipant)
+                        .statusCode(HttpStatus.OK.value())
+                        .statusMessage("워크스페이스 담당자 정보입니다.")
+                        .build(),
+                HttpStatus.OK
+        );
+    }
+
+
     // 워크스페이스 참여자 확인
     @GetMapping("/workspace/{workspaceId}/members/check")
     ResponseEntity<CommonSuccessDto> checkWorkspaceMembership(
@@ -388,6 +408,20 @@ public class WorkspaceController {
                         .build(),
                 HttpStatus.OK
         );
+    }
+
+    // workspaceId 넘겼을 때 하위 프로젝트 Id, 프로젝트명 가져오는 api
+    @GetMapping("/project/{workspaceId}/sub-project")
+    public ResponseEntity<List<SubProjectResDto>> getSubProjects(@PathVariable String workspaceId) {
+        List<SubProjectResDto> projects = workspaceService.getSubProjectsByWorkspace(workspaceId);
+        return ResponseEntity.ok(projects);
+    }
+
+    //projectId 넘겼을 때 하위 스톤 id, 테스크명 가져오는 api
+    @GetMapping("/stone/{projectId}/sub-stone-task")
+    public ResponseEntity<StoneTaskResDto> getSubStonesAndTasks(@PathVariable String projectId) {
+        StoneTaskResDto response = workspaceService.getSubStonesAndTasks(projectId);
+        return ResponseEntity.ok(response);
     }
 
 
