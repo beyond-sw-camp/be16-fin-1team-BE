@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,4 +20,5 @@ public class RootContentsDto {
     private String id;
     private String creatorName;
     private String profileImage;
+    private List<FolderInfoDto> ancestors;
 }

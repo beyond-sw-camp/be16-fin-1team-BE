@@ -17,6 +17,16 @@ public class DriveController {
 
     private final DriverService driverService;
 
+    // 폴더 정보 조회
+    @GetMapping("/folder/{folder_id}")
+    public ResponseEntity<?> saveFolder(@PathVariable("folder_id") String folderId) {
+        return new ResponseEntity<>(CommonSuccessDto.builder()
+                .result(driverService.getFolderInfo(folderId))
+                .statusCode(HttpStatus.OK.value())
+                .statusMessage("폴더 정보 조회 성공")
+                .build(), HttpStatus.OK);
+    }
+
     // 폴더 생성
     @PostMapping("/folder")
     public ResponseEntity<?> saveFolder(@RequestHeader("X-User-Id") String userId, @RequestBody FolderSaveDto folderSaveDto) {

@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -94,6 +95,15 @@ public class DriverService {
             document.updateIsDelete();
         }
     }
+
+    public FolderInfoResDto getFolderInfo(String folderId){
+        Folder folder = folderRepository.findById(folderId).orElseThrow(()->new EntityNotFoundException("해당 폴더가 존재하지 않습니다."));
+        return FolderInfoResDto.builder()
+                .folderId(folderId)
+                .folderName(folder.getName())
+                .ancestors(folderRepository.findAncestors(folderId))
+                .build();
+    }
     
     // 폴더 하위 요소들 조회
     public List<FolderContentsDto> getFolderContents(String folderId, String userId){
@@ -103,7 +113,7 @@ public class DriverService {
         List<FolderContentsDto> folderContentsDtos = new ArrayList<>();
         // 하위 폴더 불러오기
         for(Folder childfolder : folders){
-            if(childfolder.getIsDelete().equals(true)) continue;
+            List<FolderInfoDto> ancestors = folderRepository.findAncestors(childfolder.getId());
             folderContentsDtos.add(FolderContentsDto.builder()
                             .createBy(childfolder.getCreatedBy())
                             .name(childfolder.getName())
@@ -112,6 +122,7 @@ public class DriverService {
                             .type("folder")
                             .creatorName(userInfo.get("name"))
                             .profileImage(userInfo.get("profileImageUrl"))
+                            .ancestors(ancestors)
                     .build());
         }
         // 파일 불러오기
@@ -194,6 +205,7 @@ public class DriverService {
         // 폴더 불러오기
         List<Folder> folders = folderRepository.findAllByParentIdIsNullAndRootTypeAndRootIdAndIsDeleteIsFalse(RootType.valueOf(rootType),rootId);
         for(Folder folder : folders){
+            List<FolderInfoDto> ancestors = folderRepository.findAncestors(folder.getId());
             rootContentsDtos.add(RootContentsDto.builder()
                     .createBy(folder.getCreatedBy())
                     .name(folder.getName())
@@ -202,6 +214,7 @@ public class DriverService {
                     .type("folder")
                     .creatorName(userInfo.get("name"))
                     .profileImage(userInfo.get("profileImageUrl"))
+                    .ancestors(ancestors)
                     .build());
         }
         // 파일 불러오기
