@@ -1,15 +1,20 @@
 package com.Dolmeng_E.drive.domain.drive.service;
 
+import com.Dolmeng_E.drive.common.controller.WorkspaceServiceClient;
+import com.Dolmeng_E.drive.common.dto.StoneTaskResDto;
+import com.Dolmeng_E.drive.common.dto.SubProjectResDto;
 import com.Dolmeng_E.drive.common.service.S3Uploader;
 import com.Dolmeng_E.drive.domain.drive.dto.*;
 import com.Dolmeng_E.drive.domain.drive.entity.Document;
 import com.Dolmeng_E.drive.domain.drive.entity.File;
 import com.Dolmeng_E.drive.domain.drive.entity.Folder;
+import com.Dolmeng_E.drive.domain.drive.entity.RootType;
 import com.Dolmeng_E.drive.domain.drive.repository.DocumentRepository;
 import com.Dolmeng_E.drive.domain.drive.repository.FileRepository;
 import com.Dolmeng_E.drive.domain.drive.repository.FolderRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.HashOperations;
@@ -21,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Transactional
@@ -33,8 +39,9 @@ public class DriverService {
     private final KafkaTemplate<String, String> kafkaTemplate; // Kafka 전송용
     private final ObjectMapper objectMapper;
     private final HashOperations<String, String, String> hashOperations;
+    private final WorkspaceServiceClient workspaceServiceClient;
 
-    public DriverService(FolderRepository folderRepository, S3Uploader s3Uploader, FileRepository fileRepository, DocumentRepository documentRepository, KafkaTemplate<String, String> kafkaTemplate, ObjectMapper objectMapper, @Qualifier("userInventory") RedisTemplate<String, String> redisTemplate) {
+    public DriverService(FolderRepository folderRepository, S3Uploader s3Uploader, FileRepository fileRepository, DocumentRepository documentRepository, KafkaTemplate<String, String> kafkaTemplate, ObjectMapper objectMapper, @Qualifier("userInventory") RedisTemplate<String, String> redisTemplate, WorkspaceServiceClient workspaceServiceClient) {
         this.folderRepository = folderRepository;
         this.s3Uploader = s3Uploader;
         this.fileRepository = fileRepository;
@@ -42,6 +49,7 @@ public class DriverService {
         this.kafkaTemplate = kafkaTemplate;
         this.objectMapper = objectMapper;
         this.hashOperations = redisTemplate.opsForHash();
+        this.workspaceServiceClient = workspaceServiceClient;
     }
 
     // 폴더 생성
@@ -128,40 +136,86 @@ public class DriverService {
     }
 
     // 루트 하위 요소들 조회 + 바로가기(ex. 워크스페이스의 하위 스톤 드라이브로 바로가기)
-    public List<FolderContentsDto> getContents(String rootId, String userId, String rootType){
-
-        List<FolderContentsDto> folderContentsDtos = new ArrayList<>();
-        // 하위 폴더 불러오기
-        for(Folder childfolder : folders){
-            if(childfolder.getIsDelete().equals(true)) continue;
-            folderContentsDtos.add(FolderContentsDto.builder()
-                    .createBy(childfolder.getCreatedBy())
-                    .name(childfolder.getName())
-                    .updateAt(childfolder.getUpdatedAt().toString())
-                    .type("folder")
-                    .build());
+    public List<RootContentsDto> getContents(String rootId, String userId, String rootType){
+        List<RootContentsDto> rootContentsDtos = new ArrayList<>();
+        if(rootType.equals("WORKSPACE")){
+            try {
+                List<SubProjectResDto> projects = workspaceServiceClient.getSubProjectsByWorkspace(rootId);
+                for(SubProjectResDto project : projects){
+                    rootContentsDtos.add(RootContentsDto.builder()
+                            .id(project.getProjectId())
+                            .name(project.getProjectName())
+                            .type("PROJECT")
+                            .build());
+                }
+            }catch (FeignException e){
+                System.out.println(e.getMessage());
+                throw new IllegalArgumentException("예상치못한오류 발생");
+            }
+        }else if(rootType.equals("PROJECT")){
+//            try {
+//                if (Objects.requireNonNull(workspaceServiceClient.checkProjectMembership(rootId, userId).getBody()).getResult().equals(false)){
+//                    throw new IllegalArgumentException("권한이 없습니다.");
+//                }
+//            }catch (Exception e){
+//                throw new IllegalArgumentException("예상치못한오류 발생");
+//            }
+            try {
+                StoneTaskResDto stoneTaskResDto = workspaceServiceClient.getSubStonesAndTasks(rootId);
+                List<StoneTaskResDto.StoneInfo> stones = stoneTaskResDto.getStones();
+                for(StoneTaskResDto.StoneInfo stone : stones){
+                    rootContentsDtos.add(RootContentsDto.builder()
+                            .id(stone.getStoneId())
+                            .name(stone.getStoneName())
+                            .type("STONE")
+                            .build());
+                }
+            }catch (Exception e){
+                throw new IllegalArgumentException("예상치못한오류 발생");
+            }
+        }else if(rootType.equals("STONE")){
+//            try {
+//                if(Objects.requireNonNull(workspaceServiceClient.checkStoneMembership(rootId, userId).getBody()).getResult().equals(false)){
+//                    throw new IllegalArgumentException("권한이 없습니다.");
+//                }
+//            }catch (Exception e){
+//                throw new IllegalArgumentException("예상치못한오류 발생");
+//            }
+            // 폴더 불러오기
+            List<Folder> folders = folderRepository.findAllByParentIdIsNullAndRootTypeAndRootIdAndIsDeleteIsFalse(RootType.valueOf(rootType),rootId);
+            for(Folder folder : folders){
+                rootContentsDtos.add(RootContentsDto.builder()
+                        .createBy(folder.getCreatedBy())
+                        .name(folder.getName())
+                        .updateAt(folder.getUpdatedAt().toString())
+                        .id(folder.getId())
+                        .type("folder")
+                        .build());
+            }
+            // 파일 불러오기
+            List<File> files = fileRepository.findAllByFolderIsNullAndRootTypeAndRootIdAndIsDeleteIsFalse(RootType.valueOf(rootType),rootId);
+            for(File file : files){
+                rootContentsDtos.add(RootContentsDto.builder()
+                        .size(file.getSize())
+                        .createBy(file.getCreatedBy())
+                        .name(file.getName())
+                        .type(file.getType())
+                        .id(file.getId())
+                        .build());
+            }
+            // 문서 불러오기
+            List<Document> documents = documentRepository.findAllByFolderIsNullAndRootTypeAndRootIdAndIsDeleteIsFalse(RootType.valueOf(rootType),rootId);
+            for(Document document : documents){
+                rootContentsDtos.add(RootContentsDto.builder()
+                        .createBy(document.getCreatedBy())
+                        .updateAt(document.getUpdatedBy())
+                        .name(document.getTitle())
+                        .type("document")
+                        .id(document.getId())
+                        .build());
+            }
         }
-        // 파일 불러오기
-        for(File file : folder.getFiles()){
-            if(file.getIsDelete().equals(true)) continue;
-            folderContentsDtos.add(FolderContentsDto.builder()
-                    .size(file.getSize())
-                    .createBy(file.getCreatedBy())
-                    .name(file.getName())
-                    .type(file.getType())
-                    .build());
-        }
-        // 문서 불러오기
-        for(Document document : folder.getDocuments()){
-            if(document.getIsDelete().equals(true)) continue;
-            folderContentsDtos.add(FolderContentsDto.builder()
-                    .createBy(document.getCreatedBy())
-                    .updateAt(document.getUpdatedBy())
-                    .name(document.getTitle())
-                    .type("document")
-                    .build());
-        }
-        return folderContentsDtos;
+        return rootContentsDtos;
     }
 
     // 파일 업로드
