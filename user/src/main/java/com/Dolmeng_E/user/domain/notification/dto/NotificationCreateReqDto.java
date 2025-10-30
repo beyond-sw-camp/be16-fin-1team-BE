@@ -21,4 +21,8 @@ public class NotificationCreateReqDto {
     private String type;
     private List<UUID> userIdList = new ArrayList<>();
     private LocalDateTime sendAt;
+    private String workspaceId;
+    private String projectId;
+    private String stoneId;
+    private String taskId;
 }
