@@ -191,13 +191,17 @@ public class AccessGroupService {
 
             // 4. 권한그룹 이름 변경 (새 이름이 있을 때만)
             if (dto.getNewAccessGroupName() != null && !dto.getNewAccessGroupName().isBlank()) {
-                // 동일 워크스페이스 내 중복 이름 방지
-                boolean exists = accessGroupRepository.existsByWorkspaceIdAndAccessGroupName(workspace.getId(), dto.getNewAccessGroupName());
-                if (exists) {
-                    throw new IllegalArgumentException("이미 동일한 이름의 권한 그룹이 존재합니다: " + dto.getNewAccessGroupName());
+                // 기존 권한 그룹명이 바꿀 그룹명과 같으면 패스, 다르면 중복이름 검사
+                if(!targetGroup.getAccessGroupName().equals(dto.getNewAccessGroupName())) {
+                    // 동일 워크스페이스 내 중복 이름 방지
+                    boolean exists = accessGroupRepository.existsByWorkspaceIdAndAccessGroupName(workspace.getId(), dto.getNewAccessGroupName());
+                    if (exists) {
+                        throw new IllegalArgumentException("이미 동일한 이름의 권한 그룹이 존재합니다: " + dto.getNewAccessGroupName());
+                    }
+                    targetGroup.setAccessGroupName(dto.getNewAccessGroupName());
+                    accessGroupRepository.save(targetGroup);
                 }
-                targetGroup.setAccessGroupName(dto.getNewAccessGroupName());
-                accessGroupRepository.save(targetGroup);
+
             }
 
             // 5. 순회하면서 권한 여부 업데이트
