@@ -10,15 +10,15 @@ import org.springframework.kafka.core.*;
 import java.util.HashMap;
 import java.util.Map;
 
-@Configuration
 // 알림 서비스 위한 Config
+@Configuration
 public class KafkaConfig {
+
     @Value("${spring.kafka.bootstrap-servers}")
     private String kafkaServer;
 
-    // producer
-    @Bean
-    public ProducerFactory<String, Object> producerFactory(){
+    @Bean(name = "notificationProducerFactory")
+    public ProducerFactory<String, Object> notificationProducerFactory() {
         Map<String, Object> config = new HashMap<>();
         config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServer);
         config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
@@ -26,9 +26,8 @@ public class KafkaConfig {
         return new DefaultKafkaProducerFactory<>(config);
     }
 
-    @Bean
-    public KafkaTemplate<String, Object> kafkaTemplate(){
-        return new KafkaTemplate<>(producerFactory());
+    @Bean(name = "notificationKafkaTemplate")
+    public KafkaTemplate<String, Object> notificationKafkaTemplate() {
+        return new KafkaTemplate<>(notificationProducerFactory());
     }
-
 }

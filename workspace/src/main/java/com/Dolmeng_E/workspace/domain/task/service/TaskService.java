@@ -1,6 +1,9 @@
 package com.Dolmeng_E.workspace.domain.task.service;
 
+import com.Dolmeng_E.workspace.common.domain.NotificationType;
+import com.Dolmeng_E.workspace.common.dto.NotificationCreateReqDto;
 import com.Dolmeng_E.workspace.common.service.MilestoneCalculator;
+import com.Dolmeng_E.workspace.common.service.NotificationKafkaService;
 import com.Dolmeng_E.workspace.domain.project.entity.Project;
 import com.Dolmeng_E.workspace.domain.project.repository.ProjectRepository;
 import com.Dolmeng_E.workspace.domain.stone.entity.Stone;
@@ -23,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,6 +41,7 @@ public class TaskService {
     private final WorkspaceRepository workspaceRepository;
     private final StoneParticipantRepository stoneParticipantRepository;
     private final MilestoneCalculator milestoneCalculator;
+    private final NotificationKafkaService notificationKafkaService;
 
     // 태스크 생성(생성시 스톤의 task수 반영 필요)
     public String createTask(String userId, TaskCreateDto dto) {
@@ -100,6 +105,28 @@ public class TaskService {
                         .build();
 
                 taskRepository.save(task);
+
+        // task 담당자에게 알림 발송
+
+        // 테스트 코드
+        List<UUID> userIdList = new ArrayList<>();
+        // 알림받을 인원들 list에 담고
+        userIdList.add(task.getTaskManager().getUserId());
+
+        // 객체 생성
+        NotificationCreateReqDto notificationCreateReqDto = NotificationCreateReqDto.builder()
+                // 워크스페이스명 수동으로 넣어줘야 해요
+                .title("[" + workspace.getWorkspaceName() + "]" + "태스크 배정")
+                .content("태스크가 배정되었습니다! 🎉")
+                .userIdList(userIdList)
+                // 위에서 추가한 알림 타입 String으로 주입
+                .type("TASK_MESSAGE")
+                // 예약 알림이라면 원하는 날짜 지정 (예. 만료기한날짜 -1일 등)
+                // 즉시알림이라면 null (채팅같은)
+                .sendAt(null)
+                .build();
+
+        notificationKafkaService.kafkaNotificationPublish(notificationCreateReqDto);
 
         // 6. 스톤의 태스크 수 갱신
         stone.incrementTaskCount();
