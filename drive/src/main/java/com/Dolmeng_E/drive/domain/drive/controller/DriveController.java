@@ -1,9 +1,6 @@
 package com.Dolmeng_E.drive.domain.drive.controller;
 
-import com.Dolmeng_E.drive.domain.drive.dto.DocumentSaveDto;
-import com.Dolmeng_E.drive.domain.drive.dto.FolderMoveDto;
-import com.Dolmeng_E.drive.domain.drive.dto.FolderSaveDto;
-import com.Dolmeng_E.drive.domain.drive.dto.FolderUpdateNameDto;
+import com.Dolmeng_E.drive.domain.drive.dto.*;
 import com.Dolmeng_E.drive.domain.drive.service.DriverService;
 import com.example.modulecommon.dto.CommonSuccessDto;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +38,7 @@ public class DriveController {
 
     // 폴더명 수정
     @PutMapping("/folder/{folderId}")
-    public ResponseEntity<?> updateFolder(@RequestHeader("X-User-Id") String userId, @RequestBody FolderUpdateNameDto folderUpdateNameDto, @PathVariable String folderId) {
+    public ResponseEntity<?> updateFolder(@RequestBody FolderUpdateNameDto folderUpdateNameDto, @PathVariable String folderId) {
         return new ResponseEntity<>(CommonSuccessDto.builder()
                 .result(driverService.updateFolderName(folderUpdateNameDto, folderId))
                 .statusCode(HttpStatus.OK.value())
@@ -51,7 +48,7 @@ public class DriveController {
 
     // 폴더 삭제
     @DeleteMapping("/folder/{folderId}")
-    public ResponseEntity<?> deleteFolder(@RequestHeader("X-User-Id") String userId, @PathVariable String folderId) {
+    public ResponseEntity<?> deleteFolder(@PathVariable String folderId) {
         return new ResponseEntity<>(CommonSuccessDto.builder()
                 .result(driverService.deleteFolder(folderId))
                 .statusCode(HttpStatus.OK.value())
@@ -90,9 +87,9 @@ public class DriveController {
 
     // 파일 업로드
     @PostMapping("/folder/{folderId}/file")
-    public ResponseEntity<?> uploadFile(@RequestHeader("X-User-Id") String userId, @PathVariable String folderId, @RequestParam MultipartFile file, @RequestParam String workspaceId) {
+    public ResponseEntity<?> uploadFile(@RequestHeader("X-User-Id") String userId, @PathVariable String folderId, @ModelAttribute FileSaveDto fileSaveDto) {
         return new ResponseEntity<>(CommonSuccessDto.builder()
-                .result(driverService.uploadFile(file, folderId, workspaceId))
+                .result(driverService.uploadFile(userId, folderId, fileSaveDto))
                 .statusCode(HttpStatus.CREATED.value())
                 .statusMessage("파일 업로드 성공")
                 .build(), HttpStatus.CREATED);
@@ -100,7 +97,7 @@ public class DriveController {
 
     // 파일 삭제
     @DeleteMapping("/file/{fileId}")
-    public ResponseEntity<?> deleteFile(@RequestHeader("X-User-Id") String userId, @PathVariable String fileId) {
+    public ResponseEntity<?> deleteFile(@PathVariable String fileId) {
         return new ResponseEntity<>(CommonSuccessDto.builder()
                 .result(driverService.deleteFile(fileId))
                 .statusCode(HttpStatus.OK.value())
@@ -109,10 +106,10 @@ public class DriveController {
     }
 
     // 문서 생성
-    @PostMapping("/document")
-    public ResponseEntity<?> saveDocument(@RequestHeader("X-User-Id") String userId, @RequestBody DocumentSaveDto documentSaveDto) {
+    @PostMapping("/folder/{folderId}/document")
+    public ResponseEntity<?> saveDocument(@RequestHeader("X-User-Id") String userId, @PathVariable String folderId, @RequestBody DocumentSaveDto documentSaveDto) {
         return new ResponseEntity<>(CommonSuccessDto.builder()
-                .result(driverService.createDocument(documentSaveDto, userId))
+                .result(driverService.createDocument(userId, folderId, documentSaveDto))
                 .statusCode(HttpStatus.CREATED.value())
                 .statusMessage("문서 생성 성공")
                 .build(), HttpStatus.CREATED);
