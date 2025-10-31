@@ -141,7 +141,7 @@ public class DriverService {
             if(document.getIsDelete().equals(true)) continue;
             folderContentsDtos.add(FolderContentsDto.builder()
                     .createBy(document.getCreatedBy())
-                    .updateAt(document.getUpdatedBy())
+                    .updateAt(document.getUpdatedAt().toString())
                     .name(document.getTitle())
                     .type("document")
                     .id(document.getId())
@@ -244,7 +244,7 @@ public class DriverService {
             Map<String, String> userInfo = hashOperations.entries("user:"+getUserId);
             rootContentsDtos.add(RootContentsDto.builder()
                     .createBy(document.getCreatedBy())
-                    .updateAt(document.getUpdatedBy())
+                    .updateAt(document.getUpdatedAt().toString())
                     .name(document.getTitle())
                     .type("document")
                     .id(document.getId())
