@@ -55,7 +55,7 @@ public class DriverService {
     // 폴더 생성
     public String createFolder(FolderSaveDto folderSaveDto, String userId){
         if(folderRepository.findByParentIdAndNameAndIsDeleteIsFalse(folderSaveDto.getParentId(), folderSaveDto.getName()).isPresent()){
-            throw new IllegalArgumentException("중복된 폴더명입니다.");
+            throw new IllegalArgumentException("이미 존재하는 폴더명입니다.");
         }
         return folderRepository.save(folderSaveDto.toEntity()).getId();
     }
