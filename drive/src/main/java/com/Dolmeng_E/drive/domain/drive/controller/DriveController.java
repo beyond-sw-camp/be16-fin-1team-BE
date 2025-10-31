@@ -152,7 +152,7 @@ public class DriveController {
         return new ResponseEntity<>(CommonSuccessDto.builder()
                 .result(driverService.updateDocument(documentId, documentUpdateDto))
                 .statusCode(HttpStatus.OK.value())
-                .statusMessage("문서 조회 성공")
+                .statusMessage("문서 수정 성공")
                 .build(), HttpStatus.OK);
     }
     
@@ -163,6 +163,16 @@ public class DriveController {
                 .result(driverService.getFilesSize(workspaceId))
                 .statusCode(HttpStatus.OK.value())
                 .statusMessage("스토리지 사용량 조회 성공")
+                .build(), HttpStatus.OK);
+    }
+
+    // 파일 수정
+    @PutMapping("/file/{fileId}")
+    public ResponseEntity<?> updateFile(@PathVariable String fileId, @RequestBody FileUpdateDto fileUpdateDto) {
+        return new ResponseEntity<>(CommonSuccessDto.builder()
+                .result(driverService.updateFile(fileId, fileUpdateDto))
+                .statusCode(HttpStatus.OK.value())
+                .statusMessage("문서 조회 성공")
                 .build(), HttpStatus.OK);
     }
 }

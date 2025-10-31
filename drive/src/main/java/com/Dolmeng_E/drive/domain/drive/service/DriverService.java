@@ -135,6 +135,7 @@ public class DriverService {
                     .id(file.getId())
                     .creatorName(userInfo.get("name"))
                     .profileImage(userInfo.get("profileImageUrl"))
+                    .url(file.getUrl())
                     .build());
         }
         // 문서 불러오기
@@ -237,6 +238,7 @@ public class DriverService {
                     .id(file.getId())
                     .creatorName(userInfo.get("name"))
                     .profileImage(userInfo.get("profileImageUrl"))
+                    .url(file.getUrl())
                     .build());
         }
         // 문서 불러오기
@@ -399,6 +401,16 @@ public class DriverService {
         }
         document.updateTitle(documentUpdateDto.getTitle());
         return document.getTitle();
+    }
+
+    // 파일 이름 변경
+    public String updateFile(String fileId, FileUpdateDto fileUpdateDto){
+        File file = fileRepository.findById(fileId).orElseThrow(()->new EntityNotFoundException(("해당 파일이 존재하지 않습니다.")));
+        if(fileRepository.findByFolderAndNameAndIsDeleteFalse(file.getFolder(), fileUpdateDto.getName()).isPresent()){
+            throw new IllegalArgumentException("같은 이름의 파일이 존재합니다.");
+        }
+        file.updateName(fileUpdateDto.getName());
+        return file.getName();
     }
 
     public Long getFilesSize(String workspaceId){
