@@ -1,5 +1,6 @@
 package com.Dolmeng_E.workspace.domain.workspace.entity;
 
+import com.example.modulecommon.domain.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,35 +13,28 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class WorkspaceInvite {
+@Table(name = "workspace_invite")
+public class WorkspaceInvite extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private String id;
+
+    @Column(nullable = false)
+    private String email;  // 초대 이메일
+
+    @Column(nullable = false)
+    private String inviteToken;  // 초대코드(UUID 등)
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "workspace_id", nullable = false)
+    @JoinColumn(name = "workspace_id")
     private Workspace workspace;
 
-    @Column(nullable = false)
-    private String inviteEmail;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "inviter_id")
+    private WorkspaceParticipant inviter;
 
-    @Column(nullable = false, unique = true)
-    private String inviteCode;
-
-    @Column(nullable = false)
-    private boolean isAccepted;
-
-    @Column(nullable = false)
-    private boolean isExistingUser;
-
-    @Column(nullable = false)
-    private LocalDateTime expiresAt;
-
-    @Column(nullable = false)
-    private boolean isPendingRegistration; // 비회원 초대용
-
-    public boolean isExpired() {
-        return expiresAt.isBefore(LocalDateTime.now());
-    }
+    private LocalDateTime expiredAt;   // 만료 시간
+    private boolean isUsed;            // 사용 여부
 }
+

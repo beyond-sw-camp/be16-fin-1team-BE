@@ -101,23 +101,6 @@ public class WorkspaceController {
     }
 
 
-//    To-Do: throw로 던졌지만 공통 에러 코드로 잡아야함
-//    워크스페이스 이메일 회원 초대 (메일 발송)
-    @PostMapping("/{workspaceId}/invite")
-    public ResponseEntity<CommonSuccessDto> inviteUsersToWorkspace(
-            @RequestHeader("X-User-Id") String userId,
-            @PathVariable String workspaceId,
-            @RequestBody WorkspaceInviteDto dto
-    ) throws AccessDeniedException {
-        workspaceService.inviteUsers(userId, workspaceId, dto);
-        return new ResponseEntity<>(CommonSuccessDto.builder()
-                .result("초대 메일 발송 완료")
-                .statusCode(HttpStatus.OK.value())
-                .statusMessage("워크스페이스 이메일 초대 성공")
-                .build(),
-                HttpStatus.OK);
-    }
-
 //    워크스페이스 참여자 목록 조회
     @GetMapping("/{workspaceId}/participants")
     public ResponseEntity<?> getWorkspaceParticipants(
