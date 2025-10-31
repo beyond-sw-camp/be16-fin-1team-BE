@@ -124,7 +124,10 @@ public class TaskService {
                 // 예약 알림이라면 원하는 날짜 지정 (예. 만료기한날짜 -1일 등)
                 // 즉시알림이라면 null (채팅같은)
                 .sendAt(null)
+                .workspaceId(workspace.getId())
                 .taskId(task.getId())
+                .stoneId(stone.getId())
+                .projectId(project.getId())
                 .build();
 
         notificationKafkaService.kafkaNotificationPublish(notificationCreateReqDto);
@@ -208,7 +211,10 @@ public class TaskService {
                     // 예약 알림이라면 원하는 날짜 지정 (예. 만료기한날짜 -1일 등)
                     // 즉시알림이라면 null (채팅같은)
                     .sendAt(null)
+                    .workspaceId(workspace.getId())
                     .taskId(task.getId())
+                    .stoneId(stone.getId())
+                    .projectId(project.getId())
                     .build();
         }
 
@@ -307,6 +313,8 @@ public class TaskService {
                 // 예약 알림이라면 원하는 날짜 지정 (예. 만료기한날짜 -1일 등)
                 // 즉시알림이라면 null (채팅같은)
                 .sendAt(null)
+                .projectId(project.getId())
+                .workspaceId(workspace.getId())
                 .stoneId(stone.getId())
                 .build();
 
