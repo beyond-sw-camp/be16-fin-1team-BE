@@ -57,7 +57,6 @@ public class WorkspaceService {
     private final UserFeign userFeign;
     private final AccessGroupService accessGroupService;
     private final AccessGroupRepository accessGroupRepository;
-    private final EmailService emailService;
     private final WorkspaceInviteRepository workspaceInviteRepository;
     private final ProjectParticipantRepository projectParticipantRepository;
     private final UserGroupRepository userGroupRepository;
@@ -333,54 +332,6 @@ public class WorkspaceService {
     }
 
 
-
-
-    //    워크스페이스 이메일 회원 초대 (ToDo : 로직 반드시 수정 할 것, X-User-Id 로 바뀌어서 그에 맞게!)
-    public void inviteUsers(String userId, String workspaceId, WorkspaceInviteDto dto) throws AccessDeniedException {
-        // 1. 워크스페이스 확인
-        Workspace workspace = workspaceRepository.findById(workspaceId)
-                .orElseThrow(() -> new EntityNotFoundException("워크스페이스를 찾을 수 없습니다."));
-
-        // 2. 요청자 권한 확인
-        UserInfoResDto requester = userFeign.fetchUserInfoById(userId);
-        WorkspaceParticipant admin = workspaceParticipantRepository
-                .findByWorkspaceIdAndUserId(workspaceId, requester.getUserId())
-                .orElseThrow(() -> new EntityNotFoundException("요청자 워크스페이스 참가자 정보가 없습니다."));
-
-        if(admin.getWorkspaceRole()!=WorkspaceRole.ADMIN) {
-            throw new AccessDeniedException("관리자 권한이 필요합니다.");
-        }
-
-        for (String email : dto.getInviteEmails()) {
-
-            // 1. User 서비스에 회원 존재 여부 확인
-            boolean userExists;
-            try {
-                userFeign.fetchUserInfoById(email);
-                userExists = true;
-            } catch (FeignException.NotFound e) {
-                userExists = false;
-            }
-
-            // 초대코드 생성
-            String inviteCode = UUID.randomUUID().toString();
-
-            // 2. 초대 정보 저장 (회원 여부 포함)
-            WorkspaceInvite invite = WorkspaceInvite.builder()
-                    .workspace(workspace)
-                    .inviteEmail(email)
-                    .inviteCode(inviteCode)
-                    .isAccepted(false)
-                    .isExistingUser(userExists)   // 분기 기준 저장
-                    .expiresAt(LocalDateTime.now().plusDays(3))
-                    .build();
-
-            workspaceInviteRepository.save(invite);
-
-            // 3. 이메일 발송
-            emailService.sendInviteMail(email, inviteCode, workspace.getWorkspaceName(), userExists);
-        }
-}
 
 //    워크스페이스 참여자 목록 조회
     @Transactional(readOnly = true)
