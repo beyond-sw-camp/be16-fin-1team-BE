@@ -17,7 +17,7 @@ import java.util.Map;
 @Component
 public class EventConsumer {
     private final ObjectMapper objectMapper; // JSON 파싱용
-    private final HashOperations<String, String, String> hashOperations;
+    private final HashOperations<String, String, String> hashOperations; // 유저 정보 가져오는 용도
     private final DocumentDocumentRepository documentDocumentRepository;
 
     public EventConsumer(ObjectMapper objectMapper, RedisTemplate<String, String> redisTemplate, DocumentDocumentRepository documentDocumentRepository) {
@@ -29,7 +29,6 @@ public class EventConsumer {
     @KafkaListener(topics = "document-topic", groupId = "search-consumer-group")
     public void handleDocument(String eventMessage, Acknowledgment ack) {
         try {
-            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             // 1. Kafka 메시지(JSON)를 DTO로 파싱
             EventDto eventDto = objectMapper.readValue(eventMessage, EventDto.class);
             String eventType = eventDto.getEventType();
