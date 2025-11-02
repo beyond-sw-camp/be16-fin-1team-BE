@@ -392,8 +392,13 @@ public class DriverService {
     @Transactional(readOnly = true)
     public DocumentResDto findDocument(String userId, String documentId){
         Document document = documentRepository.findById(documentId).orElseThrow(()->new EntityNotFoundException(("해당 문서가 존재하지 않습니다.")));
+        String getFolderName = null;
+        if(document.getFolder()!=null){
+            getFolderName = document.getFolder().getName();
+        }
         return DocumentResDto.builder()
                 .title(document.getTitle())
+                .folderName(getFolderName)
                 .build();
     }
 
