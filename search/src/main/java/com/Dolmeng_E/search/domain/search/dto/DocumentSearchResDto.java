@@ -25,6 +25,8 @@ public class DocumentSearchResDto {
     private String profileImageUrl;
 //  파일, 문서는 생성일, 스톤과 테스크는 마감일
     private LocalDate dateTime;
+    private String rootType;
+    private String rootId;
 
     @Data
     @NoArgsConstructor

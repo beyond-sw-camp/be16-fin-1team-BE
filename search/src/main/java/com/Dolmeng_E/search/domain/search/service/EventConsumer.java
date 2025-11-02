@@ -11,8 +11,10 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 
+import javax.lang.model.UnknownEntityException;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 public class EventConsumer {
@@ -37,8 +39,7 @@ public class EventConsumer {
             // 2. eventType에 따라 분기 처리
             switch (eventType) {
                 case "DOCUMENT_CREATED":
-                case "DOCUMENT_UPDATED":
-                    // 생성과 수정은 ES에서 동일하게 save()를 사용 (Upsert: 없으면 생성, 있으면 덮어쓰기)
+                    // 생성
                     String key = "user:"+eventPayload.getCreatedBy();
                     Map<String, String> userInfo = hashOperations.entries(key);
                     DocumentDocument document = DocumentDocument.builder()
@@ -51,9 +52,23 @@ public class EventConsumer {
                             .createdBy(eventPayload.getCreatedBy())
                             .creatorName(userInfo.get("name"))
                             .profileImageUrl(userInfo.get("profileImageUrl"))
+                            .rootId(eventPayload.getRootId())
+                            .rootType(eventPayload.getRootType())
                             .build();
                     documentDocumentRepository.save(document); // ES에 저장 또는 업데이트
                     System.out.println("ES 색인(C/U) 성공: " + document.getId());
+                    ack.acknowledge();
+                    break;
+                case "DOCUMENT_UPDATED":
+                    Optional<DocumentDocument> optionalDocument = documentDocumentRepository.findById(eventPayload.getId());
+                    if (optionalDocument.isPresent()) {
+                        DocumentDocument documentToUpdate = optionalDocument.get();
+                        documentToUpdate.updateDocument(eventPayload);
+                        documentDocumentRepository.save(documentToUpdate);
+                        System.out.println("ES 업데이트(U) 성공: " + documentToUpdate.getId());
+                    } else {
+                        System.err.println("ES 업데이트(U) 실패: 원본 문서를 찾을 수 없음 - ID: " + eventPayload.getId());
+                    }
                     ack.acknowledge();
                     break;
 

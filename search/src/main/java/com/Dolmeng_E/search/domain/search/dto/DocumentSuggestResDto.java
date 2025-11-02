@@ -13,4 +13,6 @@ public class DocumentSuggestResDto {
     private String id;
     private String docType;
     private String searchTitle;
+    private String rootType;
+    private String rootId;
 }
