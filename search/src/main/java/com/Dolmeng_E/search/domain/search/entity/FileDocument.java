@@ -64,4 +64,12 @@ public class FileDocument {
     // 생성자 이름
     @Field(type = FieldType.Keyword, index = false)
     private String creatorName;
+
+    // 루트 경로
+    @Field(type = FieldType.Keyword, index = false)
+    private String rootType;
+
+    // 루트 ID
+    @Field(type = FieldType.Keyword, index = false)
+    private String rootId;
 }
