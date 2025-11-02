@@ -484,7 +484,7 @@ public class WorkspaceService {
         // 6. 마일스톤 최신화 및 DTO 변환
         List<ProjectProgressResDto> result = uniqueProjects.stream()
                 .map(project -> {
-                    project.updateMilestone(); // 완료/전체 비율 재계산
+                    project.updateMilestone();
                     return ProjectProgressResDto.fromEntity(project);
                 })
                 .toList();
