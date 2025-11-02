@@ -1,6 +1,7 @@
 package com.Dolmeng_E.drive.domain.drive.service;
 
 import com.Dolmeng_E.drive.common.controller.WorkspaceServiceClient;
+import com.Dolmeng_E.drive.common.dto.EntityNameReqDto;
 import com.Dolmeng_E.drive.common.dto.StoneTaskResDto;
 import com.Dolmeng_E.drive.common.dto.SubProjectResDto;
 import com.Dolmeng_E.drive.common.dto.WorkspaceOrProjectManagerCheckDto;
@@ -451,5 +452,20 @@ public class DriverService {
                     .build());
         }
         return folderResDtos;
+    }
+
+    public String getRootName(String userId, String rootId, String rootType){
+        if(rootType.equals("WORKSPACE")){
+            return workspaceServiceClient.getEntityName(userId, EntityNameReqDto.builder()
+                    .workspaceId(rootId).build()).getName();
+        }
+        else if(rootType.equals("STONE")){
+            return workspaceServiceClient.getEntityName(userId, EntityNameReqDto.builder()
+                    .stoneId(rootId).build()).getName();
+        }
+        else{
+            return workspaceServiceClient.getEntityName(userId, EntityNameReqDto.builder()
+                    .projectId(rootId).build()).getName();
+        }
     }
 }

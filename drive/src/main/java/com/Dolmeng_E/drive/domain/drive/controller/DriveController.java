@@ -194,4 +194,14 @@ public class DriveController {
                 .statusMessage("폴더 하위 폴더 목록 조회 성공")
                 .build(), HttpStatus.OK);
     }
+
+    // 문서함 이름 가져오기
+    @GetMapping("/{rootType}/{rootId}/name")
+    public ResponseEntity<?> getRootName(@RequestHeader("X-User-Id") String userId, @PathVariable String rootId, @PathVariable String rootType) {
+        return new ResponseEntity<>(CommonSuccessDto.builder()
+                .result(driverService.getRootName(userId, rootId, rootType))
+                .statusCode(HttpStatus.OK.value())
+                .statusMessage("루트 이름 가져오기 성공")
+                .build(), HttpStatus.OK);
+    }
 }
