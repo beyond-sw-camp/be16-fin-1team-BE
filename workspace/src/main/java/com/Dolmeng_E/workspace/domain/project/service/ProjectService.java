@@ -360,6 +360,7 @@ public class ProjectService {
                 .build();
     }
 
+    // 프로젝트 대시보드용 인원 현황 API
     @Transactional(readOnly = true)
     public ProjectPeopleOverviewResDto getProjectPeopleOverview(String userId, String projectId) {
 
@@ -468,6 +469,37 @@ public class ProjectService {
                         .toList())
                 .build();
     }
+
+    // 프로젝트 stone, task 수 조회 API
+    @Transactional(readOnly = true)
+    public ProjectDashboardResDto getProjectDashboard(String userId, String projectId) {
+
+        // 1) 프로젝트 존재/삭제 체크
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 프로젝트가 존재하지 않습니다."));
+        if (Boolean.TRUE.equals(project.getIsDelete())) {
+            throw new IllegalArgumentException("삭제된 프로젝트입니다.");
+        }
+
+        // 2) 스톤 집계: 루트 제외 + 삭제 제외
+        long totalStoneCount = stoneRepository.countActiveNonRootByProjectId(projectId);
+        long completedStoneCount = stoneRepository.countCompletedNonRootByProjectId(projectId);
+
+        // 3) 태스크 집계: 삭제 스톤 제외
+        long totalTaskCount = taskRepository.countTasksByProjectId(projectId);
+        long completedTaskCount = taskRepository.countDoneTasksByProjectId(projectId);
+
+        // 4) 진행률은 엔티티의 milestone(네가 별도 로직으로 관리 중)을 그대로 사용
+        return ProjectDashboardResDto.builder()
+                .projectMilestone(project.getMilestone())     // 그대로 노출
+                .totalStoneCount((int) totalStoneCount)       // int 필요 시 캐스팅
+                .completedStoneCount((int) completedStoneCount)
+                .totalTaskCount((int) totalTaskCount)
+                .completedTaskCount((int) completedTaskCount)
+                .build();
+    }
+
+
 
 
 
