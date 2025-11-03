@@ -616,13 +616,62 @@ public class DriverService {
     }
     
     // 루트 하위 폴더 불러오기
-    public List<FolderResDto> getRootFolders(String rootId, String rootType){
+    public List<FolderResDto> getRootFolders(String workspaceId, String userId, String rootId, String rootType){
         List<FolderResDto> folderResDtos = new ArrayList<>();
+        if(rootType.equals("WORKSPACE")){
+            try {
+                List<SubProjectResDto> subProjectResDtos = workspaceServiceClient.getSubProjectsByWorkspace(rootId);
+                for(SubProjectResDto subProjectResDto : subProjectResDtos){
+                    folderResDtos.add(FolderResDto.builder()
+                            .rootType("PROJECT")
+                            .rootId(subProjectResDto.getProjectId())
+                            .rootName(subProjectResDto.getProjectName())
+                            .build());
+                }
+            }catch (FeignException e){
+                System.out.println(e.getMessage());
+                throw new IllegalArgumentException("예상치못한오류 발생");
+            }
+        }else if(rootType.equals("PROJECT")) {
+            try {
+                if (Objects.requireNonNull(workspaceServiceClient.checkProjectMembership(rootId, userId).getBody()).getResult().equals(false)
+                        && Objects.requireNonNull(workspaceServiceClient.checkWorkspaceManager(workspaceId, userId).getBody()).getResult().equals(false)) {
+                    throw new IllegalArgumentException("권한이 없습니다.");
+                }
+                List<StoneTaskResDto.StoneInfo> stoneInfos = workspaceServiceClient.getSubStonesAndTasks(rootId).getStones();
+                for(StoneTaskResDto.StoneInfo stoneInfo : stoneInfos){
+                    folderResDtos.add(FolderResDto.builder()
+                            .rootType("STONE")
+                            .rootId(stoneInfo.getStoneId())
+                            .rootName(stoneInfo.getStoneName())
+                            .build());
+                }
+
+            } catch (FeignException e) {
+                System.out.println(e.getMessage());
+                throw new IllegalArgumentException("예상치못한오류 발생");
+            }
+        }else if (rootType.equals("STONE")) {
+            try {
+                WorkspaceOrProjectManagerCheckDto workspaceOrProjectManagerCheckDto = workspaceServiceClient.checkWorkspaceOrProjectManager(rootId, userId);
+                if(Objects.requireNonNull(workspaceServiceClient.checkStoneMembership(rootId, userId).getBody()).getResult().equals(false)
+                        && !workspaceOrProjectManagerCheckDto.isProjectManager() && !workspaceOrProjectManagerCheckDto.isWorkspaceManager()
+                        && Objects.requireNonNull(workspaceServiceClient.checkStoneManagership(rootId, userId).getBody()).getResult().equals(false)
+                ){
+                    throw new IllegalArgumentException("권한이 없습니다.");
+                }
+            }catch (FeignException e){
+                System.out.println(e.getMessage());
+                throw new IllegalArgumentException("예상치못한오류 발생");
+            }
+        }
         List<Folder> folders = folderRepository.findAllByParentIdIsNullAndRootTypeAndRootIdAndIsDeleteIsFalse(RootType.valueOf(rootType),rootId);
         for(Folder folder : folders){
             folderResDtos.add(FolderResDto.builder()
                     .folderName(folder.getName())
                     .folderId(folder.getId())
+                    .rootId(folder.getRootId())
+                    .rootType(folder.getRootType().toString())
                     .build());
         }
         return folderResDtos;

@@ -177,9 +177,9 @@ public class DriveController {
 
     // 위치 별 하위 폴더들 가져오기(폴더트리구조)
     @GetMapping("/{rootType}/{rootId}/folders")
-    public ResponseEntity<?> getContents(@PathVariable String rootId, @PathVariable String rootType) {
+    public ResponseEntity<?> getRootContents(@RequestHeader("X-Workspace-Id") String workspaceId, @RequestHeader("X-User-Id") String userId, @PathVariable String rootId, @PathVariable String rootType) {
         return new ResponseEntity<>(CommonSuccessDto.builder()
-                .result(driverService.getRootFolders(rootId, rootType))
+                .result(driverService.getRootFolders(workspaceId, userId, rootId, rootType))
                 .statusCode(HttpStatus.OK.value())
                 .statusMessage(rootType+"하위 폴더 목록 조회 성공")
                 .build(), HttpStatus.OK);
