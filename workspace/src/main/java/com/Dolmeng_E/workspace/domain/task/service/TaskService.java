@@ -1,5 +1,7 @@
 package com.Dolmeng_E.workspace.domain.task.service;
 
+import com.Dolmeng_E.workspace.common.controller.DriveServiceClient;
+import com.Dolmeng_E.workspace.common.controller.SearchServiceClient;
 import com.Dolmeng_E.workspace.common.domain.NotificationType;
 import com.Dolmeng_E.workspace.common.dto.NotificationCreateReqDto;
 import com.Dolmeng_E.workspace.common.service.MilestoneCalculator;
@@ -49,6 +51,8 @@ public class TaskService {
     private final NotificationKafkaService notificationKafkaService;
     private final ObjectMapper objectMapper;
     private final KafkaTemplate<String, String> kafkaTemplate;
+    private final DriveServiceClient driveServiceClient;
+    private final SearchServiceClient searchServiceClient;
 
     // 태스크 생성(생성시 스톤의 task수 반영 필요)
     public String createTask(String userId, TaskCreateDto dto) {
@@ -243,6 +247,8 @@ public class TaskService {
 
     // 태스크 삭제(삭제시 스톤의 task수 반영 필요)
     public void deleteTask(String userId, String taskId) {
+        driveServiceClient.deleteAll("TASK", taskId);
+        searchServiceClient.deleteAll("TASK", taskId);
         // 1. 태스크 조회
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new EntityNotFoundException("태스크를 찾을 수 없습니다."));

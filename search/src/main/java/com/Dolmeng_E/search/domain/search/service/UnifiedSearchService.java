@@ -163,7 +163,7 @@ public class UnifiedSearchService {
                 // [수정] DTO 필드에 맞게 _source 필터링
                 // (id는 metadata, searchTitle/docType은 _source에서 가져옴)
                 .withSourceFilter(new FetchSourceFilter(
-                        new String[]{"searchTitle", "docType"}, null))
+                        new String[]{"searchTitle", "docType", "fileUrl"}, null))
                 .build();
 
         // [수정 1] DTO 클래스 변경
