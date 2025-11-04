@@ -1063,6 +1063,14 @@ public class StoneService {
                 .toList();
     }
 
+    // 스톤 ID로 테스크 목록 조회
+    public List<SubTaskResDto> getSubTasksByStone(String stoneId){
+        Stone stone = stoneRepository.findById(stoneId).orElseThrow(()->new EntityNotFoundException("존재하지 않는 스톤입니다."));
+        List<Task> tasks = taskRepository.findAllByStone(stone);
+        return tasks.stream()
+                .map(SubTaskResDto::new)
+                .toList();
+    }
 
 
 }

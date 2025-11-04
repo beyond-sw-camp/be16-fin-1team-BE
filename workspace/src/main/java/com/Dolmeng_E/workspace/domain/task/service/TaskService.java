@@ -15,13 +15,17 @@ import com.Dolmeng_E.workspace.domain.task.dto.TaskModifyDto;
 import com.Dolmeng_E.workspace.domain.task.dto.TaskResDto;
 import com.Dolmeng_E.workspace.domain.task.entity.Task;
 import com.Dolmeng_E.workspace.domain.task.repository.TaskRepository;
+import com.Dolmeng_E.workspace.domain.workspace.dto.DriveKafkaReqDto;
 import com.Dolmeng_E.workspace.domain.workspace.entity.Workspace;
 import com.Dolmeng_E.workspace.domain.workspace.entity.WorkspaceParticipant;
 import com.Dolmeng_E.workspace.domain.workspace.entity.WorkspaceRole;
 import com.Dolmeng_E.workspace.domain.workspace.repository.WorkspaceParticipantRepository;
 import com.Dolmeng_E.workspace.domain.workspace.repository.WorkspaceRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,6 +46,8 @@ public class TaskService {
     private final StoneParticipantRepository stoneParticipantRepository;
     private final MilestoneCalculator milestoneCalculator;
     private final NotificationKafkaService notificationKafkaService;
+    private final ObjectMapper objectMapper;
+    private final KafkaTemplate<String, String> kafkaTemplate;
 
     // 태스크 생성(생성시 스톤의 task수 반영 필요)
     public String createTask(String userId, TaskCreateDto dto) {
@@ -258,6 +264,22 @@ public class TaskService {
 
         // 6. 마일스톤 갱신
         milestoneCalculator.updateStoneAndParents(stone);
+
+        // kafka 메시지 발행
+        DriveKafkaReqDto driveKafkaReqDto = DriveKafkaReqDto.builder()
+                .rootId(taskId)
+                .rootType("TASK")
+                .build();
+        try {
+            // 3. DTO를 JSON 문자열로 변환
+            String message = objectMapper.writeValueAsString(driveKafkaReqDto);
+
+            // 4. Kafka 토픽으로 이벤트 발행
+            kafkaTemplate.send("drive-delete-topic", message);
+
+        } catch (JsonProcessingException e) {
+            // 예외 처리 (심각한 경우 트랜잭션 롤백 고려)
+        }
     }
 
 
