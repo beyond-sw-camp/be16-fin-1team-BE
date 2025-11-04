@@ -157,7 +157,12 @@ public class ProjectController {
             @RequestHeader("X-User-Id") String userId,
             @PathVariable String projectId
     ) {
-
+        ProjectSnapshotDto dto = projectService.getProjectLLM(userId,projectId);
+        return new ResponseEntity<>(CommonSuccessDto.builder()
+                .statusMessage("프로젝트 LLM DTO 완료")
+                .result(dto)
+                .statusCode(HttpStatus.OK.value())
+                .build(), HttpStatus.OK);
     }
 
 

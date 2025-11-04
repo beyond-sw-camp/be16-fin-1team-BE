@@ -47,4 +47,13 @@ public interface WorkspaceParticipantRepository extends JpaRepository<WorkspaceP
 
     List<WorkspaceParticipant> findAllByUserId(UUID userId);
 
+    // WorkspaceParticipantRepository
+    @Query("""
+    select count(wp)
+    from WorkspaceParticipant wp
+    where wp.workspace.id = :workspaceId
+      and wp.isDelete = false    -- 활성(삭제되지 않음)
+""")
+    long countActiveByWorkspaceId(String workspaceId);
+
 }
