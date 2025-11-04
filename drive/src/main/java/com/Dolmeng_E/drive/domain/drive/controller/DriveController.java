@@ -77,9 +77,9 @@ public class DriveController {
 
     // 폴더 옮기기
     @PutMapping("/folder/{folderId}/move")
-    public ResponseEntity<?> updateFolderStruct(@RequestHeader("X-User-Id") String userId, @PathVariable String folderId, @RequestBody FolderMoveDto folderMoveDto) {
+    public ResponseEntity<?> updateFolderStruct(@RequestHeader("X-Workspace-Id") String workspaceId, @RequestHeader("X-User-Id") String userId, @PathVariable String folderId, @RequestBody FolderMoveDto folderMoveDto) {
         return new ResponseEntity<>(CommonSuccessDto.builder()
-                .result(driverService.updateFolderStruct(folderId, folderMoveDto))
+                .result(driverService.updateFolderStruct(workspaceId, userId, folderId, folderMoveDto))
                 .statusCode(HttpStatus.OK.value())
                 .statusMessage("폴더 위치 변경 성공")
                 .build(), HttpStatus.OK);
@@ -107,9 +107,9 @@ public class DriveController {
 
     // 파일/문서 옮기기
     @PutMapping("/element/{elementId}/move")
-    public ResponseEntity<?> updateElementStruct(@RequestHeader("X-User-Id") String userId, @PathVariable String elementId, @RequestBody ElementMoveDto elementMoveDto) {
+    public ResponseEntity<?> updateElementStruct(@RequestHeader("X-Workspace-Id") String workspaceId, @RequestHeader("X-User-Id") String userId, @PathVariable String elementId, @RequestBody ElementMoveDto elementMoveDto) {
         return new ResponseEntity<>(CommonSuccessDto.builder()
-                .result(driverService.updateElementStruct(elementId, elementMoveDto))
+                .result(driverService.updateElementStruct(workspaceId, userId, elementId, elementMoveDto))
                 .statusCode(HttpStatus.OK.value())
                 .statusMessage("문서/파일 위치 변경 성공")
                 .build(), HttpStatus.OK);
