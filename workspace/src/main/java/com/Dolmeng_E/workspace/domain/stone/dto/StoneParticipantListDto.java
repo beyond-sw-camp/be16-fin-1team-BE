@@ -12,8 +12,6 @@ import java.util.UUID; // 추가
 @AllArgsConstructor
 @Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class StoneParticipantListDto {
     private String stoneId;
     private Set<UUID> stoneParticipantList; // String → UUID 변경 // 추가
