@@ -1,5 +1,7 @@
 package com.Dolmeng_E.workspace.domain.project.service;
 
+import com.Dolmeng_E.workspace.common.controller.DriveServiceClient;
+import com.Dolmeng_E.workspace.common.controller.SearchServiceClient;
 import com.Dolmeng_E.workspace.common.dto.UserIdListDto;
 import com.Dolmeng_E.workspace.common.dto.UserInfoResDto;
 import com.Dolmeng_E.workspace.common.service.AccessCheckService;
@@ -56,6 +58,8 @@ public class ProjectService {
     private final UserFeign userFeign;
     private final ObjectMapper objectMapper;
     private final KafkaTemplate<String, String> kafkaTemplate;
+    private final DriveServiceClient driveServiceClient;
+    private final SearchServiceClient searchServiceClient;
 
 // 프로젝트 생성
 
@@ -182,6 +186,8 @@ public class ProjectService {
 
     // 프로젝트 삭제
     public void deleteProject(String userId, String projectId) {
+        driveServiceClient.deleteAll("PROJECT", projectId);
+        searchServiceClient.deleteAll("PROJECT", projectId);
 
         // 1. 프로젝트 조회
         Project project = projectRepository.findById(projectId)
@@ -235,23 +241,6 @@ public class ProjectService {
 
         // 8. 저장
         projectRepository.save(project);
-
-        // kafka 메시지 발행
-        DriveKafkaReqDto driveKafkaReqDto = DriveKafkaReqDto.builder()
-                .rootId(project.getId())
-                .rootType("PROJECT")
-                .build();
-        try {
-            // 3. DTO를 JSON 문자열로 변환
-            String message = objectMapper.writeValueAsString(driveKafkaReqDto);
-
-            // 4. Kafka 토픽으로 이벤트 발행
-            kafkaTemplate.send("drive-delete-topic", message);
-
-        } catch (JsonProcessingException e) {
-            // 예외 처리 (심각한 경우 트랜잭션 롤백 고려)
-            throw new RuntimeException("Kafka 메시지 직렬화 실패", e);
-        }
     }
 
 

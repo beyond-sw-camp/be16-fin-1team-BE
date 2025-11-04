@@ -130,7 +130,7 @@ public class DriverService {
             document.updateIsDelete();
             // kafka 메시지 발행
             DocumentKafkaUpdateDto documentKafkaUpdateDto = DocumentKafkaUpdateDto.builder()
-                    .eventType("DOCUMENT_DELETED")
+                    .eventType("FILE_DELETED")
                     .eventPayload(DocumentKafkaUpdateDto.EventPayload.builder()
                             .id(document.getId())
                             .build())
@@ -140,7 +140,7 @@ public class DriverService {
                 String message = objectMapper.writeValueAsString(documentKafkaUpdateDto);
 
                 // 4. Kafka 토픽으로 이벤트 발행
-                kafkaTemplate.send("document-topic", message);
+                kafkaTemplate.send("file-topic", message);
 
             } catch (JsonProcessingException e) {
                 // 예외 처리 (심각한 경우 트랜잭션 롤백 고려)
@@ -868,8 +868,9 @@ public class DriverService {
     }
     
     // 루트id와 type의 모든 폴더/파일/문서 삭제
-    public void deleteAll(String rootId, String rootType){
+    public void deleteAll(String rootType, String rootId){
         try{
+            System.out.println("테스트1");
             if(rootType.equals("WORKSPACE")){
                 documentRepository.softDeleteByRootInfo(RootType.valueOf(rootType), rootId);
                 fileRepository.softDeleteByRootInfo(RootType.valueOf(rootType), rootId);
@@ -900,8 +901,11 @@ public class DriverService {
                     fileRepository.softDeleteByRootInfo(RootType.STONE, stoneInfo.getStoneId());
                     folderRepository.softDeleteByRootInfo(RootType.STONE, stoneInfo.getStoneId());
                 }
+                folderRepository.flush();
+                fileRepository.flush();
+                documentRepository.flush();
             }
-        }catch (Exception e){
+        }catch (FeignException e){
             throw new IllegalArgumentException("삭제에 실패했습니다. 잠시후 다시 시도해주세요.");
         }
 

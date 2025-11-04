@@ -1,5 +1,7 @@
 package com.Dolmeng_E.workspace.domain.workspace.service;
 
+import com.Dolmeng_E.workspace.common.controller.DriveServiceClient;
+import com.Dolmeng_E.workspace.common.controller.SearchServiceClient;
 import com.Dolmeng_E.workspace.common.dto.*;
 import com.Dolmeng_E.workspace.common.service.UserFeign;
 import com.Dolmeng_E.workspace.domain.access_group.dto.AccessGroupAddUserDto;
@@ -71,8 +73,10 @@ public class WorkspaceService {
     private final TaskRepository taskRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
+    private final DriveServiceClient driveServiceClient;
+    private final SearchServiceClient searchServiceClient;
 
-//    워크스페이스 생성(PRO,ENTERPRISE)
+    //    워크스페이스 생성(PRO,ENTERPRISE)
     public String createWorkspace(WorkspaceCreateDto workspaceCreateDto, String userId) {
 
 
@@ -406,6 +410,8 @@ public class WorkspaceService {
 
     // 워크스페이스 삭제
     public void deleteWorkspace(String userId, String workspaceId) {
+        driveServiceClient.deleteAll("WORKSPACE", workspaceId);
+        searchServiceClient.deleteAll("WORKSPACE", workspaceId);
         // 1. 유저 정보 검증 (Feign)
         UserInfoResDto userInfo = userFeign.fetchUserInfoById(userId);
 
@@ -432,23 +438,6 @@ public class WorkspaceService {
         // 6. 워크스페이스 참여자들도 함께 비활성화
         List<WorkspaceParticipant> participants = workspaceParticipantRepository.findAllByWorkspace(workspace);
         participants.forEach(p -> p.deleteParticipant());
-
-        // kafka 메시지 발행
-        DriveKafkaReqDto driveKafkaReqDto = DriveKafkaReqDto.builder()
-                .rootId(workspaceId)
-                .rootType("WORKSPACE")
-                .build();
-        try {
-            // 3. DTO를 JSON 문자열로 변환
-            String message = objectMapper.writeValueAsString(driveKafkaReqDto);
-
-            // 4. Kafka 토픽으로 이벤트 발행
-            kafkaTemplate.send("drive-delete-topic", message);
-
-        } catch (JsonProcessingException e) {
-            // 예외 처리 (심각한 경우 트랜잭션 롤백 고려)
-            throw new RuntimeException("Kafka 메시지 직렬화 실패", e);
-        }
     }
 
     // 워크스페이스 정보 반환
