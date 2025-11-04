@@ -1,5 +1,6 @@
 package com.Dolmeng_E.workspace.domain.stone.controller;
 
+import com.Dolmeng_E.workspace.common.dto.SubProjectResDto;
 import com.Dolmeng_E.workspace.common.dto.UserInfoListResDto;
 import com.Dolmeng_E.workspace.common.dto.UserInfoResDto;
 import com.Dolmeng_E.workspace.domain.stone.dto.*;
@@ -218,5 +219,9 @@ public class StoneController {
                 .build(),
                 HttpStatus.OK);
     }
-
+    // workspaceId 넘겼을 때 하위 프로젝트 Id, 프로젝트명 가져오는 api
+    @GetMapping("/task/{stoneId}/sub-task")
+    public List<SubTaskResDto> getSubTasks(@PathVariable String stoneId) {
+        return stoneService.getSubTasksByStone(stoneId);
+    }
 }
