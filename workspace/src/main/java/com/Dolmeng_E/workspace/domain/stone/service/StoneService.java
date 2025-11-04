@@ -1,5 +1,7 @@
 package com.Dolmeng_E.workspace.domain.stone.service;
 
+import com.Dolmeng_E.workspace.common.controller.DriveServiceClient;
+import com.Dolmeng_E.workspace.common.controller.SearchServiceClient;
 import com.Dolmeng_E.workspace.common.dto.*;
 import com.Dolmeng_E.workspace.common.service.AccessCheckService;
 import com.Dolmeng_E.workspace.common.service.ChatFeign;
@@ -54,10 +56,10 @@ public class StoneService {
     private final UserFeign userFeign;
     private final MilestoneCalculator milestoneCalculator;
     private final ChatFeign chatFeign;
-    private final ObjectMapper objectMapper;
-    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final DriveServiceClient driveServiceClient;
+    private final SearchServiceClient searchServiceClient;
 
-// 최상위 스톤 생성(프로젝트 생성 시 자동 생성)
+    // 최상위 스톤 생성(프로젝트 생성 시 자동 생성)
     public String createTopStone(TopStoneCreateDto dto) {
 
         // 1. 참여자 검증
@@ -695,6 +697,8 @@ public class StoneService {
 
     // 스톤 삭제
     public void deleteStone(String userId, String stoneId) {
+        driveServiceClient.deleteAll("STONE", stoneId);
+        searchServiceClient.deleteAll("STONE", stoneId);
 
         // 1. 스톤 조회
         Stone stone = stoneRepository.findById(stoneId)
@@ -771,23 +775,6 @@ public class StoneService {
 
         // 11. 변경 저장
         stoneRepository.save(stone);
-
-        // kafka 메시지 발행
-        DriveKafkaReqDto driveKafkaReqDto = DriveKafkaReqDto.builder()
-                .rootId(stone.getId())
-                .rootType("STONE")
-                .build();
-        try {
-            // 3. DTO를 JSON 문자열로 변환
-            String message = objectMapper.writeValueAsString(driveKafkaReqDto);
-
-            // 4. Kafka 토픽으로 이벤트 발행
-            kafkaTemplate.send("drive-delete-topic", message);
-
-        } catch (JsonProcessingException e) {
-            // 예외 처리 (심각한 경우 트랜잭션 롤백 고려)
-            throw new RuntimeException("Kafka 메시지 직렬화 실패", e);
-        }
     }
 
     // 스톤 완료 처리
