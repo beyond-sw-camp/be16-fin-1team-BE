@@ -1,12 +1,8 @@
 package com.Dolmeng_E.search.domain.search.service;
 
-import com.Dolmeng_E.search.domain.search.dto.EventDto;
 import com.Dolmeng_E.search.domain.search.dto.StoneEventDto;
-import com.Dolmeng_E.search.domain.search.entity.FileDocument;
 import com.Dolmeng_E.search.domain.search.entity.ParticipantInfo;
 import com.Dolmeng_E.search.domain.search.entity.StoneDocument;
-import com.Dolmeng_E.search.domain.search.repository.DocumentDocumentRepository;
-import com.Dolmeng_E.search.domain.search.repository.FileDocumentRepository;
 import com.Dolmeng_E.search.domain.search.repository.StoneDocumentRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.data.redis.core.HashOperations;
@@ -18,7 +14,6 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Component
 public class StoneEventConsumer {
@@ -76,7 +71,7 @@ public class StoneEventConsumer {
                     System.out.println("ES 색인(C/U) 성공: " + stoneDocument.getId());
                     ack.acknowledge();
                     break;
-                case "FILE_UPDATED":
+                case "STONE_UPDATED":
                     ack.acknowledge();
                     break;
                 default:

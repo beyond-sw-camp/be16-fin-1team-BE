@@ -285,6 +285,7 @@ public class StoneService {
         for(ProjectParticipant pp : projectParticipants) {
             viewableUserIds.add(pp.getWorkspaceParticipant().getUserId().toString());
         }
+        viewableUserIds.add(workspaceParticipantRepository.findByWorkspaceIdAndWorkspaceRole(workspace.getId(), WorkspaceRole.ADMIN).getUserId().toString());
         List<StoneKafkaSaveDto.EventPayload.ParticipantInfo> participantInfos = new ArrayList<>();
         List<StoneParticipant> stoneParticipants = stoneParticipantRepository.findAllByStone(childStone);
         for(StoneParticipant sp : stoneParticipants) {
