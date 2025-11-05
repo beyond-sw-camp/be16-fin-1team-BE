@@ -3,6 +3,7 @@ package com.Dolmeng_E.search.domain.search.service;
 import com.Dolmeng_E.search.domain.search.dto.StoneEventDto;
 import com.Dolmeng_E.search.domain.search.entity.ParticipantInfo;
 import com.Dolmeng_E.search.domain.search.entity.StoneDocument;
+import com.Dolmeng_E.search.domain.search.entity.TaskDocument;
 import com.Dolmeng_E.search.domain.search.repository.StoneDocumentRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.data.redis.core.HashOperations;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 public class StoneEventConsumer {
@@ -72,6 +74,29 @@ public class StoneEventConsumer {
                     ack.acknowledge();
                     break;
                 case "STONE_UPDATED":
+                    Optional<StoneDocument> optionalStoneDocument = stoneDocumentRepository.findById(eventPayload.getId());
+                    if (optionalStoneDocument.isPresent()) {
+                        StoneDocument stoneToUpdate = optionalStoneDocument.get();
+                        if(eventPayload.getName()!=null){
+                            stoneToUpdate.setSearchTitle(eventPayload.getName());
+                        }
+                        if(eventPayload.getDescription()!=null){
+                            stoneToUpdate.setSearchContent(eventPayload.getDescription());
+                        }
+                        if(eventPayload.getManager()!=null){
+                            stoneToUpdate.setCreatedBy(eventPayload.getManager());
+                        }
+                        if(eventPayload.getEndDate()!=null){
+                            stoneToUpdate.setDateTime(eventPayload.getEndDate().toLocalDate());
+                        }
+                        if(eventPayload.getStatus()!=null){
+                            stoneToUpdate.setStoneStatus(eventPayload.getStatus());
+                        }
+                        stoneDocumentRepository.save(stoneToUpdate);
+                        System.out.println("ES 업데이트(U) 성공: " + stoneToUpdate.getId());
+                    } else {
+                        System.err.println("ES 업데이트(U) 실패: 원본 문서를 찾을 수 없음 - ID: " + eventPayload.getId());
+                    }
                     ack.acknowledge();
                     break;
                 default:
