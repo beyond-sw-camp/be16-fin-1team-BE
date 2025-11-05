@@ -373,6 +373,8 @@ public class DriverService {
             document.setRootId(elementMoveDto.getRootId());
             document.setRootType(RootType.valueOf(elementMoveDto.getRootType()));
 
+            Set<String> participants = workspaceServiceClient.getViewableUserIds(elementMoveDto.getRootId(), elementMoveDto.getRootType());
+
             // kafka 메시지 발행
             DocumentKafkaUpdateDto documentKafkaUpdateDto = DocumentKafkaUpdateDto.builder()
                     .eventType("DOCUMENT_UPDATED")
@@ -381,6 +383,7 @@ public class DriverService {
                             .parentId(elementMoveDto.getFolderId() != null ? elementMoveDto.getFolderId() : null)
                             .rootId(document.getRootId())
                             .rootType(document.getRootType().toString())
+                            .viewableUserIds(participants)
                             .build())
                     .build();
             try {
