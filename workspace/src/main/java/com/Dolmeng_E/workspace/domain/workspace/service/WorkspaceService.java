@@ -1152,6 +1152,34 @@ public class WorkspaceService {
                 .toList();
     }
 
+    // 접근 권한 유저ID 리턴
+    public List<String> getViewableUserIds(String rootId, String rootType){
+        List<String> viewableUserIds = new ArrayList<>();
+        // 워크스페이스일 경우
+        if(rootType.equals("WORKSPACE")){
+            Workspace workspace = workspaceRepository.findById(rootId).orElseThrow(()->new EntityNotFoundException("존재하지 않는 워크스페이스입니다."));
+            List<WorkspaceParticipant> workspaceParticipants = workspaceParticipantRepository.findAllByWorkspace(workspace);
+            for(WorkspaceParticipant workspaceParticipant : workspaceParticipants){
+                viewableUserIds.add(workspaceParticipant.getUserId().toString());
+            }
+        }else if(rootType.equals("PROJECT")){
+            Project project = projectRepository.findById(rootId).orElseThrow(()->new EntityNotFoundException("존재하지 않는 프로젝트입니다."));
+            List<ProjectParticipant> projectParticipants = projectParticipantRepository.findAllByProject(project);
+            for(ProjectParticipant projectParticipant : projectParticipants){
+                viewableUserIds.add(projectParticipant.getWorkspaceParticipant().getUserId().toString());
+            }
+            viewableUserIds.add(workspaceParticipantRepository.findByWorkspaceIdAndWorkspaceRole(project.getWorkspace().getId(), WorkspaceRole.ADMIN).getUserId().toString());
+        }else if(rootType.equals("STONE")){
+            Stone stone = stoneRepository.findById(rootId).orElseThrow(()->new EntityNotFoundException("존재하지 않는 스톤입니다."));
+            List<StoneParticipant> stoneParticipants = stoneParticipantRepository.findAllByStone(stone);
+            for(StoneParticipant stoneParticipant : stoneParticipants){
+                viewableUserIds.add(stoneParticipant.getWorkspaceParticipant().getUserId().toString());
+            }
+            viewableUserIds.add(workspaceParticipantRepository.findByWorkspaceIdAndWorkspaceRole(stone.getProject().getWorkspace().getId(), WorkspaceRole.ADMIN).getUserId().toString());
+            viewableUserIds.add((stone.getProject().getWorkspaceParticipant().getUserId().toString()));
+        }
+        return viewableUserIds;
+    }
 
 
 

@@ -465,6 +465,8 @@ public class DriverService {
             // kafka 메시지 발행
             List<String> viewableUserIds = new ArrayList<>();
             viewableUserIds.add(savedFile.getCreatedBy());
+            List<String> participants = workspaceServiceClient.getViewableUserIds(savedFile.getRootId(), savedFile.getRootType().toString());
+            viewableUserIds.addAll(participants);
             DocumentKafkaSaveDto documentKafkaSaveDto = DocumentKafkaSaveDto.builder()
                     .eventType("FILE_CREATED")
                     .eventPayload(DocumentKafkaSaveDto.EventPayload.builder()
@@ -571,6 +573,8 @@ public class DriverService {
         // kafka 메시지 발행
         List<String> viewableUserIds = new ArrayList<>();
         viewableUserIds.add(savedDocument.getCreatedBy());
+        List<String> participants = workspaceServiceClient.getViewableUserIds(savedDocument.getRootId(), savedDocument.getRootType().toString());
+        viewableUserIds.addAll(participants);
         DocumentKafkaSaveDto documentKafkaSaveDto = DocumentKafkaSaveDto.builder()
                 .eventType("DOCUMENT_CREATED")
                 .eventPayload(DocumentKafkaSaveDto.EventPayload.builder()

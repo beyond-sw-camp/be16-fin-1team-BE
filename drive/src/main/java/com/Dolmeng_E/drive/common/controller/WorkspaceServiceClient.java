@@ -73,4 +73,8 @@ public interface WorkspaceServiceClient {
             @RequestHeader("X-User-Id") String userId,
             @RequestBody EntityNameReqDto dto
     );
+
+    // 파일/문서 접근 초기 접근 권한 유저아이디 목록 불러오는 API
+    @GetMapping("/workspace/{rootId}/{rootType}/getViewableUserIds")
+    List<String> getViewableUserIds(@PathVariable String rootId, @PathVariable String rootType);
 }
