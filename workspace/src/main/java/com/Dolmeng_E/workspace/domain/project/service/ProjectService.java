@@ -15,6 +15,7 @@ import com.Dolmeng_E.workspace.domain.stone.dto.ProjectPeopleOverviewResDto;
 import com.Dolmeng_E.workspace.domain.stone.dto.SimpleStoneRefDto;
 import com.Dolmeng_E.workspace.domain.stone.entity.Stone;
 import com.Dolmeng_E.workspace.domain.stone.entity.StoneParticipant;
+import com.Dolmeng_E.workspace.domain.stone.entity.StoneStatus;
 import com.Dolmeng_E.workspace.domain.stone.repository.StoneParticipantRepository;
 import com.Dolmeng_E.workspace.domain.project.repository.ProjectParticipantRepository;
 import com.Dolmeng_E.workspace.domain.project.repository.ProjectRepository;
@@ -37,6 +38,8 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -503,13 +506,78 @@ public class ProjectService {
         long totalTaskCount = taskRepository.countTasksByProjectId(projectId);
         long completedTaskCount = taskRepository.countDoneTasksByProjectId(projectId);
 
-        // 4) 진행률은 엔티티의 milestone(네가 별도 로직으로 관리 중)을 그대로 사용
+        // 4) 진행률은 엔티티의 milestone을 그대로 사용
+
+    // 추가된 부분 데이터 계산
+
+        // 1. 평균 태스크 완료시간(일 단위, 반올림)
+        Double avgSec = taskRepository.avgCompletionSecondsByProjectId(projectId);
+        int avgTaskCompletedTime = (avgSec == null) ? 0 : (int) Math.round(avgSec / 86400.0);
+
+        // 2. 태스크 리스크 지수(밀린태스크 수 / 전체 태스크 수)
+        LocalDateTime now = LocalDateTime.now();
+        long delayedOpen    = taskRepository.countDelayedOpenByProjectId(projectId, now);
+
+        BigDecimal taskRisk = (totalTaskCount > 0)
+                ? BigDecimal.valueOf(delayedOpen)
+                .divide(BigDecimal.valueOf(totalTaskCount), 4, RoundingMode.HALF_UP)
+                : BigDecimal.ZERO;
+
+        // 지연되고 있는 태스크 top3 정보
+        List<Task> delayed = taskRepository
+                .findTop3ByStone_Project_IdAndIsDoneFalseAndEndTimeBeforeOrderByEndTimeAsc(projectId, now);
+
+        List<ProjectDashboardResDto.LazyTask> lazyTasklist = delayed.stream()
+                .map(t -> ProjectDashboardResDto.LazyTask.builder()
+                        .taskName(t.getTaskName())
+                        .lazyDay((int) java.time.temporal.ChronoUnit.DAYS.between(t.getEndTime(), now))
+                        .taskManagerName(
+                                (t.getTaskManager() != null) ? t.getTaskManager().getUserName() : null
+                        )
+                        .build()
+                )
+                .toList();
+
+        // 완료된 스톤들 정보
+        List<ProjectDashboardResDto.CompletedStone> completedStoneList =
+                project.getStones().stream()
+                        .filter(s -> !Boolean.TRUE.equals(s.getIsDelete()))
+                        // 루트 스톤 제외하려면
+                        .filter(s -> s.getParentStoneId() != null)
+                        .filter(s -> s.getStatus().equals(StoneStatus.COMPLETED))
+                        .sorted(Comparator.comparing(Stone::getUpdatedAt,
+                                Comparator.nullsLast(Comparator.naturalOrder())).reversed())
+                        .map(s -> ProjectDashboardResDto.CompletedStone.builder()
+                                .stoneId(s.getId())
+                                .stoneName(s.getStoneName())
+                                .stoneCompletedDay(s.getUpdatedAt())
+                                .build())
+                        .toList();
+
+        // 완료된 태스크들 정보
+        List<ProjectDashboardResDto.CompletedTask> completedTaskList =
+                taskRepository.findAllByProjectIdAndIsDoneTrueOrderByCompletedAtDesc(projectId).stream()
+                        .map(t -> ProjectDashboardResDto.CompletedTask.builder()
+                                .taskId(t.getId())
+                                .taskName(t.getTaskName())
+                                .taskCompletedDay(t.getTaskCompletedDate())
+                                .build())
+                        .toList();
+
+
         return ProjectDashboardResDto.builder()
-                .projectMilestone(project.getMilestone())     // 그대로 노출
-                .totalStoneCount((int) totalStoneCount)       // int 필요 시 캐스팅
+                .projectMilestone(project.getMilestone())
+                .totalStoneCount((int) totalStoneCount)
                 .completedStoneCount((int) completedStoneCount)
                 .totalTaskCount((int) totalTaskCount)
                 .completedTaskCount((int) completedTaskCount)
+//                .projectProgress(projectProgress) // 프젝마일스톤과 동일
+                .avgTaskCompletedTime(avgTaskCompletedTime)   // 단위: '일'
+                .taskRisk(taskRisk)
+                .lazyTasklist(lazyTasklist)
+                .completedStoneList(completedStoneList)
+                .completedTaskList(completedTaskList)
+//                .predictCompleteDay(predictCompleteDay)
                 .build();
     }
 

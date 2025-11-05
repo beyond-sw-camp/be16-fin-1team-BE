@@ -37,8 +37,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.Dolmeng_E.workspace.domain.stone.dto.TaskResDto;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.time.LocalDateTime.now;
 
 @Service
 @Transactional
@@ -863,6 +866,10 @@ public class StoneService {
             stoneRepository.findById(stone.getParentStoneId())
                     .ifPresent(milestoneCalculator::updateStoneAndParents);
         }
+
+        // 스톤 완료시간 추가
+        LocalDateTime __now = now();
+        stone.setStoneCompletedDay(__now);
 
         // 상위스톤 담당자에게 알림 발송
 
