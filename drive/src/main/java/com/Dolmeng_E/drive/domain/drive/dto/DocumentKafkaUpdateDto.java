@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -24,7 +25,7 @@ public class DocumentKafkaUpdateDto {
         private String id;
         private String searchTitle;
         private String searchContent;
-        private List<String> viewableUserIds;
+        private Set<String> viewableUserIds;
         private String parentId;
         private String rootType;
         private String rootId;

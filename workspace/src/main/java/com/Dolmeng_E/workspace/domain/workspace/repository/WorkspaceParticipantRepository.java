@@ -42,6 +42,7 @@ public interface WorkspaceParticipantRepository extends JpaRepository<WorkspaceP
     boolean existsByWorkspaceIdAndUserId(String workspaceId, UUID userId);
 
     Page<WorkspaceParticipant> findAllByWorkspaceId(String workspaceId, Pageable pageable);
+    List<WorkspaceParticipant> findAllByWorkspaceId(String workspaceId);
 
     List<WorkspaceParticipant> findByWorkspaceIdAndIsDeleteFalse(String workspaceId);
 

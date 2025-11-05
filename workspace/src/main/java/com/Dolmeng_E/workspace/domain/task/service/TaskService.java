@@ -38,9 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime; // [ADD]
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Transactional
@@ -128,7 +126,7 @@ public class TaskService {
         taskRepository.saveAndFlush(task);
 
         // kafka 메시지 발행
-        List<String> viewableUserIds = new ArrayList<>();
+        Set<String> viewableUserIds = new HashSet<>();
         List<StoneParticipant> stoneParticipants = stoneParticipantRepository.findAllByStone(stone);
         for(StoneParticipant sp : stoneParticipants) {
             viewableUserIds.add(sp.getWorkspaceParticipant().getUserId().toString());
