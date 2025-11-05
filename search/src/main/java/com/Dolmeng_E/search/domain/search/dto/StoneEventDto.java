@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -24,7 +25,7 @@ public class StoneEventDto {
         private String id;
         private String name;
         private String description;
-        private List<String> viewableUserIds;
+        private Set<String> viewableUserIds;
         private LocalDateTime endDate;
         private String projectId;
         private String rootType;

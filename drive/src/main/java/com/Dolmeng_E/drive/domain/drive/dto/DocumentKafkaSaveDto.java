@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -25,7 +26,7 @@ public class DocumentKafkaSaveDto {
         private String searchTitle;
         private String searchContent;
         private String createdBy;
-        private List<String> viewableUserIds;
+        private Set<String> viewableUserIds;
         private LocalDateTime createdAt;
         private String rootType;
         private String rootId;

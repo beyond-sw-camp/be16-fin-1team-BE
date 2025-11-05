@@ -280,7 +280,7 @@ public class StoneService {
         }
 
         // kafka 메시지 발행
-        List<String> viewableUserIds = new ArrayList<>();
+        Set<String> viewableUserIds = new HashSet<>();
         List<ProjectParticipant> projectParticipants = projectParticipantRepository.findAllByProject(childStone.getProject());
         for(ProjectParticipant pp : projectParticipants) {
             viewableUserIds.add(pp.getWorkspaceParticipant().getUserId().toString());

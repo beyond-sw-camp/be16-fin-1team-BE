@@ -8,6 +8,7 @@ import org.springframework.data.elasticsearch.annotations.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @Builder
@@ -50,7 +51,7 @@ public class TaskDocument {
     // --- 권한/정렬 필드 ---
     // 권한 필드 stone 참여자 목록 + 프로젝트 관리자 + 워크스페이스 관리자
     @Field(type = FieldType.Keyword)
-    private List<String> viewableUserIds;
+    private Set<String> viewableUserIds;
 
     // --- URL 생성 및 UI 표시용 필드 ---
     // 완료 여부
