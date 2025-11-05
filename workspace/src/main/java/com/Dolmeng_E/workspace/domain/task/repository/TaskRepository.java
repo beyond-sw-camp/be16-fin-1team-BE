@@ -172,4 +172,19 @@ public interface TaskRepository extends JpaRepository<Task, String> {
         group by t.taskManager.id
     """)
     List<Object[]> countTotalsAndCompletedByManager(@Param("projectId") String projectId);
+
+    // 프로젝트 기준으로 지연 중인 태스크 상위 3건 (오래 밀린 순)
+    List<Task> findTop3ByStone_Project_IdAndIsDoneFalseAndEndTimeBeforeOrderByEndTimeAsc(
+            String projectId, LocalDateTime now
+    );
+
+    // ⚠️ 완료된 태스크 전부 (완료일 최신순) — 엔티티 필드명에 맞게 정렬 기준 수정 (taskCompletedDate)
+    @Query("""
+        select t from Task t
+          join t.stone s
+         where s.project.id = :projectId
+           and t.isDone = true
+      order by t.taskCompletedDate desc
+    """)
+    List<Task> findAllByProjectIdAndIsDoneTrueOrderByCompletedAtDesc(@Param("projectId") String projectId);
 }

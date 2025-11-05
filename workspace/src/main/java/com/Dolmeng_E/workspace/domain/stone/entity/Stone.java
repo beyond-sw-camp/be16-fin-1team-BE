@@ -4,6 +4,7 @@ import com.Dolmeng_E.workspace.domain.project.entity.Project;
 import com.Dolmeng_E.workspace.domain.task.entity.Task;
 import com.Dolmeng_E.workspace.domain.workspace.entity.WorkspaceParticipant;
 import com.example.modulecommon.domain.BaseTimeEntity;
+import io.micrometer.core.annotation.Counted;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
@@ -96,6 +97,10 @@ public class Stone extends BaseTimeEntity {
     // 추가 : 스톤 설명
     @Column(name = "stone_describe")
     private String stoneDescribe;
+
+    // 추가 : 스톤 완료일자
+    @Column(name = "stone_completed_day")
+    private LocalDateTime stoneCompletedDay;
 
     // 자식스톤 관계 매핑을 위한 oneToMany(트리구조 조회시 활용)
     @OneToMany(mappedBy = "stone", cascade = CascadeType.ALL, orphanRemoval = true)
