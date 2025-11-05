@@ -9,6 +9,7 @@ import org.springframework.data.elasticsearch.annotations.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @Builder
@@ -51,7 +52,7 @@ public class FileDocument {
     // --- 권한/정렬 필드 ---
     // 해당 폴더 권한 + 관리자
     @Field(type = FieldType.Keyword)
-    private List<String> viewableUserIds;
+    private Set<String> viewableUserIds;
 
     // --- URL 생성 및 UI 표시용 필드 ---
     // 생성일

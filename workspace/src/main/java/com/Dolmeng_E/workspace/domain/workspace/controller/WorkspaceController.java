@@ -479,6 +479,12 @@ public class WorkspaceController {
         );
     }
 
+    // 접근 가능한 유저 목록 가져오기
+    @GetMapping("/{rootId}/{rootType}/getViewableUserIds")
+    public List<String> getViewableUserIds(@PathVariable String rootId, @PathVariable String rootType) {
+        return workspaceService.getViewableUserIds(rootId, rootType);
+    }
+
 
 
 
