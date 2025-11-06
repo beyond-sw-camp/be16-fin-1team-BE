@@ -13,10 +13,10 @@ metadata:
     # nginx.ingress.kubernetes.io/rewrite-target: /$1 #첫번쨰 prefix제거
     
 spec:
-#  tls:
-#  - hosts:
-#    - "server.orbitflow.store"
-#    secretName: server-orbit-store-tls # Certificate의 secretName
+  tls:
+  - hosts:
+    - "server.orbitflow.store"
+    secretName: server-orbit-store-tls # Certificate의 secretName
   rules:
   - host: server.orbitflow.store  # 설정하려는 도메인 이름.
     http:
