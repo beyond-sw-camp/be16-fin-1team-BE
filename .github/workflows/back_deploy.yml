@@ -31,7 +31,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           # (수정) fetch-depth: 0 대신 2로 변경 (push 이벤트 비교용)
-          fetch-depth: 2
+          fetch-depth: 0
 
       - name: Detect changed services (using paths-filter)
         id: filter
