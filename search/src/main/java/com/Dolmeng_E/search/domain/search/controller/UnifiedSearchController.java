@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 public class UnifiedSearchController {
     private final UnifiedSearchService unifiedSearchService;
     private final SearchService searchService;
-
     @GetMapping("/search")
     public ResponseEntity<?> searchDocument(@RequestHeader("X-Workspace-Id") String workspaceId, @RequestHeader("X-User-Id") String userId, @RequestParam String keyword) {
         return new ResponseEntity<>(CommonSuccessDto.builder()
