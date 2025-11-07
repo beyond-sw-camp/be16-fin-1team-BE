@@ -141,7 +141,7 @@ jobs:
       - name: Update Kubeconfig
         uses: aws-actions/amazon-eks-kubeconfig@v1
         with:
-          name: ${{ env.EKS_CLUSTER_NAME }}
+          cluster-name: ${{ env.EKS_CLUSTER_NAME }}
           region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }}
 
