@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 public class UnifiedSearchController {
-
     private final UnifiedSearchService unifiedSearchService;
     private final SearchService searchService;
 
