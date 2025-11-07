@@ -25,15 +25,14 @@ public class DocumentEventConsumer {
     private final DocumentDocumentRepository documentDocumentRepository;
     private final HtmlParsingService htmlParsingService;
 
+
+
     public DocumentEventConsumer(ObjectMapper objectMapper, RedisTemplate<String, String> redisTemplate, DocumentDocumentRepository documentDocumentRepository, FileDocumentRepository fileDocumentRepository, HtmlParsingService htmlParsingService) {
         this.objectMapper = objectMapper;
         this.hashOperations = redisTemplate.opsForHash();
         this.documentDocumentRepository = documentDocumentRepository;
         this.htmlParsingService = htmlParsingService;
     }
-
-
-
     @KafkaListener(topics = "document-topic", groupId = "search-consumer-group")
     public void handleDocument(String eventMessage, Acknowledgment ack) {
         try {
