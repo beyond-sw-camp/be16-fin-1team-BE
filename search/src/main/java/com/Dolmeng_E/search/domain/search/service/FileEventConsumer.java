@@ -17,6 +17,7 @@ import java.util.Optional;
 
 @Component
 public class FileEventConsumer {
+
     private final ObjectMapper objectMapper; // JSON 파싱용
     private final HashOperations<String, String, String> hashOperations; // 유저 정보 가져오는 용도
     private final FileDocumentRepository fileDocumentRepository;

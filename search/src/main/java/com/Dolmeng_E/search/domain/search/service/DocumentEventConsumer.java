@@ -20,7 +20,6 @@ import java.util.Optional;
 
 @Component
 public class DocumentEventConsumer {
-
     private final ObjectMapper objectMapper;
     private final HashOperations<String, String, String> hashOperations;
     private final DocumentDocumentRepository documentDocumentRepository;
@@ -32,6 +31,8 @@ public class DocumentEventConsumer {
         this.documentDocumentRepository = documentDocumentRepository;
         this.htmlParsingService = htmlParsingService;
     }
+
+
 
     @KafkaListener(topics = "document-topic", groupId = "search-consumer-group")
     public void handleDocument(String eventMessage, Acknowledgment ack) {
