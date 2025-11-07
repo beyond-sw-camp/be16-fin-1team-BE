@@ -126,15 +126,12 @@ jobs:
       - name: Build, tag, and push Docker image to ECR
         id: build-image
         env:
-          # (중요) PR 머지 시에는 github.sha가 머지 커밋의 SHA를 올바르게 가리킵니다.
-          IMAGE_TAG: ${{ github.sha }}
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           SERVICE_FOLDER: ${{ matrix.service }}
           ECR_REPO_NAME: ${{ steps.map-names.outputs.ecr_repo }}
         run: |
           echo "Building service from folder: $SERVICE_FOLDER"
           cd $SERVICE_FOLDER
-          docker build -t $ECR_REGISTRY/$ECR_REPO_NAME:$IMAGE_TAG --build-arg GITHUB_USER=EunDuk2 --build-arg GITHUB_TOKEN=${{ secrets.GH_TOKEN }} .
           docker build -t $ECR_REGISTRY/$ECR_REPO_NAME:latest --build-arg GITHUB_USER=EunDuk2 --build-arg GITHUB_TOKEN=${{ secrets.GH_TOKEN }} .
           docker push $ECR_REGISTRY/$ECR_REPO_NAME:latest
 
@@ -150,7 +147,6 @@ jobs:
           K8S_DEPLOYMENT_NAME: ${{ steps.map-names.outputs.k8s_deployment }}
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPO_NAME: ${{ steps.map-names.outputs.ecr_repo }}
-          IMAGE_TAG: ${{ github.sha }}
         run: |
           echo "Deploying ${{ matrix.service }} (K8s: $K8S_DEPLOYMENT_NAME)..."
-          kubectl set image deployment/$K8S_DEPLOYMENT_NAME *=*$ECR_REGISTRY/$ECR_REPO_NAME:$IMAGE_TAG -n ${{ env.K8S_NAMESPACE }}
+          kubectl set image deployment/$K8S_DEPLOYMENT_NAME *=$ECR_REGISTRY/$ECR_REPO_NAME:latest -n ${{ env.K8S_NAMESPACE }}
