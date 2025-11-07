@@ -62,5 +62,5 @@ jobs:
           # 'api-gateway' 컨테이너(가정)의 이미지를
           # 방금 푸시한 새 이미지 태그로 교체합니다.
           kubectl set image deployment/chat-depl \
-          chat=$REGISTRY/$REPOSITORY:$IMAGE_TAG \
+          chat-container=$REGISTRY/$REPOSITORY:$IMAGE_TAG \
           -n orbit
