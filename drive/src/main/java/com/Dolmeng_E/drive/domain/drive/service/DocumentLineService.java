@@ -285,6 +285,4 @@ public class DocumentLineService {
                 .profileImage(userInfo.get("profileImageUrl"))
                 .build();
     }
-
-
 }
