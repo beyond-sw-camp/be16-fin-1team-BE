@@ -32,6 +32,7 @@ public class DocumentEventConsumer {
         this.htmlParsingService = htmlParsingService;
     }
 
+
     @KafkaListener(topics = "document-topic", groupId = "search-consumer-group")
     public void handleDocument(String eventMessage, Acknowledgment ack) {
         try {
