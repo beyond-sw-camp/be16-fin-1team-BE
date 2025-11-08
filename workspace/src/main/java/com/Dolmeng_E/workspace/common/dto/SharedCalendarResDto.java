@@ -15,4 +15,5 @@ public class SharedCalendarResDto {
     private LocalDateTime startedAt;
     private LocalDateTime endedAt;
     private Boolean isShared;
+    private String userName;
 }
