@@ -39,6 +39,8 @@
   [📢 Orbit 발표자료 링크](https://www.canva.com/design/DAG4NaBfaR4/Lf-l1N13jIC3GpZDcCXmLg/edit?utm_content=DAG4NaBfaR4&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)
 </div>
 
+<br/>
+
 ## 📖 배경 및 필요성
 현대 협업 환경은 Jira, Slack, Notion 등 기능별 SaaS 사용이 보편화되면서 **정보가 파편화**되고 잦은 **컨텍스트 전환**이 발생하는 문제를 겪고 있습니다. 또한, 기존 툴의 복잡한 UI는 사용자의 피로도를 가중시킵니다.
 
@@ -605,6 +607,12 @@
 
 
 <br/>
+
+## 🔍 Backend상세
+
+🔗 [Backend 더 자세한 설명](https://github.com/beyond-sw-camp/be16-fin-Dolmeng_E-Orbit-BE/README-be.md)
+
+<br />
 
 ## 📝 프로젝트 회고
 
