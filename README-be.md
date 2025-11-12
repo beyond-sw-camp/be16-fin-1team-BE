@@ -1,618 +1,338 @@
-# 🪐 Orbit(오르빗)
 
-> 💫 모든 일정/협업을 하나로! 캘린더·간트·마일스톤·칸반·채팅·문서를 **실시간으로 연동**하는 애자일 기반 통합 프로젝트 플랫폼
-> <p align="center">
-</p>
-<img width="2400" height="800" alt="image" src="https://github.com/user-attachments/assets/045e5ea7-5171-485d-880d-3e9c2110e06a" />
+![header](https://capsule-render.vercel.app/api?type=venom&color=auto&height=300&section=header&text=CalIT&fontSize=50&desc=📆Optimize%20Your%20Workspace%20Scrum%20Management&descAlignY=60)
 
-<br/>
+# 👀 팀원 구성
 
-## 👀 팀원 구성
-<table>
-	<tr>
-    <td><img width="300" alt="은성" src="https://avatars.githubusercontent.com/u/124436476?v=4"> </td>
-    <td><img width="300" alt="영관" src="https://avatars.githubusercontent.com/u/154659797?v=4"></td>
-    <td><img width="300" alt="민형" src="https://avatars.githubusercontent.com/u/206010512?v=4"></td>
-    <td><img width="300" alt="현지" src="https://avatars.githubusercontent.com/u/194198612?v=4"></td>
-    <td><img width="300" alt="강산" src="https://avatars.githubusercontent.com/u/207882668?v=4"></td>
-	</tr>
-		<tr>
-    <th><a href="https://github.com/EunDuk2"> 조은성 </a></th>
-    <th><a href="https://github.com/YoungKwanK"> 김영관</a> </th>
-    <th><a href="https://github.com/jominhyeong97"> 조민형</a> </th>
-    <th><a href="https://github.com/ifunhy"> 김현지</a> </th>
-    <th><a href="https://github.com/rm2001kr"> 김강산</a> </th>
-  </tr>
-  <th> 팀장,BE,FE </th>
-  <th> BE,FE </th>
-  <th> BE,FE </th>
-  <th> BE,FE </th>
-  <th> BE,FE </th>
-</table>
+<br>
 
-<br/>
+|                    **👑차윤슬**                      |                  **박성준**                   |                 **최승은**                  |                     **강혜정**                     |             **지연희**              |
+|:------------------------------------------------:|:------------------------------------------:|:----------------------------------------:|:-----------------------------------------------:|:--------------------------------:|
+| <img src="https://github.com/user-attachments/assets/8d255376-5ae9-4685-8f11-cd4b18a4bb55" width="128px"/> | <img src="https://github.com/user-attachments/assets/f49055cf-2b4d-41ac-bb7d-98b47d257c4b" width="128px"/> | <img src="https://github.com/user-attachments/assets/21e6cee5-c2f0-4c94-9a0a-938053c5342b" width="128px"/> | <img src="https://github.com/user-attachments/assets/813020ee-ef97-4f44-becd-38ef55a778b1" width="128px"/> | <img src="https://github.com/user-attachments/assets/cefb90f7-237b-4613-b6e2-89e1c40c00f3" width="128px"/> |
+| [@yunseul-dev](https://github.com/yunseul-dev) | [@seongxun](https://github.com/seongxun) | [@xeunnie](https://github.com/xeunnie) | [ @hyejeung](https://github.com/hyejeung) | [@Aqulog](https://github.com/Aqulog) |
 
-## 💻 발표자료
-<div align="center">
-<img width="200" height="76" alt="스크린샷 2025-11-12 오전 9 26 06" src="https://github.com/user-attachments/assets/45d23073-8c7d-4666-a480-d3906f1a687b" />
 
-  [📢 Orbit 발표자료 링크](https://www.canva.com/design/DAG4NaBfaR4/Lf-l1N13jIC3GpZDcCXmLg/edit?utm_content=DAG4NaBfaR4&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)
-</div>
 
-## 📖 배경 및 필요성
-현대 협업 환경은 Jira, Slack, Notion 등 기능별 SaaS 사용이 보편화되면서 **정보가 파편화**되고 잦은 **컨텍스트 전환**이 발생하는 문제를 겪고 있습니다. 또한, 기존 툴의 복잡한 UI는 사용자의 피로도를 가중시킵니다.
+# ⚒️ 기술 스택
 
-본 프로젝트는 이러한 파편화된 협업 기능을 **단일 플랫폼에 통합**하고, 사용자 친화적인 UI/UX를 제공하여 생산성 저하 문제를 해결하고자 합니다.
 
-핵심 목표는 **마일스톤**(목표 추적), **간트 차트**(작업 흐름), **캘린더**(일정 관리) 기능을 유기적으로 연동하는 것입니다. 하나의 변경 사항이 모든 관련 기능에 **실시간 동기화**되도록 하여, 팀원 누구나 통일된 데이터를 기반으로 프로젝트 전체 흐름을 한눈에 파악하는 효율적인 협업 환경을 구축하는 것을 목표로 합니다.
 
-<br/>
+### 백엔드
+<img src="https://img.shields.io/badge/SpringBoot-181717?style=flat&logo=SpringBoot&logoColor=6DB33F&color=white" alt=""> <img src="https://img.shields.io/badge/Spring_Security-181717?style=flat&logo=SpringSecurity&logoColor=6DB33F&color=white" alt=""> <img src="https://img.shields.io/badge/JSON_Web_Tokens-181717?style=flat&logo=JSONWebTokens&logoColor=000000&color=white" alt=""> <img src="https://img.shields.io/badge/Spring-181717?style=flat&logo=Spring&logoColor=6DB33F&color=white" alt=""> <img src="https://img.shields.io/badge/Spring_Batch-181717?style=flat&logo=Spring&logoColor=6DB33F&color=white" alt=""> <img src="https://img.shields.io/badge/Apache_Kafka-181717?style=flat&logo=ApacheKafka&logoColor=231F20&color=white" alt=""> <img src="https://img.shields.io/badge/n8n-181717?style=flat&logo=n8n&logoColor=0F74E2&color=white" alt=""> <img src="https://img.shields.io/badge/Redis-181717?style=flat&logo=Redis&logoColor=DC382D&color=white" alt="">
+### 데이터베이스
+<img src="https://img.shields.io/badge/MariaDB-181717?style=flat&logo=MariaDB&logoColor=003545&color=white" alt=""> <img src="https://img.shields.io/badge/PostgreSQL-181717?style=flat&logo=PostgreSQL&logoColor=336791&color=white" alt=""> 
 
-## ✨ 주요 기능
 
-### 1) 📅 통합 일정 관리
-- 개인/프로젝트/팀 **통합 캘린더** (월/주/일 뷰)
-- 일정 상태/중요도 색상 구분, 날짜 클릭 상세/수정
-- **간트 차트·마일스톤과 양방향 연동**, To-Do(개인 작업)까지 한 화면에서
+---
 
-### 2) ⏰ 체계적인 알림
-- 마감/회의 등 **예약 알림** (예: 1일 전, 15분 전)
-- WebSocket/SSE 기반 **실시간 동기화**
-- 워크스페이스/프로젝트/스톤/태스크 **메타데이터 포함 푸시**
 
-### 3) 🛠 스크럼 & 칸반
-- 스프린트·태스크·이슈를 **칸반 보드**로 관리
-- 진행률/리드타임 등 생산성 지표 시각화
 
-### 4) 💬 실시간 채팅·피드백
-- 프로젝트/스톤 **전용 채팅방 자동 개설(옵션)**
-- 화상회의 기능 제공 → **실시간 화상 통화 가능**
-
-### 5) 📁 통합 문서 관리
-- 워크스페이스/프로젝트/스톤별 문서 및 파일 관리 시스템
-- **계층적 폴더 구조**로 문서와 파일을 체계적으로 관리
-- AWS S3 기반 파일 저장 
-- Kafka 이벤트 기반 **검색 인덱스 자동 동기화**
-- 워크스페이스별 스토리지 사용량 추적 및 관리
-- 문서/폴더/파일 이동 및 구조 변경 기능
-
-### 6) 📝 실시간 공동 작성
-- WebSocket(STOMP) 기반 **실시간 동시 편집** 지원
-- Redis Pub/Sub을 통한 편집 변경사항 **실시간 브로드캐스팅**
-- 라인 단위 잠금(Lock) 메커니즘으로 **동시 편집 충돌 방지**
-- 커서 위치 실시간 동기화 및 온라인 사용자 목록 표시
-- **배치 업데이트** 처리 (라인 생성/수정/삭제 일괄 처리)
-
-### 7) 🔍 자동완성 & 검색
-- Elasticsearch 기반의 **통합 검색** 및 검색어 **자동완성**
-- Nori 한글 형태소 분석기 및 Edge N-gram을 활용한 **정확한 한글 검색**
-- 검색어 **하이라이팅** (제목/내용/문서 라인별 하이라이트 표시)
-- matchBoolPrefix 기반 **자동완성 제안** (최대 10개 결과)
-- 권한 기반 검색 필터링 (사용자별 접근 권한에 따른 결과 제한)
-
-### 8) 🤖 AI 어시스턴트
-- 사용자 친화적 챗봇(프로젝트 요약, 일정 등록, 일정 브리핑 등)
-- 프로젝트 데이터 분석 → **대시보드 인사이트 정보 제공**
-
-<br/>
-
-## 📋 프로젝트 산출물
-
-| 구분 | 링크 |
-| :--- | :--- |
-| **Figma** | [🔗 Figma 디자인 보기](https://www.figma.com/design/f8NVDb2aljFlzoDFRRo8bl/Orbit?node-id=0-1&p=f&t=sfF5y7Eb2MaNDDP3-0) |
-| **API 명세서** | [🔗 API 명세서 보기](https://docs.google.com/spreadsheets/d/1GIcKtK_Tk5H-6UdCrks_X5xXr9MtWWH2bNvIPpIW59k/edit?gid=1634200920#gid=1634200920) |
-| **WBS** | [🔗 WBS 보기](https://docs.google.com/spreadsheets/d/1GIcKtK_Tk5H-6UdCrks_X5xXr9MtWWH2bNvIPpIW59k/edit?gid=2008137453#gid=2008137453) |
-| **요구사항 명세서** | [🔗 요구사항 명세서 보기](https://docs.google.com/spreadsheets/d/1GIcKtK_Tk5H-6UdCrks_X5xXr9MtWWH2bNvIPpIW59k/edit?gid=0#gid=0) |
-
-<br/>
-
-## 🧱 ERD
-
-  <img width="5240" height="2943" alt="Final-Dolmeng-E-msa (1)" src="https://github.com/user-attachments/assets/c36920e1-2bee-41e5-bc56-be1aeb23153d" />
-
-
-<br/>
-
-
-## 기능 화면
-
-<details id="home">
-  <summary><b>🏠 홈</b></summary>
-  <br/>
-  <img width="1919" height="945" alt="홈화면" src="https://github.com/user-attachments/assets/febd3178-8c65-489c-984d-1731f5248051" />
-</details>
-
-<details id="my-schedule">
-  <summary><b>📅 내일정</b></summary>
-  <br/>
-  <details>
-    <summary><b>내 일정 홈</b></summary>
-    <br/>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/2ea0aa72-9c3d-416c-bf47-cdff6f727641" />   
-  </details>
-  <br/>
-  <details>
-    <summary><b>프로젝트 캘린더</b></summary>
-    <br/>
-    <p><b>프로젝트 캘린더 조회</b></p>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/e0ebff3a-0108-4bef-afbe-78b646ad40e1" />  
-    <p><b>프로젝트 캘린더 조회 - 숨김</b></p>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/2497021e-04d1-4119-94b3-50e17cdd2f60" />   
-  </details>
-  
-  <details>
-    <summary><b>공유 캘린더</b></summary>
-    <br/>
-    <p><b>공유 캘린더 조회</b></p>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/91feca78-3584-44f3-bc35-084eed3e9d81" /> 
-    <p><b>일정 등록</b></p>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/fe4ff621-899b-4991-83fc-259e277f16ae" />   
-    <p><b>일정 수정</b></p>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/c4a3b3ca-9470-43fe-ad8a-cade5e355a55" />   
-    <p><b>일정 삭제</b></p>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/4fce0e34-d756-4b7f-b8b7-f93d1c161c22" />   
-    <p><b>공유 캘린더 구독</b></p>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/fcf37dbc-ce4e-40eb-aeb1-2985440df39e" />   
-    <p><b>공유 캘린더 구독 삭제</b></p>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/af506ba1-6725-46f7-a05d-e0c898ce28b0" />   
-    <p><b>공유 캘린더 숨김</b></p>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/a35e651a-b1f3-4bf1-baee-10a14cf10f75" />   
-  </details>
-
- <details>
-    <summary><b>todo</b></summary>
-    <br/>
-    <p><b>todo 등록</b></p>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/efdfaa2f-c6e8-4491-8034-a001d0b81457" /> 
-    <p><b>todo 수정</b></p>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/6b9bfacf-7b68-4ff0-a0df-fbba53445b7b" />   
-    <p><b>todo 삭제</b></p>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/54166e94-024d-4bef-b8e5-f74f6020a155" />   
-    <p><b>todo 완료, 미완료</b></p>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/1459b27a-4b7a-4118-897f-19ab1110e542" />   
-  </details>
-</details>
-
-<details id="drive">
-  <summary><b>📁 문서함</b></summary>
-  <br/>
-  <details>
-    <summary><strong>폴더/파일/문서 생성</strong></summary>
-    <br>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/c11b292d-1990-469d-848f-bbe3b072e024" />
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/4afb999c-6b39-4a24-845d-c365e3fbc97e" />
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/87aa75a7-4a72-4afd-96b0-7fb2f0ac7503" />
-  </details>
-  <details>
-    <summary><strong>폴더/파일/문서 조회</strong></summary>
-    <br>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/a048a2af-6429-462d-99d5-cfb2d3b91ccd" />
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/39f4fcf7-d640-42c8-b909-47dfaad681c9" />
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/65f98a67-6a7a-4f3e-97e2-9087e0b2e4e8" />
-  </details>
-  <details>
-    <summary><strong>폴더/파일/문서 상세 조회</strong></summary>
-    <br>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/304dc758-4d2d-44e8-8fb4-38aff452ba1b" />
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/de5dec62-fe2e-43eb-b979-1ebbe2bc2e24" />
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/22190ad5-26fe-4c48-bddf-3a11b0e5fee9" />
-  </details>
-   <details>
-    <summary><strong>폴더/문서 제목 변경</strong></summary>
-    <br>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/8960f969-b92f-4f6f-bdc4-9c4bd0eea429" />
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/31fc8ec7-6ca4-4015-8232-4b4d8aa6d7ea" />
-  </details>
-   <details>
-    <summary><strong>프로젝트 문서함으로 옮기기</strong></summary>
-    <br>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/1fa69e55-7255-483c-af6f-037e0bc55f38" />
-  </details>
-  <details>
-    <summary><strong>스톤 문서함으로 옮기기</strong></summary>
-    <br>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/4f075dc5-6360-4701-95da-9f73582b79f1" />
-  </details>
-  <details>
-    <summary><strong>폴더/문서/파일 삭제</strong></summary>
-    <br>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/8d4381ad-7471-49eb-86b6-d23f22cf8820" />
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/8b4781f5-0c98-4733-8863-77307ca29ecd" />
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/6863f2f8-c749-46c4-b107-bfa91f74dab6" />
-  </details>
-  <details>
-    <summary><strong>트리뷰, 브레드크럼 동작</strong></summary>
-    <br>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/7677faef-5ee2-4ba0-a912-5933e1d80cf2" />
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/181529df-2a14-4998-b05d-d34209afd303" />
-  </details>
-  <details>
-    <summary><strong>정렬, 필터</strong></summary>
-    <br>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/e66bd977-ca61-48ad-a77e-685a943f94a9" />
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/e114b20b-9bfc-492c-98a0-63576bad169d" />
-
-  </details>
-
-  
-</details>
-<details id="document">
-  <summary><b>📄 실시간 문서 편집</b></summary>
-  <br/>
-  <details>
-    <summary><strong>동시 문서 편집</strong></summary>
-    <br>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/ba839f4a-8351-4d44-82bd-6523bb7684af" />
-  </details>
-  <details>
-    <summary><strong>툴바 기능</strong></summary>
-    <br>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/875830b6-057f-470a-92e9-bd6beb33735a" />
-  </details>
-  <details>
-    <summary><strong>문서 다운로드</strong></summary>
-    <br>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/0153aaea-ec64-43cd-abf0-b4246932f9a6" />
-
-  </details>
-  <details>
-    <summary><strong>제목 변경</strong></summary>
-    <br>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/2f04c506-5e1d-48bb-a68e-f136cde6c5dd" />
-  </details>
-
-
-  
-</details>
-
-<!-- 프로젝트: 하위 토글 + GIF 공간 -->
-<details id="project">
-  <summary><b>🗂 프로젝트</b></summary>
-  <br/>
-
-  <!-- 프로젝트 -->
-  <details>
-    <summary><b>프로젝트</b></summary>
-    <br/>
-    <p><b>프로젝트 생성</b></p>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/15d6ebed-e1b2-409c-89fb-c9102feeeb6c" />
-    <p><b>프로젝트 수정</b></p>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/46fd102d-e5c9-4d60-8eba-f32c4f07373b" />
-    <p><b>프로젝트 삭제</b></p>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/a7b3d0b6-40f6-4db7-80e6-1f1b5cf043c5" />
-    <p><b>프로젝트 대시보드 조회</b></p>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/5c6a5aac-988d-4a28-953e-900e6b92a98f" />
-    <p><b>프로젝트 간트차트 조회</b></p>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/0dd15885-7db9-40e1-967c-38039292f124" />
-    <p><b>프로젝트 간트차트 조회</b></p>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/80a84b7a-a7cb-4b78-8945-e0c3889b84d8" />
-  </details>
-
-  <!-- 스톤 -->
-  <details>
-    <summary><b>스톤</b></summary>
-    <br/>
-    <p><b>스톤 생성</b></p>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/11c3c345-8bce-4e60-a745-6adf57fb8594" />  
-    <p><b>스톤 수정</b></p>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/7888fdb5-5a3d-4e00-a3bd-35fd5f049406" />  
-    <p><b>스톤 삭제</b></p>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/c16a0501-9b03-4dcf-8713-d2eb7d12dde5" />  
-    <p><b>스톤 조회(트리)</b></p>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/989db430-a8a1-4820-8d93-d33e8707ce6e" />  
-    <p><b>스톤 상세조회</b></p>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/6b272b29-b8b4-4fad-a830-c4b862b58e87" />  
-    <p><b>스톤 완료</b></p>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/8e04103e-ad70-4ac5-b0e4-2223f85c1e87" />  
-    <p><b>스톤 참여자 변경</b></p>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/c6b421d6-fcdf-4be7-b098-d0512e73cd9e" />  
-    <p><b>스톤 담당자 변경</b></p>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/2d35e13e-f548-4eb4-963a-5f231376883b" />  
-  </details>
-
-  <!-- 태스크 -->
-  <details>
-    <summary><b>태스크</b></summary>
-    <br/>
-    <p><b>태스크 생성</b></p>
-    <img width="75%" alt="Task Create" src="https://github.com/user-attachments/assets/f69a112f-7e5a-40c2-80b1-2b40bf1e6449" />
-    <p><b>태스크 삭제</b></p>
-    <img width="75%" alt="Task Delete" src="https://github.com/user-attachments/assets/749d8131-c6ec-456c-bda4-a5283d7b0065" />
-    <p><b>태스크 완료</b></p>
-    <img width="75%" alt="Task Done" src="https://github.com/user-attachments/assets/08725f12-ad87-43af-b4d2-023150b4d04d" />
-    <p><b>태스크 완료 취소</b></p>
-    <img width="75%" alt="Task Cancel Done" src="https://github.com/user-attachments/assets/06e95071-8780-4da1-93b2-4257d6194999" />
-  </details>
-</details>
-
-<!-- 관리자페이지: 하위 토글 + GIF 공간 -->
-<details id="admin">
-  <summary><b>🛠 관리자페이지</b></summary>
-  <br/>
-
-  <!-- 권한 그룹 -->
-  <details>
-    <summary><b>권한 그룹</b></summary>
-    <br/>
-    <p><b>권한 그룹 생성</b></p>
-    <img width="75%" alt="Access Group Create" src="https://github.com/user-attachments/assets/0a431fdd-2b23-4b08-a8ec-b54e70a2fadc" />    
-    <p><b>권한 그룹 수정</b></p>
-    <img width="75%" alt="Access Group Update" src="https://github.com/user-attachments/assets/9e720b0a-ed46-4741-93ee-59f3f4775866" />    
-    <p><b>권한 그룹 사용자 수정</b></p>
-    <img width="75%" alt="Access Group Users Update" src="https://github.com/user-attachments/assets/fe525430-d331-463c-9af5-a619912f34b4" />  
-    <p><b>권한 그룹 상세목록 조회</b></p>
-    <img width="75%" alt="Access Group Detail" src="https://github.com/user-attachments/assets/a968e582-b647-40b9-bbec-950a319d5809" />
-    <p><b>권한 그룹 삭제</b></p>
-    <img width="75%" alt="Access Group Delete" src="https://github.com/user-attachments/assets/c39c985c-4ebc-4361-b730-13d775ef72a6" />
-  </details>
-
-  <!-- 워크스페이스 -->
-  <details>
-    <summary><b>워크스페이스</b></summary>
-    <br/>
-    <p><b>워크스페이스 생성</b></p>
-    <img width="75%" alt="Workspace Create" src="https://github.com/user-attachments/assets/b240fa57-5fce-4b20-9074-65d363fb793b" />
-    <p><b>워크스페이스 수정</b></p>
-    <img width="75%" alt="Workspace Update" src="https://github.com/user-attachments/assets/e520871d-796e-4296-9ae1-02e6d81d9340" /> 
-    <p><b>워크스페이스 삭제</b></p>
-    <img width="75%" alt="Workspace Delete" src="https://github.com/user-attachments/assets/bdbfce05-27da-4724-8992-b0b2c0fa7e55" />
-  </details>
-
-  <!-- 사용자 그룹 -->
-  <details>
-    <summary><b>사용자 그룹</b></summary>
-    <br/>
-    <p><b>사용자 그룹 생성</b></p>
-    <img width="75%" alt="User Group Create" src="https://github.com/user-attachments/assets/d569201b-ebd6-4616-9db3-654987a876bb" />  
-    <p><b>사용자 그룹 수정</b></p>
-    <img width="75%" alt="User Group Update" src="https://github.com/user-attachments/assets/6379e2e5-3577-4c75-870b-2decf113bcb8" /> 
-    <p><b>사용자 그룹 상세목록 조회</b></p>
-    <img width="75%" alt="User Group Detail" src="https://github.com/user-attachments/assets/5a9af53b-e3c2-4c4f-a066-fe9cc7213dc7" />  
-    <p><b>사용자 그룹 삭제</b></p>
-    <img width="75%" alt="User Group Delete" src="https://github.com/user-attachments/assets/47f7710e-3fbb-4429-824b-22144c8b53de" />    
-    <p><b>사용자 그룹 검색</b></p>
-    <img width="75%" alt="User Group Search" src="https://github.com/user-attachments/assets/50bc45f0-f8f6-4022-959a-e505ed727779" />
-  </details>
-</details>
-
-<details id="mypage">
-  <summary><b>👤 마이페이지</b></summary>
-  <br/>
-  <details>
-    <summary><strong>마이페이지 조회</strong></summary>
-    <br>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/340676cb-c1af-4a60-8f77-1e7f5054994f" />
-  </details>
-
-  <details>
-    <summary><strong>마이페이지 조회</strong></summary>
-    <br>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/9264da67-59a2-4487-bf03-5e0b45e5208f" />
-  </details>
-</details>
-
-<details id="chatbot">
-  <summary><b>⌨️ 채팅</b></summary>
-  <br/>
-    <details>
-    <summary><strong>채팅방 생성 및 입장</strong></summary>
-    <br>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/aff29cd9-22a6-4345-835c-3d062d6af17d" />
-  </details>
-
-  <details>
-    <summary><strong>채팅 기능</strong></summary>
-    <br>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/13bd5d2a-c6e1-4e65-928b-737447c1c714" />
-  </details>
-
-  <details>
-    <summary><strong>채팅 이미지 업로드 및 이모티콘 사용</strong></summary>
-    <br>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/6db070a7-d649-4978-87be-53a265b4e5a7" />
-  </details>
-
-  <details>
-    <summary><strong>채팅 요약 미리보기</strong></summary>
-    <br>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/4ba348eb-3d93-4f45-9a1a-3b0c09472dc4" />
-  </details>
-</details>
-
-<details id="chatbot">
-  <summary><b>🗣️ 화상회의</b></summary>
-  <br/>
-    <details>
-    <summary><strong>화상 회의 참여</strong></summary>
-    <br>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/a048a832-6430-414d-909c-37d1a1abe5e5" />
-  </details>
-  
-  <details>
-    <summary><strong>음소거/화면 송출 중지</strong></summary>
-    <br>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/d02c0075-0cb7-4ded-bca7-a04be03f841d" />
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/1e88cc03-dde9-424f-b718-655be4073852" />
-  </details>
-
-  <details>
-    <summary><strong>화면 공유</strong></summary>
-    <br>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/e9eeb29c-9d20-4ddd-b7f3-c80cf9a951a1" />
-  </details>
-
-  <details>
-    <summary><strong>화상 회의 나가기</strong></summary>
-    <br>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/3cc6d6db-c424-4984-aef3-c076c865a176" />
-  </details>
-
-  <details>
-    <summary><strong>화면 이동 및 전체화면</strong></summary>
-    <br>
-    <img width="75%" alt="Image" src="" />
-  </details>
-
-  <details>
-    <summary><strong>화상 회의, 채팅 동시 작업</strong></summary>
-    <br>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/3fe3b5c5-ba09-464b-8782-9c89812088d9" />
-  </details>
-
-  <details>
-    <summary><strong>화상 회의 전체 화면</strong></summary>
-    <br>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/b86fbee3-d5c4-42cb-a8e2-52f64b2bf563" />
-  </details>
-
-  <details>
-    <summary><strong>화상 회의 참여자 화면 이동</strong></summary>
-    <br>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/b238d1cc-58ca-41cd-b47d-dd9a46efb8ff" />
-  </details>
-</details>
-
-<details id="chatbot">
-  <summary><b>🤖 챗봇</b></summary>
-  <br/>
-  <p><b>사용가이드</b></p>
-      <img width="75%" alt="User Group Search" src="https://github.com/user-attachments/assets/98ea0494-d452-4776-b72b-52906151dbf6" />
-  <p><b>일정 등록</b></p>
-    <img width="75%" alt="User Group Create" src="https://github.com/user-attachments/assets/ab6faa3d-5352-43bf-948a-625cfc7ef36e" />  
-  <p><b>읽지 않은 채팅방 메시지 요약</b></p>
-    <img width="75%" alt="User Group Update" src="https://github.com/user-attachments/assets/e9575c0a-d687-4cb4-98ca-7aa4ab00fa03" /> 
-  <p><b>일정 브리핑</b></p>
-    <img width="75%" alt="User Group Delete" src="https://github.com/user-attachments/assets/b0b448a0-cf5d-47d7-871a-87c43fce30a4" />    
-  <p><b>프로젝트 요약</b></p>
-    <img width="75%" alt="User Group Search" src="https://github.com/user-attachments/assets/ec8f0157-2127-47cc-bbaa-738c5665e797" />
-  <p><b>일상 대화</b></p>
-      <img width="75%" alt="User Group Search" src="https://github.com/user-attachments/assets/a9478b7d-c2fd-461f-82c7-fc0d70bd4fe0" />
-
-</details>
-
-<details id="search">
-  <summary><b>🔎 검색</b></summary>
-  
-  <details>
-    <summary><strong>파일/문서/스톤/테스크 검색</strong></summary>
-    <br>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/a4d2d473-3ea3-46c4-9c84-fee8adb70a50" />
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/afb7ef80-1d80-4f05-ae95-aff33c9b7ce9" />
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/fa8f5334-5aee-4676-a2fe-5094dc9f62d9" />
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/6a7ae9b9-a5d6-4ee1-9b70-eaa1872fb636" />
-
-  </details>
-
-  <details>
-    <summary><strong>자동완성</strong></summary>
-    <br>
-    <img width="75%" alt="Image" src="https://github.com/user-attachments/assets/380e7868-b2ed-4b80-bb00-9f88fa0ab29c" />
-  </details>
-</details>
-
-<!-- ===== /Feature Toggle Gallery ===== -->
-
-
-
-
-## 🏗️ 시스템 아키텍처
+# 🎯 소프트웨어 아키텍처
 <details>
-  <summary><b>시스템 아키텍처 보기</b></summary>
-  <img width="1137" height="1197" alt="시스템 아키텍처 최종본 drawio" src="https://github.com/user-attachments/assets/6803e342-9925-43ad-b4e7-22b0a48516db" />
+  <summary><b>레이어드 아키텍처 + 멀티모듈 아키텍처</b></summary>
+  
+## 레이어드 아키텍처(Layerd Architecture)
+  
+  > 레이어드 아키텍처는 소프트웨어를 여러 계층으로 나누어 설계하는 방식입니다. 각 레이어는 정해진 역할을 가집니다.
+
+1. 레이어 간의 책임이 명확하게 분리되어 있어 코드 변경 시 영향 범위를 최소화할 수 있습니다.
+2. 레이어 간의 의존 흐름이 일정하여 새로운 기능 개발 시 통일된 프로세스로 빠르게 개발할 수 있었습니다.
+
+<br/>
+
+## 멀티모듈 아키텍처(MultyModule Architecture)
+  
+> 멀티모듈 아키텍처는 여러 개의 작은 단위 모듈로 소프트웨어를 나누어 설계하는 방식입니다. 각 모듈은 독립적으로 개발되고 배포될 수 있으며, 모듈 간 재사용성을 높여 전체 시스템의 복잡성을 효율적으로 관리할 수 있습니다.
+
+1. 공통 모듈을 여러 프로젝트에서 재사용할 수 있어 코드 중복을 줄일 수 있습니다.
+2. 각 모듈이 독립적으로 개발되고 배포될 수 있어 개발 및 테스트의 효율성이 향상됩니다.
+3. 기존 모듈을 확장하기 쉽기 때문에 전체 시스템의 복잡성을 효율적으로 관리 가능합니다.
+
+### 1. 멀티모듈 아키텍처 도입 배경 
+ 프로젝트 초기에는 모든 기능이 단일 모듈로 구성되어 있었습니다. 하지만, 기능이 다양해지고 서버의 역할이 분리될 필요가 생기면서, 각각의 책임에 맞게 모듈을 분리해야 했습니다. 따라서, 프로젝트를 Batch, Common, API-Server라는 세 모듈로 나누었습니다.
+
+
+![image](https://github.com/user-attachments/assets/4a9a9fa4-4c33-42a4-b97a-27d22d961a3a)
+
+ 
+### 2. 모듈 구성 및 역할
+- **Common 모듈** <br/>
+  공통적으로 사용되는 코드와 설정을 관리합니다. 주로 데이터베이스 관련 설정, 공통 유틸리티 클래스 등이 포함되어 있습니다.
+- **API-Server 모듈** <br/>
+  사용자 요청을 처리하고, 실시간 SSE 알람을 제공하는 등 웹 애플리케이션의 중심이 되는 모듈입니다. 스프링 부트 웹 의존성을 가지고 있어 SSE 알람 서비스를 구현할 수 있습니다.
+- **Batch 모듈** <br/>
+   일정 작업을 주기적으로 실행하는 서버로, 리마인드 알람 작업 등 배치 처리를 담당합니다. 스프링 배치를 사용하여 멀티 스레드 기반으로 작업을 효율적으로 처리하고, 한 번 실행된 후 종료됩니다.
+
+### 3. 주요 이슈 및 해결 방안
+
+> 멀티모듈화를 진행하면서 SSE 알람 서비스의 의존성 문제가 있었습니다. SseEmitter 클래스를 사용하기 위해서는 spring-boot-web 의존성이 필요했으나, 이 의존성은 배치 모듈의 특성과 맞지 않았습니다. 
+
+이 문제를 해결하기 위해 SSE 알람 전송 로직은 API-Server 모듈에 남겨두어 클라이언트와의 실시간 통신을 유지할 수 있도록 했습니다. 또한 모듈 간 결합도를 낮추기 위해 **Kafka를 사용하여 모듈 간 메시지를 전달하는 구조**를 도입했습니다. Batch 모듈에서 알람 메시지를 Kafka를 통해 전달하면, API-Server 모듈이 이를 수신하여 적절한 SSE 알람을 클라이언트에게 보냅니다. 이를 통해 모듈 간 결합도를 낮추고, 새로운 기능이 추가되더라도 서로의 변경에 영향을 덜 받도록 설계할 수 있었습니다.
+
+### 4. 구조 개선의 효과
+
+- **유지보수성 및 확장성 증가** <br/>
+  각 모듈이 독립적으로 개발 및 확장할 수 있는 구조로 변경되었습니다.
+
+- **결합도 감소** <br/>
+  모듈 간 의존성을 줄여 변경에 유연하게 대응할 수 있었습니다.
+
+- **성능 최적화** <br/>
+  Batch 모듈은 멀티 스레드를 활용한 배치 작업으로 리소스 사용을 최적화하고, API-Server 모듈은 실시간 통신을 유지하는 구조로 설계하여 성능을 개선했습니다.
+
+<br/>
+
+## 레이어드 아키텍처 + 멀티모듈 아키텍처
+레이어드 아키텍처를 기반으로 API 서버와 공통 모듈로 구성된 멀티 모듈 구조를 채택 함으로써 API 서버는 주요 비즈니스 로직을 담당하고, 공통 모듈은 엔티티와 같은 재사용 가능한 컴포넌트를 관리하여 모듈 간의 중복을 줄이고 코드의 재사용성을 높였습니다.
+
 
 </details>
+
+
+<br>
+
+# ✨ 주요 기능
+<details>
+  <summary><b>캘린더 & 대쉬보드</b></summary>
+  <div markdown="1">
+
+![image](https://github.com/user-attachments/assets/4f08ce80-c1fc-4777-ae44-edef10c648ad)
+
+
+## 조회 기능 개선: JPQL에서 QueryDSL로의 전환
+
+> 캘린더와 대시보드에서는 스프린트, 태스크, 회의 등 다양한 상황으로 조회가 필요했습니다. 조회 기능을 개선하기 위해 기존 JPQL 코드를 QueryDSL로 리팩토링하여 동적 쿼리를 적용함으로써, 코드의 가독성과 성능을 모두 향상시켰습니다.
+
+### QueryDSL 전환의 장점
+
+1. **동적 쿼리 작성 용이**
+    
+    QueryDSL은 코드 기반으로 쿼리를 작성하기 때문에, 조건에 따라 유연하게 동적 쿼리를 생성할 수 있습니다. 이를 통해 복잡한 조회 조건을 쉽게 처리할 수 있으며, 코드의 가독성도 높아집니다.
+    
+2. **컴파일 타임 안전성**
+    
+    JPQL은 문자열 기반이므로 런타임 오류가 발생할 가능성이 높습니다. 반면, QueryDSL은 Java 코드로 작성되기 때문에, 쿼리 작성 시점에 컴파일 타임에서 오류를 감지할 수 있기 때문에 코드의 안정성을 강화할 수 있습니다.
+    
+3. **복잡한 조인 처리의 간결화**
+    
+    QueryDSL은 엔티티 간의 조인이나 서브쿼리를 쉽게 표현할 수 있어, 복잡한 조회 로직을 간결하게 작성할 수 있습니다.
+    
+4. **N+1 문제 해결**
+    
+    QueryDSL을 사용하면 **페치 조인(Fetch Join)**을 통해 연관된 엔티티를 한 번의 쿼리로 함께 조회할 수 있습니다. 이를 통해 JPQL에서 자주 발생하는 N+1 문제를 방지하고, 데이터베이스 접근 횟수를 줄여 성능을 더욱 최적화할 수 있습니다.
+    
+
+### 성능 개선 사항
+
+- **불필요한 데이터 조회 최소화**
+    
+    QueryDSL로 리팩토링하면서, 필요한 필드만 선택적으로 조회하도록 최적화했습니다. 이를 통해 데이터 전송량을 줄이고, 데이터베이스의 부하를 줄일 수 있었습니다.
+    
+- **쿼리 성능 향상 및 N+1 문제 해결**
+    
+    동적 쿼리를 작성할 때 조건을 유연하게 추가하고, 페치 조인을 사용해 연관된 엔티티를 한 번의 쿼리로 조회하여 N+1 문제를 해결했습니다. 그 결과, 조회 기능의 응답 속도가 크게 향상되었습니다.
+
+  </div>
+</details>
+
+<details>
+  <summary><b>채팅</b></summary>
+  <div markdown="1">
+
+### 1. WebSocket & STOMP
+#### **사용 기술 및 적용 이유**
+
+![stomp](https://github.com/user-attachments/assets/d546f308-987a-4ba3-8011-973d94144a63)
+
+<br>
+
+**WebSocket:** 실시간 양방향 통신을 지원하여, 채팅 시스템에서 사용자 간 빠르고 지속적인 메시지 교환이 가능합니다. <br>
+**STOMP (Simple Text Oriented Messaging Protocol):** WebSocket 위에서 동작하는 메시징 프로토콜로, 메시지 라우팅을 유연하게 설정할 수 있습니다. **채팅방 ID**를 포함한 경로를 통해 각 채팅방의 구독자들에게 메시지를 정확하게 전달하는 데 활용됩니다.
+
+#### 적용 예시
+
+채팅방마다 `/sub/room/{chatRoomId}` 형식으로 구독 경로를 설정하여, 해당 채팅방에 속한 사용자들이 메시지를 실시간으로 주고받을 수 있게 하였습니다.
+### 2. 메시지 전송 흐름
+#### **메시지 처리 방식**
+
+**웹소켓을 통한 전송:** 사용자가 웹소켓을 통해 특정 경로로 메시지를 전송합니다. <br>
+**인메모리 브로커:** 전송된 메시지는 인메모리 브로커에서 카프카 프로듀서로 전달됩니다. <br>
+**카프카 토픽 저장:** 프로듀서는 메시지를 토픽에 직렬화하여 저장합니다. <br>
+**컨슈머 메시지 처리:** 컨슈머는 해당 토픽에서 메시지를 읽고 역직렬화한 후 다시 인메모리 브로커로 전달합니다. <br>
+**구독자에게 메시지 전달:** 브로커는 메시지를 구독 경로에 맞춰 구독자들에게 실시간으로 전달합니다. <br>
+
+### 3. Kafka
+#### **사용 기술 및 적용 이유**
+
+![kafka](https://github.com/user-attachments/assets/213ce4a8-202b-479d-b010-1607480929e5)
+
+<br>
+
+**확장성 및 신뢰성:** STOMP 기반의 세션 관리는 단일 서버 환경에서는 한계가 있었습니다. 다중 서버 환경에서 메시지 손실과 확장성 문제를 해결하기 위해 **Kafka**를 도입하였습니다. Kafka는 사용자가 다른 서버에 접속해도 메시지를 안정적으로 전달받을 수 있도록 해줍니다. <br>
+**세션 관리:** 여러 서버를 운영하는 환경에서 Kafka를 통해 서버 간 세션을 관리하여, 메시지의 일관성과 신뢰성을 보장하였습니다.
+
+#### 적용 예시
+Kafka의 Pub-Sub 모델을 활용하여 동일한 토픽을 구독한 클라이언트들에게 안정적으로 메시지를 전송하고, 여러 서버 간의 세션 관리 문제를 해결하였습니다.
+
+### 4. 개선 사항
+#### Kafka 도입 후 성능 개선
+
+STOMP만으로 운영 시 발생할 수 있는 확장성 문제와 메시지 손실 문제를 해결하였습니다. Kafka의 Pub-Sub 모델을 통해 서버 간 세션을 안정적으로 관리할 수 있었으며, 메시지 전송의 신뢰성을 크게 높였습니다.
+    
+  </div>
+</details>
+<details>
+  <summary><b>알람</b></summary>
+  <div markdown="1">
+
+
+## Spring Batch를 통한 알람 기능 개선
+
+> 기존에는 **`@Scheduled`** 어노테이션을 사용한 스케줄링 방식으로 리마인드 알람을 구현했지만, 서버 부하와 메모리 사용량 증가로 인해 안정적인 서비스 제공에 어려움이 있었습니다. 이를 해결하기 위해 Spring Batch를 도입하여 알람 기능을 개선했습니다.
+
+### 배치 적용 후 개선 사항
+
+1. **역할 분리**
+    
+    Spring Batch의 Job, Step, Chunk 구조를 사용하여 리마인드 알람 기능을 단계별로 구현했습니다. 각 알람 유형(회의, 스프린트, 태스크)에 대해 독립적인 배치 작업을 설정하여 관리함으로써 코드의 책임을 명확히 하고 작업의 독립성을 유지했습니다.
+    
+    - **ItemReader**: 데이터베이스에서 회의, 스프린트, 태스크의 마감일 기준으로 알람 대상 데이터를 조회합니다.
+    - **ItemProcessor**: 데이터를 검증하고 알람 메시지에 필요한 정보를 가공하여, 알람 시점에 맞는 데이터를 설정합니다.
+    - **ItemWriter**: 가공된 데이터를 Kafka를 통해 **`reminder-alarm`** 토픽으로 전송하여 알람 메시지를 처리합니다.
+2. **부하 분산**
+    - 알람 처리 로직을 독립적인 배치 서버로 분리해 메인 서버의 부하를 줄이고, 작업 분산을 통해 안정적인 서비스를 제공했습니다.
+    - 배치 서버에서 발생하는 오류가 메인 서버에 미치는 영향을 최소화했습니다.
+3. **확장성 강화**
+    - Spring Batch는 배치 모듈에서 알람 메시지를 Kafka를 통해 API 서버로 전달하고, API 서버는 클라이언트에게 알람을 전송합니다.
+    - 이는 배치 모듈과 실시간 알람 처리(SSE Emitter)의 의존성 문제를 해결하고, 모듈 간 결합도를 낮춰 확장성과 유연성을 높였습니다.
+4. **Kubernetes CronJob을 통한 배치 스케줄링**
+    - Kubernetes 환경에서 Spring Batch 작업을 주기적으로 실행하기 위해 CronJob을 사용했습니다.
+    - CronJob을 통해 배치 작업을 정기적으로 실행하여 특정 시간에 맞춰 알람 기능을 수행했습니다.
   
-
-<br/>
-
-## ⚒️ 기술 스택
-
-**Frontend**  
-![Vue.js](https://img.shields.io/badge/Vue.js-4FC08D?style=for-the-badge&logo=vuedotjs&logoColor=white)
-![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
-![Pinia](https://img.shields.io/badge/Pinia-FFB300?style=for-the-badge&logo=pinia&logoColor=black)
-![Vue Router](https://img.shields.io/badge/Vue_Router-4FC08D?style=for-the-badge&logo=vuerouter&logoColor=white)
-![Vuetify](https://img.shields.io/badge/Vuetify-1867C0?style=for-the-badge&logo=vuetify&logoColor=white)
-![MDI](https://img.shields.io/badge/MDI-000000?style=for-the-badge&logo=materialdesignicons&logoColor=white)
-![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
-![FullCalendar](https://img.shields.io/badge/FullCalendar-3178C6?style=for-the-badge&logo=fullcalendar&logoColor=white)
-![Chart.js](https://img.shields.io/badge/Chart.js-FF6384?style=for-the-badge&logo=chartdotjs&logoColor=white)
-![ApexCharts](https://img.shields.io/badge/ApexCharts-008FFB?style=for-the-badge&logo=apexcharts&logoColor=white)
-![Vue Flow](https://img.shields.io/badge/Vue_Flow-4FC08D?style=for-the-badge&logo=vuedotjs&logoColor=white)
-![Tiptap](https://img.shields.io/badge/Tiptap-000000?style=for-the-badge&logo=tiptap&logoColor=white)
-![ProseMirror](https://img.shields.io/badge/ProseMirror-000000?style=for-the-badge&logo=prosemirror&logoColor=white)
-![STOMP.js](https://img.shields.io/badge/STOMP.js-grey?style=for-the-badge&logo=websocket&logoColor=white)
-![SockJS](https://img.shields.io/badge/SockJS-grey?style=for-the-badge&logo=javascript&logoColor=white)
-![OpenVidu](https://img.shields.io/badge/OpenVidu-273A8B?style=for-the-badge&logo=openvidu&logoColor=white)
-![Axios](https://img.shields.io/badge/Axios-5A29E4?style=for-the-badge&logo=axios&logoColor=white)
-![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)
-![Docx](https://img.shields.io/badge/docx-2B579A?style=for-the-badge&logo=microsoftword&logoColor=white)
-![Lodash](https://img.shields.io/badge/Lodash-3492FF?style=for-the-badge&logo=lodash&logoColor=white)
-![UUID](https://img.shields.io/badge/UUID-grey?style=for-the-badge)
-![Core-JS](https://img.shields.io/badge/Core_JS-F7E018?style=for-the-badge&logo=javascript&logoColor=black)
-![File Saver](https://img.shields.io/badge/File_Saver-blue?style=for-the-badge)
+   <img src="https://github.com/user-attachments/assets/c9c8d171-0eec-4994-8191-61fbcf3b764e" width="800" heigh="400" />
 
 
-**Backend**  
-![Java](https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)
-![Spring Cloud](https://img.shields.io/badge/Spring_Cloud-6DB33F?style=for-the-badge&logo=spring&logoColor=white)
-![Spring WebFlux](https://img.shields.io/badge/Spring_WebFlux-6DB33F?style=for-the-badge&logo=spring&logoColor=white)
-![Spring Cloud Gateway](https://img.shields.io/badge/Spring_Cloud_Gateway-6DB33F?style=for-the-badge&logo=spring&logoColor=white)
-![Netflix Eureka](https://img.shields.io/badge/Netflix_Eureka-6DB33F?style=for-the-badge&logo=netflix&logoColor=white)
-![OpenFeign](https://img.shields.io/badge/OpenFeign-6DB33F?style=for-the-badge&logo=spring&logoColor=white)
-![Resilience4j](https://img.shields.io/badge/Resilience4j-8A2BE2?style=for-the-badge)
-<br>
-![Apache Kafka](https://img.shields.io/badge/Apache_Kafka-231F20?style=for-the-badge&logo=apachekafka&logoColor=white)
-![WebSocket](https://img.shields.io/badge/WebSocket-010101?style=for-the-badge&logo=websocket&logoColor=white)
-![STOMP](https://img.shields.io/badge/STOMP-grey?style=for-the-badge)
-![OpenVidu](https://img.shields.io/badge/OpenVidu-273A8B?style=for-the-badge&logo=openvidu&logoColor=white)
-![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)
-<br>
-![Lombok](https://img.shields.io/badge/Lombok-000000?style=for-the-badge&logo=lombok&logoColor=white)
-![Jackson](https://img.shields.io/badge/Jackson-grey?style=for-the-badge)
-![Apache Tika](https://img.shields.io/badge/Apache_Tika-D22128?style=for-the-badge&logo=apache&logoColor=white)
-![JSoup](https://img.shields.io/badge/JSoup-FF9900?style=for-the-badge)
-![Apache HttpClient](https://img.shields.io/badge/Apache_HttpClient-D22128?style=for-the-badge&logo=apache&logoColor=white)
+  
+### 배치 적용 후 성능 비교
 
-**Database**  
-![MariaDB](https://img.shields.io/badge/MariaDB-003545?style=for-the-badge&logo=mariadb&logoColor=white)
-![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)
-![Redis Stack](https://img.shields.io/badge/Redis_Stack-DC382D?style=for-the-badge&logo=redis&logoColor=white)
-![Elasticsearch](https://img.shields.io/badge/Elasticsearch-005571?style=for-the-badge&logo=elasticsearch&logoColor=white)
+프로메테우스와 그라파나로 모니터링한 결과, 도입 전에는 알람 발생 시 CPU 사용량이 급증했으나, 도입 후에는 API 서버의 CPU 사용량이 감소하고 배치 서버에 부하가 분산되는 것을 확인할 수 있었습니다. 
 
-**Deployment & DevOps**  
-![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)
-![AWS S3](https://img.shields.io/badge/AWS_S3-569A31?style=for-the-badge&logo=amazons3&logoColor=white)
-![n8n](https://img.shields.io/badge/n8n-1A1A1A?style=for-the-badge&logo=n8n&logoColor=white)
-<br>
-![Gradle](https://img.shields.io/badge/Gradle-02303A?style=for-the-badge&logo=gradle&logoColor=white)
-![Maven Central](https://img.shields.io/badge/Maven_Central-C71A36?style=for-the-badge&logo=apachemaven&logoColor=white)
-![GitHub Packages](https://img.shields.io/badge/GitHub_Packages-000000?style=for-the-badge&logo=github&logoColor=white)
+**[배치 도입 전 테스트 결과]**
 
-**Collaboration & Tools**
+![image](https://github.com/user-attachments/assets/5677f68a-c56b-4199-97b9-fb4fce7e5469)
 
-![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)
-![Notion](https://img.shields.io/badge/Notion-000000?style=for-the-badge&logo=notion&logoColor=white)
-![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)
-![Figma](https://img.shields.io/badge/Figma-F24E1E?style=for-the-badge&logo=figma&logoColor=white)
-![Postman](https://img.shields.io/badge/Postman-FF6C37?style=for-the-badge&logo=postman&logoColor=white)
-![Asana](https://img.shields.io/badge/Asana-8D8D8D?style=for-the-badge&logo=asana&logoColor=white)
-![ERDCloud](https://img.shields.io/badge/ERDCloud-0099FF?style=for-the-badge&logo=erdcloud&logoColor=white)
+**[배치 도입 후 테스트 결과]**
+![image](https://github.com/user-attachments/assets/bb925ba8-b415-4a81-b41c-609c2210672b)
+
+- 분산 처리 환경을 구축한 결과, 배치 작업 중에도 다른 API 요청에 영향을 주지 않고 서버의 안정성을 유지할 수 있었습니다.
+- 멀티스레드를 활용해 병렬 처리한 결과 알람 처리 속도를 11% 향상시켜 전반적인 시스템 성능을 최적화했습니다.
 
 
-<br/>
+  </div>
+</details>
+<details>
+  <summary><b>회의록 공동작성</b></summary>
+  <div markdown="1">
 
-## 📝 프로젝트 회고
+## 1. Redis
 
-| 팀원 | 회고 내용 |
-|------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 조은성 | 이번 프로젝트를 통해 프론트엔드, 백엔드, 데브옵스 전반에서 사용자 경험 중심의 구조를 설계할 수 있었습니다. <br>프론트엔드에서는 마일스톤 노드를 트리 형태로 시각화해 프로젝트의 전체 흐름을 한눈에 볼 수 있도록 구현했습니다. 노드가 많아질 때의 복잡도를 줄이기 위해 포커스 모드와 전체보기 모드를 구분하고, 특정 트리를 핀으로 고정해 기본 로딩 상태로 설정할 수 있도록 개선했습니다. <br>백엔드는 WebSocket + STOMP + Kafka를 활용한 실시간 채팅 구조를 설계했습니다. STOMP로 양방향 실시간 통신을 구현하고, Kafka로 멀티 서버 간 메시지 동기화와 순서를 보장했습니다. 이를 통해 확장성과 안정성을 동시에 확보했습니다. <br>데브옵스 영역에서는 쿠버네티스 기반의 고가용성 구조를 구성했습니다. Deployment를 통해 파드 수를 자동으로 관리하고, GitHub Actions와 롤링 업데이트를 이용해 CI/CD 파이프라인을 안정적으로 운영했습니다. <br>이번 프로젝트는 기능 구현을 넘어, 사용자가 끊김 없이 서비스를 경험할 수 있는 시스템 아키텍처를 실제로 설계하고 개선할 수 있었던 의미 있는 경험이었습니다. |
-| 김영관 | 이번 프로젝트에서 문서함, 통합 검색, 실시간 문서 편집이라는 세 가지 핵심 도메인을 개발했습니다.<br>문서함: 처음엔 단순 `parentId` 구조로 계층형 폴더를 설계했지만, 조상 경로 조회 시 발생하는 재귀 쿼리와 N+1 능 이슈에 직면했습니다. <br>이는 MariaDB의 `WITH RECURSIVE`를 도입해 단일 네이티브 쿼리로 해결하며 견고한 데이터 뼈대를 완성할 수 있었습니다.<br>통합 검색: Elasticsearch의 기본 `analyzer`는 한글 검색에 한계가 명확했습니다. <br>`Nori` 플러그인을 도입해 형태소 분석을 적용하고 나서야 비로소 제대로 된 검색이 가능했습니다. <br>이 과정에서 '정확도' 중심의 검색과 '성능' 중심의 자동완성은 쿼리 접근 방식과 데이터 모델링 자체가 달라야 함을 깨달았습니다.<br>실시간 편집은 가장 어려웠던 부분이었습니다.문서 전체 내용을 STOMP로 전송하니, 메시지 크기 한계로 인한 메모리 이슈와 편집 내용이 덮어써지는 동시성 문제가 발생했고 한 글자가 수정될 때마다 전송할 시 "안녕하세요" 5글자에 DB 트랜잭션 5개가 몰리는 등, DB 과부하라는 새로운 문제에 직면했습니다. <br> '라인(Line) 단위'로 변경 사항을 식별하고, 여러 수정을 '배치(Batch) 업데이트'로 묶어 처리하도록 구현했습니다.<br> 이로써 STOMP 메시지 크기와 DB 트랜잭션 횟수를 동시에 최적화하여 성능과 동시성을 확보했습니다. |
-| 조민형 | 이번 프로젝트에서 관리자페이지, 워크스페이스와 프로젝트 파트를 맡아 개발했습니다. <br>관리자 페이지에서 가장 어려웠던 부분은 권한그룹을 만들고 “각 서비스에서 권한을 어디서, 어떻게 분기해 검사할 것인가”였습니다. 애플리케이션 구동 시 초기화 로직으로 DB에 값이 없으면 권한그룹과 권한 항목을 생성하고, 두 테이블을 매핑하는 연결 테이블로 확장성을 확보했습니다. 사용자는 사전에 부여된 권한그룹을 기반으로 각 항목의 T/F를 검사해 권한을 일관되게 관리할 수 있도록 구성했습니다. 그 결과 권한별 가시성과 제어 범위가 명확해져, 보안과 사용성을 함께 끌어올린 깊은 서비스 운영이 가능해졌습니다. <br>프로젝트는 ORBIT의 핵심 서비스인 프로젝트–스톤–태스크 구조 설계가 가장 어려웠습니다. CRUD가 많았지만 삭제·수정 시 다른 엔티티의 지표와 상태를 함께 반영해야 해 반복 수정이 발생했습니다. 이에 코딩 전에 데이터 변경 영향 범위를 선제적으로 도출하고 그에 맞춰 로직을 재설계했습니다. 그 결과 불필요한 재작업이 줄어 개발 효율이 개선되고 코드 일관성이 높아졌으며, 장애율도 낮아졌습니다. |
-| 김현지 |  |
-| 김강산 | 이번 프로젝트에서는 채팅 기능에 화상 회의를 연동하여 서비스 파편화 문제를 해결했습니다. 첫 번째로 많은 시간을 들인 부분은 ‘영상이 화면을 꽉 채우지 않는 문제였습니다. 비디오에 여백이 생기고 전체 화면에서도 빈 공간이 보였는데, 이는 비디오 자체의 크기 설정과 이를 감싸는 박스의 비율·overflow 처리 방식이 맞지 않아 발생한 상황이었습니다. 이를 해결하기 위해 비디오가 화면을 꽉 채우면서도 비율이 깨지지 않도록 크기 설정을 조정하고, 전체화면일 때 우선 적용되는 스타일 을 추가했습니다. 또한, 비디오를 감싸는 부모 컨테이너의overflow 처리와 모서리 스타일을 정리하여 어떤 화면 크기에서도 영상이 빈 공간 없이 자연스럽게 꽉 차도록 구현했습니다. 두 번째 문제는 새로고침 시 내 화면이 중복되거나 닉네임이 *Unknown* 으로 표시되는 현상이었습니다. 이는 세션이 완전히 종료되기 전에 재접속이 이루어져 이벤트 처리 순서가 꼬인 것이 원인이었습니다. 이를 해결하기 위해 스트림 생성 이벤트를 임시로 모아두었다가 세션 연결이 완료된 뒤 한 번에 처리하도록 변경하고, 자기 자신의 스트림은 구독 대상에서 제외했습니다. 또한 닉네임 정보는 재요청 후 캐시에 저장하고, 세션 정리 과정은 비동기 처리로 안정화했습니다. 그 결과, 새로고침 시 발생하던 중복 화면과 *Unknown* 표시 문제를 해결할 수 있었습니다. |
+### 인메모리 데이터베이스
+- **Redis**는 디스크 기반의 RDB와 달리 **인메모리**에서 데이터를 처리하여 **훨씬 빠른 성능**을 제공합니다.
+- 일반적인 인메모리 DB와 달리 Redis는 **영속성**을 지원하여, 장애 발생 시에도 데이터를 복구할 수 있습니다.
+
+### 회의록 공동작성 기능에 Redis 적용 이유
+- **빠른 읽기 작업**이 중요한 실시간 공동 작성 환경에 적합해서 선택하였습니다.
+
+### Lookaside 캐시 패턴
+- **캐시에서 먼저 데이터를 조회**하고, 데이터가 없을 경우 DB에서 조회하여 캐시에 저장하는 방식입니다.
+- 반복적인 읽기 작업에서 **성능 향상**을 기대할 수 있으며, **DB 조회 빈도**를 줄여, 캐시를 활용한 효율적인 읽기 작업이 가능합니다.
+
+## 2. Kafka
+
+### 세션 관리 기능
+- 서버를 2대 운영하는 환경에서 **Kafka**를 활용하여 세션 관리 기능을 구현하였습니다.
+- 클라이언트 간의 원활한 통신을 위해 Kafka를 선택하였으며, **Pub-Sub 모델**을 기반으로 클라이언트 간에 메시지를 주고받습니다.
+
+### Kafka의 장점
+- 동일한 **토픽을 구독한 클라이언트들**에게 메시지를 전송하여, **메시지의 일관성**과 **신뢰성**을 보장합니다.
+- **서버 간 세션 연결**를 유지할 수 있습니다.
+
+## 3. 시스템 구성도
+
+- **서버 간 세션 연결** 을 위해 kafka 를 활용해 클라이언트간의 연결을 유지시켰습니다.
+- **성능 최적화** 를 위해 **LookaSide 패턴**을 적용하여 읽기 작업의 효율성을 높였습니다.
+
+<img width="877" alt="스크린샷 2024-10-24 오후 9 34 26" src="https://github.com/user-attachments/assets/e4ad109f-fae3-47a1-8bdb-fa8ae98f4986">
+
+## 4. REDIS 적용 후 성능 개선
+
+**[REDIS 도입 전 테스트 결과]**
+
+![성능개선전](https://github.com/user-attachments/assets/5cf1459a-61b7-4a71-a7fd-81f7599328d4)
+
+- REDIS 를 도입하기 전 사용자가 작성할 때마다 DB에 업데이트가 되어 성능에 문제가 발생하였습니다.
+
+**[REDIS 도입 후 테스트 결과]**
+
+![성능개선후](https://github.com/user-attachments/assets/2478e3bc-3829-4681-9659-63cfb597c918)
+
+- REDIS 를 도입해 평균 응답 시간이 총 65% 감소했으며, DB 성능 저하 문제도 해결하였습니다.
+
+
+
+
+  </div>
+</details>
+
+<details>
+  <summary><b>AI</b></summary>
+  <div markdown="1">
+    
+## N8N? 🤔
+
+**n8n**은 자동화된 워크플로우를 구성할 수 있는 오픈소스 툴로, 다양한 서비스와의 통합을 통해 복잡한 작업들을 시각적으로 간편하게 자동화할 수 있게 해줍니다. 특히 워크플로우의 커스텀 설정이 가능해, 필요에 따라 유연하게 구성할 수 있는 것이 큰 장점입니다.
+
+**CalIT 프로젝트의 챗봇**은 이러한 **n8n**을 활용하여 구현되었습니다. <br>
+**n8n**을 사용한 이유는 사용자로부터 검색된 **지식 정보**를 활용하여 **사실에 기반**한 답변을 생성하고, 최신 기술을 통합하여 성능을 최적화하기 위함입니다.
+
+## 챗봇 구조
+
+챗봇의 **기본 구조**는 다음과 같습니다:
+
+![작성 워크플로우](https://github.com/user-attachments/assets/d26cfe96-38d0-4952-aed9-6b503e55ac9a)
+
+1. **사용자 요청 처리**
+   - 클라이언트가 서버에 메시지를 보내면, 서버는 n8n의 webhook을 호출하여 정의된 워크플로우를 실행합니다.
+
+2. **워크플로우 실행**
+   - 이 워크플로우 내에서 원하는 동작을 커스텀할 수 있기 때문에 CalIT 프로젝트의 구조에 맞도록 직접 설정하였습니다.
+   - n8n의 자동화된 워크플로우를 사용하여, 최신 기술을 도입하고 성능을 최적화하였습니다.
+
+## 구현된 워크플로우
+
+### 📨 회의 자료 추천 워크플로우
+
+![ai 회의 자료 추천](https://github.com/user-attachments/assets/2e37a546-6b28-42d3-8b5f-db38b1a0aeb4)
+
+- 사용자가 회의 자료를 요청하면, 웹훅이 동작하고 데이터베이스에 접근하여 관련 정보를 받아옵니다.
+- **Information Extractor**에서 중요한 키워드를 추출합니다.
+- 이 키워드는 AI 에이전트가 Self API, Output Parser, OpenAI 모델을 통해 처리되며, JSON 형태로 서버에 전달됩니다.
+
+### 📜 회의록 요약 워크플로우
+
+![ai 회의록 요약](https://github.com/user-attachments/assets/f38039dc-5078-4c15-bca7-ee214cfde63f)
+
+  - **Summarization Chain**은 긴 회의록이나 문서를 요약하고 핵심 내용을 추출하는 데 매우 유용합니다.
+  - 이를 통해 AI 모델과 연동해 더 효율적이고 간결한 요약 작업을 구현하였습니다.
+
+## 기대 효과
+
+**n8n**을 활용한 자동화된 워크플로우는 단순히 지식을 검색하여 제공하는 것에 그치지 않고, AI와의 연동을 통해 더욱 풍부하고 신뢰성 있는 답변을 사용자에게 제공합니다. <br>
+또한, **시각적인 워크플로우 빌더**를 통해 개발자와 비개발자 모두 쉽게 챗봇의 동작을 이해하고 수정할 수 있는 장점을 가지고 있습니다.
+
+
+  </div>
+</details>
+
+
+
 
